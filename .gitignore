@@ -1,0 +1,31 @@
+# --- Python / Django ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+db.sqlite3
+*.log
+staticfiles/
+media/
+
+# --- Node / React ---
+node_modules/
+dist/
+.vite/
+
+# --- Secretos y entorno ---
+.env
+.env.*
+!.env.example
+
+# --- Editor / sistema ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+~$*
+
+# --- Trabajo local que no va al repo ---
+tmp/
+# Material de la maestra (no es nuestro)
+Clases/Material de clases/

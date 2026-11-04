@@ -1,0 +1,133 @@
+erDiagram
+    programas ||--o{ estudiantes : "cursa"
+    programas ||--o{ unidades_aprendizaje : "ofrece"
+    usuarios ||--o| estudiantes : "perfil"
+    estudiantes ||--o{ solicitudes : "crea"
+    estudiantes ||--o{ carga_academica : "tiene"
+    periodos_escolares ||--o{ solicitudes : "en"
+    periodos_escolares ||--o{ grupos : "abre"
+    unidades_aprendizaje ||--o{ grupos : "se imparte en"
+    docentes ||--o{ grupos : "imparte"
+    grupos ||--|{ horarios_grupo : "tiene"
+    grupos ||--o{ carga_academica : "inscribe"
+    grupos ||--o{ detalle_solicitud : "solicitado en"
+    solicitudes ||--|{ detalle_solicitud : "contiene"
+    usuarios ||--o{ detalle_solicitud : "revisa"
+    usuarios ||--o{ lotes_exportacion : "exporta"
+    lotes_exportacion ||--o{ detalle_solicitud : "incluye"
+    usuarios ||--o{ notificaciones : "recibe"
+    usuarios ||--o{ bitacora : "genera"
+
+    usuarios {
+        int id_usuario PK
+        string username UK "matricula si es alumno"
+        string password_hash
+        string nombre
+        string apellidos
+        string email
+        string rol "estudiante|control_escolar|administrador"
+        bool activo
+        datetime fecha_registro
+    }
+    programas {
+        int id_programa PK
+        string nombre "Economia|Finanzas"
+    }
+    estudiantes {
+        int id_estudiante PK
+        int id_usuario FK, UK
+        string matricula UK
+        int id_programa FK
+        int semestre
+        string turno
+    }
+    docentes {
+        int id_docente PK
+        string nombre
+        string grado_academico
+        string departamento
+    }
+    periodos_escolares {
+        int id_periodo PK
+        string ciclo UK "2026-A"
+        date fecha_inicio
+        date fecha_fin
+        datetime convocatoria_inicio
+        datetime convocatoria_fin
+        bool activo
+    }
+    unidades_aprendizaje {
+        int id_materia PK
+        string clave UK "ECO-302"
+        string nombre_materia
+        int creditos
+        int id_programa FK
+        string area
+    }
+    grupos {
+        int id_grupo PK
+        int id_materia FK
+        int id_docente FK
+        int id_periodo FK
+        string num_grupo
+        string turno
+        int cupo_maximo
+        bool visible
+    }
+    horarios_grupo {
+        int id_horario PK
+        int id_grupo FK
+        int dia_semana "1 a 6"
+        time hora_inicio
+        time hora_fin
+        string aula
+    }
+    carga_academica {
+        int id_carga PK
+        int id_estudiante FK
+        int id_grupo FK
+        string estado "inscrito|baja"
+        string origen "importacion|solicitud"
+    }
+    solicitudes {
+        int id_solicitud PK
+        string folio_digital UK
+        int id_estudiante FK
+        int id_periodo FK
+        text justificacion
+        datetime fecha_solicitud
+    }
+    detalle_solicitud {
+        int id_detalle PK
+        int id_solicitud FK
+        int id_grupo FK
+        string tipo_tramite "ALTA|BAJA"
+        string estado "pendiente|aprobada|rechazada|cargada_sadce|cancelada"
+        text motivo_rechazo
+        bool visto_bueno
+        int revisado_por FK
+        datetime fecha_resolucion
+        int id_lote FK
+    }
+    lotes_exportacion {
+        int id_lote PK
+        int id_usuario FK
+        datetime fecha
+        string formato "xlsx|csv"
+        int total_registros
+    }
+    notificaciones {
+        int id_notificacion PK
+        int id_usuario FK
+        string mensaje
+        bool leida
+        datetime fecha
+    }
+    bitacora {
+        int id_log PK
+        int id_usuario FK
+        string accion
+        string entidad
+        string ip
+        datetime fecha
+    }

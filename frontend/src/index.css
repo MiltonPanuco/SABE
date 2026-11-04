@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+/* Paleta y tipografía tomadas de stitch/DESIGN.md ("Academic Prestige Modern") */
+@theme {
+  --color-primary: #002b49;
+  --color-secondary: #f59e0b;
+  --color-alta: #10b981; /* altas */
+  --color-baja: #dc2626; /* bajas y choques de horario */
+  --color-fondo: #f8fafc;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  @apply bg-fondo text-slate-900 font-sans;
+}
