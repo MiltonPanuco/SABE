@@ -1,0 +1,339 @@
+<!DOCTYPE html><html lang="es"><head><title>SABE — Oferta Académica (Control Escolar)</title><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "primary-container": "#002b49",
+          "tertiary-fixed": "#6ffbbe",
+          "inverse-surface": "#213145",
+          "secondary-fixed": "#ffddb8",
+          "on-background": "#0b1c30",
+          "inverse-primary": "#a8caef",
+          "surface-bright": "#f8f9ff",
+          "on-primary-fixed-variant": "#274969",
+          "surface": "#f8f9ff",
+          "tertiary": "#00190e",
+          "secondary-container": "#fea619",
+          "surface-dim": "#cbdbf5",
+          "outline-variant": "#c3c7ce",
+          "on-secondary": "#ffffff",
+          "on-error-container": "#93000a",
+          "tertiary-fixed-dim": "#4edea3",
+          "surface-container-highest": "#d3e4fe",
+          "secondary-fixed-dim": "#ffb95f",
+          "surface-variant": "#d3e4fe",
+          "primary": "#001629",
+          "on-secondary-fixed": "#2a1700",
+          "inverse-on-surface": "#eaf1ff",
+          "on-surface-variant": "#42474d",
+          "surface-container-low": "#eff4ff",
+          "on-primary": "#ffffff",
+          "on-tertiary": "#ffffff",
+          "error": "#ba1a1a",
+          "on-tertiary-fixed-variant": "#005236",
+          "on-primary-container": "#7293b6",
+          "on-tertiary-fixed": "#002113",
+          "secondary": "#855300",
+          "error-container": "#ffdad6",
+          "primary-fixed-dim": "#a8caef",
+          "on-tertiary-container": "#00a472",
+          "outline": "#73777e",
+          "on-error": "#ffffff",
+          "background": "#f8f9ff",
+          "on-surface": "#0b1c30",
+          "surface-container": "#e5eeff",
+          "primary-fixed": "#cfe5ff",
+          "on-primary-fixed": "#001d34",
+          "tertiary-container": "#00301e",
+          "surface-container-high": "#dce9ff",
+          "surface-container-lowest": "#ffffff",
+          "surface-tint": "#406182",
+          "on-secondary-container": "#684000",
+          "on-secondary-fixed-variant": "#653e00"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "margin": "2rem",
+          "space-sm": "0.5rem",
+          "gutter": "1.5rem",
+          "margin-sm": "1rem",
+          "space-lg": "1.5rem",
+          "space-xl": "2rem",
+          "space-md": "1rem",
+          "gutter-sm": "1rem",
+          "space-xs": "0.25rem"
+        },
+        "fontFamily": {
+          "body-md": [
+            "Inter"
+          ],
+          "display-lg": [
+            "Plus Jakarta Sans"
+          ],
+          "label-md": [
+            "Inter"
+          ],
+          "label-lg": [
+            "Inter"
+          ],
+          "headline-lg": [
+            "Plus Jakarta Sans"
+          ],
+          "label-sm": [
+            "Inter"
+          ],
+          "display-lg-mobile": [
+            "Plus Jakarta Sans"
+          ],
+          "headline-sm": [
+            "Plus Jakarta Sans"
+          ],
+          "body-sm": [
+            "Inter"
+          ],
+          "body-lg": [
+            "Inter"
+          ],
+          "headline-md": [
+            "Plus Jakarta Sans"
+          ]
+        },
+        "fontSize": {
+          "body-md": [
+            "0.875rem",
+            {
+              "lineHeight": "1.375rem",
+              "fontWeight": "400"
+            }
+          ],
+          "display-lg": [
+            "2.25rem",
+            {
+              "lineHeight": "2.75rem",
+              "letterSpacing": "-0.025em",
+              "fontWeight": "700"
+            }
+          ],
+          "label-md": [
+            "0.75rem",
+            {
+              "lineHeight": "1rem",
+              "letterSpacing": "0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "label-lg": [
+            "0.875rem",
+            {
+              "lineHeight": "1.25rem",
+              "letterSpacing": "0.01em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-lg": [
+            "1.5rem",
+            {
+              "lineHeight": "2rem",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "label-sm": [
+            "0.6875rem",
+            {
+              "lineHeight": "0.875rem",
+              "letterSpacing": "0.04em",
+              "fontWeight": "600"
+            }
+          ],
+          "display-lg-mobile": [
+            "1.75rem",
+            {
+              "lineHeight": "2.25rem",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ],
+          "headline-sm": [
+            "1.125rem",
+            {
+              "lineHeight": "1.5rem",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "600"
+            }
+          ],
+          "body-sm": [
+            "0.75rem",
+            {
+              "lineHeight": "1.125rem",
+              "fontWeight": "400"
+            }
+          ],
+          "body-lg": [
+            "1rem",
+            {
+              "lineHeight": "1.625rem",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-md": [
+            "1.25rem",
+            {
+              "lineHeight": "1.75rem",
+              "letterSpacing": "-0.015em",
+              "fontWeight": "600"
+            }
+          ]
+        }
+      },
+    },
+  }</script></head><body class="bg-background font-body-md text-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,43,73,0.06)]"><div class="flex flex-col"><div class="h-16 px-space-lg flex items-center gap-space-sm bg-surface-container"><span class="material-symbols-outlined text-primary text-[26px]">account_balance</span><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-primary tracking-tight leading-none">UAE • UAN</span><span class="font-label-sm text-label-sm text-on-surface-variant leading-none mt-space-xs">Unidad Académica de Economía</span></div></div><div class="px-space-md py-space-sm"><div class="px-space-sm py-space-xs font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Gestión de Trámites</div><nav class="flex flex-col gap-space-xs mt-space-xs" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-lg"><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="solicitudes-pendientes" href="#"><span class="material-symbols-outlined text-[20px]">pending_actions</span><span class="">Solicitudes Pendientes</span></a><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-space-sm transition-colors bg-primary-container text-on-primary-container font-semibold rounded-lg" data-path="oferta-academica" href="#"><span class="material-symbols-outlined text-[20px]">menu_book</span><span class="">Oferta Académica</span></a></nav></div><div class="px-space-md py-space-xs"><div class="px-space-sm py-space-xs font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Mantenimiento</div><nav class="flex flex-col gap-space-xs mt-space-xs" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-lg"><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="periodo-y-convocatoria" href="#"><span class="material-symbols-outlined text-[20px]">event_available</span><span class="">Periodo y Convocatoria</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="cuentas-de-estudiantes" href="#"><span class="material-symbols-outlined text-[20px]">badge</span><span class="">Importación de Datos (CSV)</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="exportar-a-sadce" href="#"><span class="material-symbols-outlined text-[20px]">sync_alt</span><span class="">Exportar Excel para SADCE</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="bitacora-de-auditoria" href="#"><span class="material-symbols-outlined text-[20px]">security_update_good</span><span class="">Bitácora de Auditoría</span></a></nav></div></div><div class="p-space-md m-space-md rounded-xl bg-surface-container flex items-center gap-space-sm"><div class="w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center text-primary shadow-[0_1px_3px_rgba(0,43,73,0.08)]"><span class="material-symbols-outlined text-[22px]">shield</span></div><div class="flex flex-col"><span class="font-label-md text-label-md text-on-surface font-semibold">Escudo UAE</span><span class="font-label-sm text-label-sm text-on-surface-variant">SABES Control UAE</span></div></div></aside><div class="pl-72 flex flex-col min-h-screen"><header class="fixed top-0 left-72 right-0 h-16 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,43,73,0.04)] z-40 px-space-lg flex items-center justify-between"><div class="flex items-center gap-space-md"><img alt="SABE" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCI7Kft64JUAva-yHOQ511rZVYBcsW0zRlS28XLpbMApGZG3u5mjVBRzDnTdYQOEb9RB9asQ2zjwW_wKSW_CK8reVTSmXU1L7rAdNn72iQDOhgK7my9JYwN_DGamQhv8XdpajdVQt2PTOS1-56LkSSmV1G8YFkpf6hykXnKgURPcO2Ca3ekoYV5o64mSpC7QXCOHZoXKwWpJCKeSK3CdA7ICGwH7kilp4QCZK7fp1-Vc6NwAfDcefGz3Q"><div class="flex items-center gap-space-xs"><span class="font-headline-sm text-headline-sm text-primary">SABE</span><span class="font-body-sm text-body-sm text-on-surface-variant hidden sm:inline">• Sistema de Altas y Bajas</span></div><span class="inline-flex items-center gap-space-xs px-space-sm py-space-xs rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm"><span class="material-symbols-outlined text-[16px]">schedule</span><span class="">Ciclo Escolar 2026-A</span></span></div><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-sm text-right"><div class="flex flex-col hidden md:flex"><span class="font-label-lg text-label-lg text-on-surface font-semibold leading-tight">Lic. Valeria M. Ruiz</span><span class="font-label-sm text-label-sm text-on-surface-variant leading-tight">Ventanilla Control Escolar UAE</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header>
+<main class="flex-1 pt-16 bg-surface px-space-lg py-space-md">
+<div class="flex flex-col w-full gap-space-lg">
+  <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+    <div class="flex flex-col">
+      <div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm mb-1">
+        <span>Ventanilla de Control Escolar</span><span class="material-symbols-outlined text-[14px]">chevron_right</span>
+        <span class="text-primary font-semibold">Oferta Académica</span>
+      </div>
+      <h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">Oferta Académica del Ciclo 2026-A</h1>
+      <p class="font-body-md text-body-md text-on-surface-variant max-w-3xl mt-space-xs">Esta es la oferta que ven los alumnos en el catálogo. El cupo disponible se calcula: cupo máximo menos alumnos inscritos.</p>
+    </div>
+    <button type="button" id="btn-new" class="px-space-lg py-space-sm bg-primary-container hover:bg-primary text-on-primary font-label-lg text-label-lg rounded-xl flex items-center gap-space-xs shadow-md shrink-0"><span class="material-symbols-outlined text-[20px]">add_circle</span>Publicar asignatura</button>
+  </div>
+
+  <div class="bg-surface-container-lowest rounded-2xl shadow-sm p-space-md flex flex-col md:flex-row gap-space-sm md:items-center">
+    <div class="relative flex-1"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+      <input id="f-text" type="text" placeholder="Buscar por materia, clave o docente" class="w-full pl-10 pr-space-md py-space-sm rounded-xl border border-outline-variant bg-surface-container-lowest font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary-container"></div>
+    <select id="f-prog" class="px-space-md py-space-sm rounded-xl border border-outline-variant bg-surface-container-lowest font-body-md text-body-md"><option value="">Programa: todos</option><option>Economía</option><option>Finanzas</option></select>
+    <select id="f-cupo" class="px-space-md py-space-sm rounded-xl border border-outline-variant bg-surface-container-lowest font-body-md text-body-md"><option value="">Cupo: todos</option><option value="con">Con cupo</option><option value="sin">Sin cupo</option></select>
+  </div>
+
+  <div class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden">
+    <div class="overflow-x-auto"><table class="w-full text-left border-collapse">
+      <thead><tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+        <th class="py-space-sm px-space-lg">Asignatura</th><th class="py-space-sm px-space-md">Grupo y docente</th><th class="py-space-sm px-space-md">Horario</th>
+        <th class="py-space-sm px-space-md">Cupo</th><th class="py-space-sm px-space-md text-center">Estado</th><th class="py-space-sm px-space-lg text-right">Acciones</th></tr></thead>
+      <tbody id="tbody" class="text-body-md font-body-md text-on-surface"></tbody></table>
+      <div id="empty" class="hidden p-space-xl text-center text-on-surface-variant font-body-md">No hay asignaturas con esos filtros.</div></div>
+  </div>
+</div>
+
+<div id="modal" class="hidden fixed inset-0 z-[60] bg-black/40 flex items-center justify-center p-space-md">
+  <div class="bg-surface-container-lowest rounded-2xl shadow-xl w-full max-w-2xl max-h-[92vh] overflow-y-auto p-space-lg">
+    <div class="flex items-start justify-between mb-space-md">
+      <div><h2 class="font-headline-md text-headline-md text-primary font-bold" id="m-title">Publicar asignatura</h2><p class="font-body-sm text-body-sm text-on-surface-variant">Ciclo 2026-A (periodo activo)</p></div>
+      <button type="button" id="m-close" class="w-9 h-9 rounded-lg hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+      <div class="md:col-span-2"><label class="font-label-md text-label-md font-semibold">Asignatura *</label><input id="m-nom" class="w-full mt-1 px-space-md py-space-sm rounded-xl border border-outline-variant" placeholder="Ej. Economía de la Innovación"></div>
+      <div><label class="font-label-md text-label-md font-semibold">Clave *</label><input id="m-clave" class="w-full mt-1 px-space-md py-space-sm rounded-xl border border-outline-variant" placeholder="Ej. EC704"></div>
+      <div><label class="font-label-md text-label-md font-semibold">Programa *</label><select id="m-prog" class="w-full mt-1 px-space-md py-space-sm rounded-xl border border-outline-variant"><option>Economía</option><option>Finanzas</option></select></div>
+      <div><label class="font-label-md text-label-md font-semibold">Grupo *</label><input id="m-gpo" class="w-full mt-1 px-space-md py-space-sm rounded-xl border border-outline-variant" placeholder="Ej. 01"></div>
+      <div><label class="font-label-md text-label-md font-semibold">Cupo máximo *</label><input id="m-cupo" type="number" min="1" class="w-full mt-1 px-space-md py-space-sm rounded-xl border border-outline-variant" placeholder="Ej. 30"></div>
+      <div class="md:col-span-2"><label class="font-label-md text-label-md font-semibold">Docente *</label><select id="m-doc" class="w-full mt-1 px-space-md py-space-sm rounded-xl border border-outline-variant"><option value="">Selecciona un docente del catálogo</option><option>Dr. Javier Medina</option><option>Dra. Celia Navarro</option><option>Mtro. Jorge Herrera</option><option>Dra. Sofía Barba</option><option>Mtra. Karla Del Real</option></select></div>
+    </div>
+    <div class="mt-space-md">
+      <div class="flex items-center justify-between"><span class="font-label-md text-label-md font-semibold">Horario por día y hora *</span>
+        <button type="button" id="m-addday" class="font-label-md text-label-md text-primary font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">add</span>Agregar día</button></div>
+      <div id="m-days" class="flex flex-col gap-space-xs mt-space-xs"></div>
+    </div>
+    <p id="m-err" class="hidden mt-space-md text-error font-label-md text-label-md"></p>
+    <div class="flex justify-end gap-space-sm mt-space-lg"><button type="button" id="m-cancel" class="px-space-lg py-space-sm rounded-xl bg-surface-container font-label-lg text-label-lg">Cancelar</button>
+      <button type="button" id="m-save" class="px-space-lg py-space-sm rounded-xl bg-primary-container text-on-primary font-label-lg text-label-lg hover:bg-primary">Publicar</button></div>
+  </div>
+</div>
+</main>
+</div><script>
+const $ = (s, r) => (r || document).querySelector(s);
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+const DIAS = ['Lun','Mar','Mié','Jue','Vie','Sáb'];
+let DATA = [
+ {nom:'Macroeconomía II', clave:'EC602', prog:'Economía', gpo:'02', doc:'Dr. Javier Medina', hor:[['Lun','08:00','10:00'],['Mié','08:00','10:00']], max:30, insc:27, on:true},
+ {nom:'Econometría II', clave:'EC605', prog:'Economía', gpo:'02', doc:'Dr. Hugo Valdez', hor:[['Mar','11:00','13:00'],['Jue','11:00','13:00']], max:30, insc:22, on:true},
+ {nom:'Desarrollo Regional', clave:'EC603', prog:'Economía', gpo:'02', doc:'Dra. Celia Navarro', hor:[['Mar','09:00','11:00'],['Jue','09:00','11:00']], max:30, insc:25, on:true},
+ {nom:'Pensamiento Económico II', clave:'EC504', prog:'Economía', gpo:'01', doc:'Dr. Ernesto Morales', hor:[['Mar','07:00','09:00'],['Jue','07:00','09:00']], max:30, insc:30, on:true},
+ {nom:'Finanzas Corporativas II', clave:'FI702', prog:'Finanzas', gpo:'01', doc:'Dra. Sofía Barba', hor:[['Mar','10:00','12:00'],['Jue','10:00','12:00']], max:35, insc:23, on:true},
+ {nom:'Contabilidad Financiera', clave:'FI201', prog:'Finanzas', gpo:'02', doc:'Mtro. Jorge Herrera', hor:[['Lun','11:00','13:00'],['Mié','11:00','13:00']], max:35, insc:35, on:true},
+ {nom:'Economía de la Innovación', clave:'EC704', prog:'Economía', gpo:'01', doc:'Mtra. Karla Del Real', hor:[['Mar','13:00','15:00'],['Jue','13:00','15:00']], max:30, insc:15, on:false}
+];
+let editing = -1;
+function horTxt(h){ return h.map(x => x[0] + ' ' + x[1] + ' a ' + x[2]).join(' • '); }
+function render(){
+  const q = $('#f-text').value.trim().toLowerCase(), p = $('#f-prog').value, c = $('#f-cupo').value;
+  const rows = DATA.map((d, i) => ({d, i})).filter(({d}) => {
+    const disp = d.max - d.insc;
+    if (p && d.prog !== p) return false;
+    if (c === 'con' && disp <= 0) return false;
+    if (c === 'sin' && disp > 0) return false;
+    return !q || (d.nom + ' ' + d.clave + ' ' + d.doc).toLowerCase().includes(q);
+  });
+  $('#empty').classList.toggle('hidden', rows.length > 0);
+  $('#tbody').innerHTML = rows.map(({d, i}) => {
+    const disp = d.max - d.insc, pct = Math.round(d.insc / d.max * 100);
+    const bar = disp <= 0 ? 'bg-error' : pct >= 85 ? 'bg-secondary-container' : 'bg-tertiary-container';
+    return `<tr class="border-t border-outline-variant/40 hover:bg-surface-container-low/60 transition-colors ${d.on ? '' : 'opacity-60'}">
+      <td class="py-space-md px-space-lg"><div class="flex flex-col"><span class="font-label-lg text-label-lg text-primary font-bold">${esc(d.nom)}</span><span class="font-label-sm text-label-sm text-on-surface-variant">${esc(d.clave)} • ${d.prog}</span></div></td>
+      <td class="py-space-md px-space-md"><div class="flex flex-col"><span class="font-label-md text-label-md font-semibold">Grupo ${esc(d.gpo)}</span><span class="font-label-sm text-label-sm text-on-surface-variant">${esc(d.doc)}</span></div></td>
+      <td class="py-space-md px-space-md font-label-md text-label-md">${horTxt(d.hor)}</td>
+      <td class="py-space-md px-space-md min-w-[150px]"><div class="flex flex-col gap-1"><span class="font-label-md text-label-md font-semibold">${disp > 0 ? disp + ' disponibles' : 'Sin cupo'} <span class="text-on-surface-variant font-normal">de ${d.max}</span></span>
+        <div class="h-1.5 rounded-full bg-surface-container"><div class="h-1.5 rounded-full ${bar}" style="width:${pct}%"></div></div></div></td>
+      <td class="py-space-md px-space-md text-center"><span class="inline-flex items-center px-space-sm py-1 rounded-full font-label-sm text-label-sm font-bold ${d.on ? 'bg-tertiary-fixed text-on-tertiary-fixed' : 'bg-surface-container text-on-surface-variant'}">${d.on ? 'Publicada' : 'Desactivada'}</span></td>
+      <td class="py-space-md px-space-lg text-right"><div class="flex justify-end gap-space-xs">
+        <button type="button" data-edit="${i}" class="px-space-sm py-space-xs rounded-lg bg-surface-container hover:bg-surface-container-high font-label-md text-label-md">Editar</button>
+        <button type="button" data-tog="${i}" class="px-space-sm py-space-xs rounded-lg font-label-md text-label-md ${d.on ? 'bg-error-container text-on-error-container' : 'bg-tertiary-fixed text-on-tertiary-fixed'}">${d.on ? 'Desactivar' : 'Activar'}</button></div></td></tr>`;
+  }).join('');
+  document.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => openModal(+b.dataset.edit));
+  document.querySelectorAll('[data-tog]').forEach(b => b.onclick = () => { const d = DATA[+b.dataset.tog]; d.on = !d.on; SABE.toast(d.on ? 'Asignatura publicada en el catálogo.' : 'Asignatura desactivada: los alumnos ya no la ven.'); render(); });
+}
+function dayRow(v){
+  v = v || ['Lun', '08:00', '10:00'];
+  const el = document.createElement('div');
+  el.className = 'flex items-center gap-space-xs';
+  el.innerHTML = `<select class="d-dia px-space-sm py-space-xs rounded-lg border border-outline-variant">${DIAS.map(x => `<option ${x === v[0] ? 'selected' : ''}>${x}</option>`).join('')}</select>
+    <input type="time" class="d-ini px-space-sm py-space-xs rounded-lg border border-outline-variant" value="${v[1]}"><span class="text-on-surface-variant">a</span>
+    <input type="time" class="d-fin px-space-sm py-space-xs rounded-lg border border-outline-variant" value="${v[2]}">
+    <button type="button" class="d-del w-8 h-8 rounded-lg hover:bg-surface-container flex items-center justify-center" title="Quitar día"><span class="material-symbols-outlined text-[18px]">delete</span></button>`;
+  el.querySelector('.d-del').onclick = () => { if ($('#m-days').children.length > 1) el.remove(); };
+  $('#m-days').appendChild(el);
+}
+function openModal(i){
+  editing = i;
+  const d = i >= 0 ? DATA[i] : {nom:'', clave:'', prog:'Economía', gpo:'', doc:'', hor:[['Lun','08:00','10:00']], max:''};
+  $('#m-title').textContent = i >= 0 ? 'Editar asignatura' : 'Publicar asignatura';
+  $('#m-nom').value = d.nom; $('#m-clave').value = d.clave; $('#m-prog').value = d.prog; $('#m-gpo').value = d.gpo; $('#m-cupo').value = d.max;
+  const sel = $('#m-doc'); if (d.doc && ![...sel.options].some(o => o.value === d.doc)) sel.add(new Option(d.doc, d.doc)); sel.value = d.doc;
+  $('#m-days').innerHTML = ''; d.hor.forEach(dayRow); $('#m-err').classList.add('hidden');
+  $('#modal').classList.remove('hidden');
+}
+function closeModal(){ $('#modal').classList.add('hidden'); }
+function save(){
+  const err = m => { const e = $('#m-err'); e.textContent = m; e.classList.remove('hidden'); };
+  const nom = $('#m-nom').value.trim(), clave = $('#m-clave').value.trim(), gpo = $('#m-gpo').value.trim(), doc = $('#m-doc').value, max = parseInt($('#m-cupo').value, 10);
+  if (!nom || !clave || !gpo || !doc) return err('Completa asignatura, clave, grupo y docente.');
+  if (!(max > 0)) return err('El cupo máximo debe ser mayor a 0.');
+  const hor = [];
+  for (const row of $('#m-days').children) {
+    const dia = row.querySelector('.d-dia').value, a = row.querySelector('.d-ini').value, b = row.querySelector('.d-fin').value;
+    if (!a || !b) return err('Indica hora de inicio y fin en cada día.');
+    if (b <= a) return err('La hora de fin debe ser posterior a la de inicio.');
+    hor.push([dia, a, b]);
+  }
+  if (DATA.some((d, i) => i !== editing && d.clave.toLowerCase() === clave.toLowerCase() && d.gpo === gpo)) return err('Ya existe ese grupo para esa clave.');
+  const insc = editing >= 0 ? DATA[editing].insc : 0;
+  if (max < insc) return err('El cupo máximo no puede ser menor a los alumnos ya inscritos (' + insc + ').');
+  const item = {nom, clave, prog: $('#m-prog').value, gpo, doc, hor, max, insc, on: editing >= 0 ? DATA[editing].on : true};
+  if (editing >= 0) DATA[editing] = item; else DATA.unshift(item);
+  closeModal(); render(); SABE.toast(editing >= 0 ? 'Asignatura actualizada.' : 'Asignatura publicada en el catálogo de los alumnos.');
+}
+$('#btn-new').onclick = () => openModal(-1);
+$('#m-close').onclick = closeModal; $('#m-cancel').onclick = closeModal; $('#m-save').onclick = save; $('#m-addday').onclick = () => dayRow();
+['f-text', 'f-prog', 'f-cupo'].forEach(id => { $('#' + id).addEventListener('input', render); $('#' + id).addEventListener('change', render); });
+render();
+</script><script src="../_shared/prototipo.js"></script></body></html>

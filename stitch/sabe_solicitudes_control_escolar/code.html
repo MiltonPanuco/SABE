@@ -1,0 +1,427 @@
+<!DOCTYPE html><html lang="es"><head><title>SABE — Solicitudes Pendientes (Control Escolar)</title><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "primary-container": "#002b49",
+          "tertiary-fixed": "#6ffbbe",
+          "inverse-surface": "#213145",
+          "secondary-fixed": "#ffddb8",
+          "on-background": "#0b1c30",
+          "inverse-primary": "#a8caef",
+          "surface-bright": "#f8f9ff",
+          "on-primary-fixed-variant": "#274969",
+          "surface": "#f8f9ff",
+          "tertiary": "#00190e",
+          "secondary-container": "#fea619",
+          "surface-dim": "#cbdbf5",
+          "outline-variant": "#c3c7ce",
+          "on-secondary": "#ffffff",
+          "on-error-container": "#93000a",
+          "tertiary-fixed-dim": "#4edea3",
+          "surface-container-highest": "#d3e4fe",
+          "secondary-fixed-dim": "#ffb95f",
+          "surface-variant": "#d3e4fe",
+          "primary": "#001629",
+          "on-secondary-fixed": "#2a1700",
+          "inverse-on-surface": "#eaf1ff",
+          "on-surface-variant": "#42474d",
+          "surface-container-low": "#eff4ff",
+          "on-primary": "#ffffff",
+          "on-tertiary": "#ffffff",
+          "error": "#ba1a1a",
+          "on-tertiary-fixed-variant": "#005236",
+          "on-primary-container": "#7293b6",
+          "on-tertiary-fixed": "#002113",
+          "secondary": "#855300",
+          "error-container": "#ffdad6",
+          "primary-fixed-dim": "#a8caef",
+          "on-tertiary-container": "#00a472",
+          "outline": "#73777e",
+          "on-error": "#ffffff",
+          "background": "#f8f9ff",
+          "on-surface": "#0b1c30",
+          "surface-container": "#e5eeff",
+          "primary-fixed": "#cfe5ff",
+          "on-primary-fixed": "#001d34",
+          "tertiary-container": "#00301e",
+          "surface-container-high": "#dce9ff",
+          "surface-container-lowest": "#ffffff",
+          "surface-tint": "#406182",
+          "on-secondary-container": "#684000",
+          "on-secondary-fixed-variant": "#653e00"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "margin": "2rem",
+          "space-sm": "0.5rem",
+          "gutter": "1.5rem",
+          "margin-sm": "1rem",
+          "space-lg": "1.5rem",
+          "space-xl": "2rem",
+          "space-md": "1rem",
+          "gutter-sm": "1rem",
+          "space-xs": "0.25rem"
+        },
+        "fontFamily": {
+          "body-md": [
+            "Inter"
+          ],
+          "display-lg": [
+            "Plus Jakarta Sans"
+          ],
+          "label-md": [
+            "Inter"
+          ],
+          "label-lg": [
+            "Inter"
+          ],
+          "headline-lg": [
+            "Plus Jakarta Sans"
+          ],
+          "label-sm": [
+            "Inter"
+          ],
+          "display-lg-mobile": [
+            "Plus Jakarta Sans"
+          ],
+          "headline-sm": [
+            "Plus Jakarta Sans"
+          ],
+          "body-sm": [
+            "Inter"
+          ],
+          "body-lg": [
+            "Inter"
+          ],
+          "headline-md": [
+            "Plus Jakarta Sans"
+          ]
+        },
+        "fontSize": {
+          "body-md": [
+            "0.875rem",
+            {
+              "lineHeight": "1.375rem",
+              "fontWeight": "400"
+            }
+          ],
+          "display-lg": [
+            "2.25rem",
+            {
+              "lineHeight": "2.75rem",
+              "letterSpacing": "-0.025em",
+              "fontWeight": "700"
+            }
+          ],
+          "label-md": [
+            "0.75rem",
+            {
+              "lineHeight": "1rem",
+              "letterSpacing": "0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "label-lg": [
+            "0.875rem",
+            {
+              "lineHeight": "1.25rem",
+              "letterSpacing": "0.01em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-lg": [
+            "1.5rem",
+            {
+              "lineHeight": "2rem",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "label-sm": [
+            "0.6875rem",
+            {
+              "lineHeight": "0.875rem",
+              "letterSpacing": "0.04em",
+              "fontWeight": "600"
+            }
+          ],
+          "display-lg-mobile": [
+            "1.75rem",
+            {
+              "lineHeight": "2.25rem",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ],
+          "headline-sm": [
+            "1.125rem",
+            {
+              "lineHeight": "1.5rem",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "600"
+            }
+          ],
+          "body-sm": [
+            "0.75rem",
+            {
+              "lineHeight": "1.125rem",
+              "fontWeight": "400"
+            }
+          ],
+          "body-lg": [
+            "1rem",
+            {
+              "lineHeight": "1.625rem",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-md": [
+            "1.25rem",
+            {
+              "lineHeight": "1.75rem",
+              "letterSpacing": "-0.015em",
+              "fontWeight": "600"
+            }
+          ]
+        }
+      },
+    },
+  }</script></head><body class="bg-background font-body-md text-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,43,73,0.06)]"><div class="flex flex-col"><div class="h-16 px-space-lg flex items-center gap-space-sm bg-surface-container"><span class="material-symbols-outlined text-primary text-[26px]">account_balance</span><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-primary tracking-tight leading-none">UAE • UAN</span><span class="font-label-sm text-label-sm text-on-surface-variant leading-none mt-space-xs">Unidad Académica de Economía</span></div></div><div class="px-space-md py-space-sm"><div class="px-space-sm py-space-xs font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Gestión de Trámites</div><nav class="flex flex-col gap-space-xs mt-space-xs" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-lg"><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-space-sm transition-colors bg-primary-container text-on-primary-container font-semibold rounded-lg" data-path="solicitudes-pendientes" href="#"><span class="material-symbols-outlined text-[20px]">pending_actions</span><span class="">Solicitudes Pendientes</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="oferta-academica" href="#"><span class="material-symbols-outlined text-[20px]">menu_book</span><span class="">Oferta Académica</span></a></nav></div><div class="px-space-md py-space-xs"><div class="px-space-sm py-space-xs font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Mantenimiento</div><nav class="flex flex-col gap-space-xs mt-space-xs" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-lg"><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="periodo-y-convocatoria" href="#"><span class="material-symbols-outlined text-[20px]">event_available</span><span class="">Periodo y Convocatoria</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="cuentas-de-estudiantes" href="#"><span class="material-symbols-outlined text-[20px]">badge</span><span class="">Importación de Datos (CSV)</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="exportar-a-sadce" href="#"><span class="material-symbols-outlined text-[20px]">sync_alt</span><span class="">Exportar Excel para SADCE</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="bitacora-de-auditoria" href="#"><span class="material-symbols-outlined text-[20px]">security_update_good</span><span class="">Bitácora de Auditoría</span></a></nav></div></div><div class="p-space-md m-space-md rounded-xl bg-surface-container flex items-center gap-space-sm"><div class="w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center text-primary shadow-[0_1px_3px_rgba(0,43,73,0.08)]"><span class="material-symbols-outlined text-[22px]">shield</span></div><div class="flex flex-col"><span class="font-label-md text-label-md text-on-surface font-semibold">Escudo UAE</span><span class="font-label-sm text-label-sm text-on-surface-variant">SABES Control UAE</span></div></div></aside><div class="pl-72 flex flex-col min-h-screen"><header class="fixed top-0 left-72 right-0 h-16 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,43,73,0.04)] z-40 px-space-lg flex items-center justify-between"><div class="flex items-center gap-space-md"><img alt="SABE" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCI7Kft64JUAva-yHOQ511rZVYBcsW0zRlS28XLpbMApGZG3u5mjVBRzDnTdYQOEb9RB9asQ2zjwW_wKSW_CK8reVTSmXU1L7rAdNn72iQDOhgK7my9JYwN_DGamQhv8XdpajdVQt2PTOS1-56LkSSmV1G8YFkpf6hykXnKgURPcO2Ca3ekoYV5o64mSpC7QXCOHZoXKwWpJCKeSK3CdA7ICGwH7kilp4QCZK7fp1-Vc6NwAfDcefGz3Q"><div class="flex items-center gap-space-xs"><span class="font-headline-sm text-headline-sm text-primary">SABE</span><span class="font-body-sm text-body-sm text-on-surface-variant hidden sm:inline">• Sistema de Altas y Bajas</span></div><span class="inline-flex items-center gap-space-xs px-space-sm py-space-xs rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm"><span class="material-symbols-outlined text-[16px]">schedule</span><span class="">Ciclo Escolar 2026-A</span></span></div><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-sm text-right"><div class="flex flex-col hidden md:flex"><span class="font-label-lg text-label-lg text-on-surface font-semibold leading-tight">Lic. Valeria M. Ruiz</span><span class="font-label-sm text-label-sm text-on-surface-variant leading-tight">Ventanilla Control Escolar UAE</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header>
+<main class="flex-1 pt-16 bg-surface px-space-lg py-space-md">
+<div class="flex flex-col w-full gap-space-lg" id="view-list">
+  <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+    <div class="flex flex-col">
+      <div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm mb-1">
+        <span>Ventanilla de Control Escolar</span><span class="material-symbols-outlined text-[14px]">chevron_right</span>
+        <span class="text-primary font-semibold">Gestión de Trámites</span>
+      </div>
+      <h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">Solicitudes Pendientes de Dictamen</h1>
+      <p class="font-body-md text-body-md text-on-surface-variant max-w-3xl mt-space-xs">Cada folio se revisa por movimiento: apruebas o rechazas cada alta y baja. Un rechazo siempre lleva motivo, y los folios extemporáneos solo se aprueban con visto bueno.</p>
+    </div>
+    <a href="#" class="px-space-lg py-space-sm bg-primary-container hover:bg-primary text-on-primary font-label-lg text-label-lg rounded-xl flex items-center gap-space-xs shadow-md shrink-0" id="btn-go-export">
+      <span class="material-symbols-outlined text-[20px]">sync_alt</span><span>Exportar Excel para SADCE</span>
+    </a>
+  </div>
+
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-space-md" id="kpis"></div>
+
+  <div class="bg-surface-container-lowest rounded-2xl shadow-sm p-space-md flex flex-col md:flex-row gap-space-sm md:items-center">
+    <div class="relative flex-1">
+      <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+      <input id="f-text" type="text" placeholder="Buscar por folio, matrícula o nombre" class="w-full pl-10 pr-space-md py-space-sm rounded-xl border border-outline-variant bg-surface-container-lowest font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary-container">
+    </div>
+    <select id="f-estado" class="px-space-md py-space-sm rounded-xl border border-outline-variant bg-surface-container-lowest font-body-md text-body-md">
+      <option value="">Estado: todos</option><option value="Pendiente">Pendiente</option><option value="Parcial">Parcialmente dictaminado</option><option value="Dictaminada">Dictaminada</option><option value="Rechazada">Rechazada</option>
+    </select>
+    <select id="f-tipo" class="px-space-md py-space-sm rounded-xl border border-outline-variant bg-surface-container-lowest font-body-md text-body-md">
+      <option value="">Tipo: todos</option><option value="normal">Dentro de convocatoria</option><option value="extemp">Extemporáneo</option>
+    </select>
+  </div>
+
+  <div class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead><tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+          <th class="py-space-sm px-space-lg">Folio</th><th class="py-space-sm px-space-md">Alumno</th><th class="py-space-sm px-space-md">Movimientos</th>
+          <th class="py-space-sm px-space-md">Recibido</th><th class="py-space-sm px-space-md text-center">Estado</th><th class="py-space-sm px-space-lg text-right">Acción</th>
+        </tr></thead>
+        <tbody id="tbody" class="text-body-md font-body-md text-on-surface"></tbody>
+      </table>
+      <div id="empty" class="hidden p-space-xl text-center text-on-surface-variant font-body-md">No hay folios con esos filtros.</div>
+    </div>
+  </div>
+</div>
+
+<div class="hidden flex flex-col w-full gap-space-lg" id="view-detail"></div>
+</main>
+</div><script>
+const FOLIOS = [
+ {folio:'SABE-2026-088', alumno:'Carlos E. Pérez Villa', mat:'210089334', prog:'Lic. en Economía', sem:'6° semestre', fecha:'12 Feb 2026, 10:14', ext:false,
+  just:'Tengo un empalme con mi horario laboral vespertino confirmado esta semana y necesito cursar Macroeconomía II en el turno matutino para no atrasar la seriación hacia sexto semestre.',
+  movs:[
+   {tipo:'ALTA', nom:'Macroeconomía II', clave:'EC602', gpo:'02', doc:'Dr. Javier Medina', hor:'Lun y Mié 08:00 a 10:00', cupo:'3 lugares disponibles de 30', choque:null, est:'pendiente'},
+   {tipo:'BAJA', nom:'Econometría I', clave:'EC501', gpo:'01', doc:'Mtra. Rosalía Campos', hor:'Mar y Jue 10:00 a 12:00', cupo:'Se libera 1 lugar', choque:null, est:'pendiente'}]},
+ {folio:'SABE-2026-087', alumno:'Andrea M. Ramos Salas', mat:'200045129', prog:'Lic. en Finanzas', sem:'8° semestre', fecha:'12 Feb 2026, 09:02', ext:false,
+  just:'Me falta esta materia para completar la seriación y el grupo de la tarde es el único que no choca con mis prácticas profesionales.',
+  movs:[
+   {tipo:'ALTA', nom:'Finanzas Corporativas II', clave:'FI702', gpo:'01', doc:'Dra. Sofía Barba', hor:'Mar y Jue 10:00 a 12:00', cupo:'12 lugares disponibles de 35', choque:'Análisis Financiero (Mar y Jue 10:00 a 12:00)', est:'pendiente'}]},
+ {folio:'SABE-2026-089', alumno:'Luis F. Cárdenas Ibarra', mat:'200078511', prog:'Lic. en Economía', sem:'7° semestre', fecha:'14 Feb 2026, 08:40', ext:true,
+  just:'Estuve hospitalizado durante la convocatoria y no pude hacer el trámite. Cuento con el justificante médico para presentarlo en ventanilla.',
+  movs:[
+   {tipo:'ALTA', nom:'Desarrollo Regional', clave:'EC603', gpo:'02', doc:'Dra. Celia Navarro', hor:'Mar y Jue 09:00 a 11:00', cupo:'5 lugares disponibles de 30', choque:null, est:'pendiente'}]},
+ {folio:'SABE-2026-086', alumno:'Diego A. Solís Nuño', mat:'220011456', prog:'Lic. en Economía', sem:'4° semestre', fecha:'11 Feb 2026, 16:20', ext:false,
+  just:'Quiero dar de baja la materia porque la cursaré en el siguiente ciclo junto con su seriación.',
+  movs:[{tipo:'BAJA', nom:'Pensamiento Económico II', clave:'EC504', gpo:'01', doc:'Dr. Ernesto Morales', hor:'Mar y Jue 07:00 a 09:00', cupo:'Se libera 1 lugar', choque:null, est:'aprobada', quien:'Lic. Roberto C. Peña', cuando:'12 Feb 2026, 12:10'}]},
+ {folio:'SABE-2026-085', alumno:'Valeria M. Luna Gil', mat:'230018990', prog:'Lic. en Finanzas', sem:'2° semestre', fecha:'11 Feb 2026, 11:05', ext:false,
+  just:'Solicito el cambio de grupo por incompatibilidad con mi horario de transporte.',
+  movs:[
+   {tipo:'ALTA', nom:'Contabilidad Financiera', clave:'FI201', gpo:'02', doc:'Mtro. Jorge Herrera', hor:'Lun y Mié 11:00 a 13:00', cupo:'0 lugares disponibles de 35', choque:null, sinCupo:true, est:'rechazada', quien:'Lic. Valeria M. Ruiz', cuando:'11 Feb 2026, 18:30', motivo:'El grupo no tiene cupo disponible.'}]}
+];
+
+const $ = (s, r) => (r || document).querySelector(s);
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function estadoFolio(f){
+  const e = f.movs.map(m => m.est);
+  const pend = e.filter(x => x === 'pendiente').length;
+  if (pend === e.length) return 'Pendiente';
+  if (pend > 0) return 'Parcial';
+  return e.every(x => x === 'rechazada') ? 'Rechazada' : 'Dictaminada';
+}
+const CHIP = {
+  Pendiente:  'bg-secondary-fixed text-on-secondary-fixed',
+  Parcial:    'bg-primary-fixed text-on-primary-fixed',
+  Dictaminada:'bg-tertiary-fixed text-on-tertiary-fixed',
+  Rechazada:  'bg-error-container text-on-error-container'
+};
+const LABEL = {Pendiente:'Pendiente', Parcial:'Parcialmente dictaminado', Dictaminada:'Dictaminada', Rechazada:'Rechazada'};
+
+function renderKpis(){
+  const all = FOLIOS.flatMap(f => f.movs);
+  const k = [
+    ['Folios pendientes', FOLIOS.filter(f => estadoFolio(f) !== 'Dictaminada' && estadoFolio(f) !== 'Rechazada').length, 'pending_actions', 'text-secondary'],
+    ['Movimientos aprobados', all.filter(m => m.est === 'aprobada').length, 'check_circle', 'text-on-tertiary-container'],
+    ['Movimientos rechazados', all.filter(m => m.est === 'rechazada').length, 'cancel', 'text-error'],
+    ['Extemporáneos', FOLIOS.filter(f => f.ext).length, 'schedule', 'text-primary']
+  ];
+  $('#kpis').innerHTML = k.map(x => `<div class="bg-surface-container-lowest rounded-2xl shadow-sm p-space-md flex items-center gap-space-md">
+    <div class="w-11 h-11 rounded-xl bg-surface-container flex items-center justify-center ${x[3]}"><span class="material-symbols-outlined">${x[2]}</span></div>
+    <div class="flex flex-col"><span class="font-headline-lg text-headline-lg text-primary font-bold leading-none">${x[1]}</span><span class="font-label-sm text-label-sm text-on-surface-variant mt-1">${x[0]}</span></div></div>`).join('');
+}
+
+function renderList(){
+  const q = $('#f-text').value.trim().toLowerCase(), fe = $('#f-estado').value, ft = $('#f-tipo').value;
+  const rows = FOLIOS.filter(f => {
+    const est = estadoFolio(f);
+    if (fe && est !== fe) return false;
+    if (ft === 'extemp' && !f.ext) return false;
+    if (ft === 'normal' && f.ext) return false;
+    return !q || (f.folio + ' ' + f.mat + ' ' + f.alumno).toLowerCase().includes(q);
+  });
+  $('#empty').classList.toggle('hidden', rows.length > 0);
+  $('#tbody').innerHTML = rows.map(f => {
+    const est = estadoFolio(f);
+    const altas = f.movs.filter(m => m.tipo === 'ALTA').length, bajas = f.movs.length - altas;
+    return `<tr class="border-t border-outline-variant/40 hover:bg-surface-container-low/60 transition-colors">
+      <td class="py-space-md px-space-lg"><div class="flex flex-col"><span class="font-label-lg text-label-lg text-primary font-bold">${f.folio}</span>${f.ext ? '<span class="inline-flex w-fit mt-1 items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold"><span class="material-symbols-outlined text-[14px]">schedule</span>Extemporáneo</span>' : ''}</div></td>
+      <td class="py-space-md px-space-md"><div class="flex flex-col"><span class="font-label-lg text-label-lg font-semibold">${f.alumno}</span><span class="font-label-sm text-label-sm text-on-surface-variant">${f.mat} • ${f.prog}</span></div></td>
+      <td class="py-space-md px-space-md"><span class="font-label-md text-label-md">${altas ? altas + ' alta' + (altas > 1 ? 's' : '') : ''}${altas && bajas ? ' • ' : ''}${bajas ? bajas + ' baja' + (bajas > 1 ? 's' : '') : ''}</span></td>
+      <td class="py-space-md px-space-md font-label-md text-label-md text-on-surface-variant">${f.fecha}</td>
+      <td class="py-space-md px-space-md text-center"><span class="inline-flex items-center px-space-sm py-1 rounded-full font-label-sm text-label-sm font-bold ${CHIP[est]}">${LABEL[est]}</span></td>
+      <td class="py-space-md px-space-lg text-right"><button type="button" data-open="${f.folio}" class="px-space-md py-space-xs rounded-lg bg-primary-container text-on-primary font-label-md text-label-md hover:bg-primary transition-colors">${est === 'Pendiente' || est === 'Parcial' ? 'Revisar' : 'Ver detalle'}</button></td></tr>`;
+  }).join('');
+  document.querySelectorAll('[data-open]').forEach(b => b.onclick = () => openFolio(b.dataset.open));
+}
+
+function openFolio(id){
+  const f = FOLIOS.find(x => x.folio === id); if (!f) return;
+  history.replaceState(null, '', '#' + id);
+  $('#view-list').classList.add('hidden'); $('#view-detail').classList.remove('hidden');
+  renderDetail(f); window.scrollTo(0, 0);
+}
+function closeFolio(){
+  history.replaceState(null, '', location.pathname);
+  $('#view-detail').classList.add('hidden'); $('#view-list').classList.remove('hidden');
+  renderKpis(); renderList();
+}
+
+function movCard(f, m, i){
+  const alta = m.tipo === 'ALTA';
+  const head = `<div class="flex items-start justify-between gap-space-md">
+    <div class="flex items-start gap-space-sm">
+      <span class="inline-flex items-center gap-1 px-space-sm py-1 rounded-full font-label-sm text-label-sm font-bold ${alta ? 'bg-tertiary-fixed text-on-tertiary-fixed' : 'bg-error-container text-on-error-container'}"><span class="material-symbols-outlined text-[14px]">${alta ? 'add_circle' : 'do_not_disturb_on'}</span>${m.tipo}</span>
+      <div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-primary font-bold">${m.nom}</span>
+      <span class="font-label-sm text-label-sm text-on-surface-variant">${m.clave} • Grupo ${m.gpo} • ${m.doc}</span>
+      <span class="font-label-md text-label-md text-on-surface mt-1 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">schedule</span>${m.hor}</span></div>
+    </div></div>`;
+  let valid;
+  if (!alta) valid = `<div class="p-space-sm rounded-xl bg-surface-container-low flex items-center gap-space-xs font-label-md text-label-md text-on-surface-variant"><span class="material-symbols-outlined text-[18px]">info</span>${m.cupo}. Las bajas no requieren validación de horario.</div>`;
+  else if (m.choque) valid = `<div class="p-space-sm rounded-xl bg-error-container/70 text-on-error-container flex items-center gap-space-xs font-label-md text-label-md font-semibold"><span class="material-symbols-outlined text-[18px]">warning</span>Traslape de horario con ${m.choque}. Esta alta no se puede aprobar.</div>`;
+  else if (m.sinCupo) valid = `<div class="p-space-sm rounded-xl bg-error-container/70 text-on-error-container flex items-center gap-space-xs font-label-md text-label-md font-semibold"><span class="material-symbols-outlined text-[18px]">block</span>Sin cupo: ${m.cupo}.</div>`;
+  else valid = `<div class="p-space-sm rounded-xl bg-tertiary-fixed/60 text-on-tertiary-fixed flex items-center gap-space-xs font-label-md text-label-md font-semibold"><span class="material-symbols-outlined text-[18px]">check_circle</span>Libre de traslapes. ${m.cupo}.</div>`;
+  const bloqueada = alta && (m.choque || m.sinCupo);
+  let foot;
+  if (m.est === 'pendiente') {
+    foot = `<div class="flex flex-wrap items-center gap-space-sm">
+      <button type="button" data-ap="${i}" ${bloqueada ? 'disabled' : ''} class="px-space-lg py-space-sm rounded-xl font-label-lg text-label-lg flex items-center gap-space-xs transition-colors ${bloqueada ? 'bg-surface-container text-on-surface-variant cursor-not-allowed' : 'bg-tertiary-container text-on-primary hover:opacity-90'}"><span class="material-symbols-outlined text-[18px]">check</span>Aprobar movimiento</button>
+      <button type="button" data-re="${i}" class="px-space-lg py-space-sm rounded-xl font-label-lg text-label-lg flex items-center gap-space-xs bg-error-container text-on-error-container hover:opacity-90 transition-colors"><span class="material-symbols-outlined text-[18px]">close</span>Rechazar</button>
+    </div>
+    <div class="hidden mt-space-sm" id="rej-${i}">
+      <label class="font-label-md text-label-md text-on-surface font-semibold" for="mot-${i}">Motivo del rechazo (obligatorio, lo verá el alumno)</label>
+      <textarea id="mot-${i}" rows="2" class="w-full mt-1 p-space-sm rounded-xl border border-outline-variant font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-error" placeholder="Ej. El grupo no tiene cupo disponible."></textarea>
+      <p class="hidden text-error font-label-sm text-label-sm mt-1" id="err-${i}">Escribe el motivo para poder rechazar.</p>
+      <div class="flex gap-space-sm mt-space-sm"><button type="button" data-rc="${i}" class="px-space-md py-space-xs rounded-lg bg-error text-on-error font-label-md text-label-md">Confirmar rechazo</button><button type="button" data-rx="${i}" class="px-space-md py-space-xs rounded-lg bg-surface-container font-label-md text-label-md">Cancelar</button></div>
+    </div>`;
+  } else if (m.est === 'aprobada') {
+    foot = `<div class="flex items-center gap-space-xs font-label-md text-label-md text-on-tertiary-container font-semibold"><span class="material-symbols-outlined text-[18px]">verified</span>Aprobado por ${m.quien} • ${m.cuando}</div>`;
+  } else {
+    foot = `<div class="flex flex-col gap-1"><span class="flex items-center gap-space-xs font-label-md text-label-md text-error font-semibold"><span class="material-symbols-outlined text-[18px]">cancel</span>Rechazado por ${m.quien} • ${m.cuando}</span><span class="font-body-sm text-body-sm text-on-surface-variant">Motivo: ${esc(m.motivo)}</span></div>`;
+  }
+  return `<div class="bg-surface-container-lowest rounded-2xl shadow-sm p-space-md flex flex-col gap-space-sm">${head}${valid}${foot}</div>`;
+}
+
+function renderDetail(f){
+  const est = estadoFolio(f);
+  const aprobadas = f.movs.filter(m => m.est === 'aprobada').length;
+  const vb = f.ext ? `<label class="flex items-start gap-space-sm p-space-md rounded-xl bg-secondary-fixed/40 cursor-pointer">
+      <input type="checkbox" id="vb" class="mt-1 w-4 h-4" ${f.vb ? 'checked' : ''}>
+      <span class="font-body-md text-body-md text-on-surface"><strong>Visto bueno de Control Escolar.</strong> Este folio es extemporáneo: solo se puede aprobar si confirmas que revisaste el justificante y autorizas el trámite.</span></label>` : '';
+  $('#view-detail').innerHTML = `
+    <div class="flex flex-col">
+      <button type="button" id="back" class="w-fit flex items-center gap-1 font-label-md text-label-md text-primary hover:underline mb-space-xs"><span class="material-symbols-outlined text-[18px]">arrow_back</span>Volver a solicitudes</button>
+      <div class="flex flex-wrap items-center gap-space-sm">
+        <h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">Folio ${f.folio}</h1>
+        <span class="inline-flex items-center px-space-sm py-1 rounded-full font-label-sm text-label-sm font-bold ${CHIP[est]}">${LABEL[est]}</span>
+        ${f.ext ? '<span class="inline-flex items-center gap-1 px-space-sm py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold"><span class="material-symbols-outlined text-[14px]">schedule</span>Extemporáneo</span>' : ''}
+      </div>
+      <p class="font-body-md text-body-md text-on-surface-variant mt-1">Recibido el ${f.fecha}. Revisa la justificación y dictamina cada movimiento.</p>
+    </div>
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-space-lg">
+      <div class="xl:col-span-4 flex flex-col gap-space-md">
+        <div class="bg-surface-container-lowest rounded-2xl shadow-sm p-space-md">
+          <h2 class="font-headline-sm text-headline-sm text-primary font-bold mb-space-sm flex items-center gap-space-xs"><span class="material-symbols-outlined">badge</span>Expediente del alumno</h2>
+          <div class="grid grid-cols-2 gap-space-sm font-body-md text-body-md">
+            <div><div class="font-label-sm text-label-sm text-on-surface-variant uppercase">Nombre</div><div class="font-semibold">${f.alumno}</div></div>
+            <div><div class="font-label-sm text-label-sm text-on-surface-variant uppercase">Matrícula</div><div class="font-semibold">${f.mat}</div></div>
+            <div><div class="font-label-sm text-label-sm text-on-surface-variant uppercase">Programa</div><div class="font-semibold">${f.prog}</div></div>
+            <div><div class="font-label-sm text-label-sm text-on-surface-variant uppercase">Avance</div><div class="font-semibold">${f.sem}</div></div>
+          </div>
+        </div>
+        <div class="bg-surface-container-lowest rounded-2xl shadow-sm p-space-md">
+          <h2 class="font-headline-sm text-headline-sm text-primary font-bold mb-space-sm flex items-center gap-space-xs"><span class="material-symbols-outlined">format_quote</span>Justificación del alumno</h2>
+          <p class="font-body-md text-body-md text-on-surface-variant italic">“${esc(f.just)}”</p>
+        </div>
+        ${vb}
+      </div>
+      <div class="xl:col-span-8 flex flex-col gap-space-md" id="movs">${f.movs.map((m, i) => movCard(f, m, i)).join('')}</div>
+    </div>
+    ${aprobadas ? `<div class="p-space-md rounded-xl bg-tertiary-fixed/50 flex flex-col md:flex-row md:items-center justify-between gap-space-sm"><span class="font-body-md text-body-md text-on-tertiary-fixed"><strong>${aprobadas} movimiento${aprobadas > 1 ? 's' : ''} aprobado${aprobadas > 1 ? 's' : ''}.</strong> Ya puede${aprobadas > 1 ? 'n' : ''} incluirse en el Excel de intercambio para SADCE.</span><a href="#" class="px-space-md py-space-xs rounded-lg bg-primary-container text-on-primary font-label-md text-label-md w-fit">Ir a Exportar Excel para SADCE</a></div>` : ''}`;
+
+  $('#back').onclick = closeFolio;
+  const vbEl = $('#vb'); if (vbEl) vbEl.onchange = () => { f.vb = vbEl.checked; };
+  document.querySelectorAll('[data-ap]').forEach(b => b.onclick = () => {
+    const m = f.movs[+b.dataset.ap];
+    if (f.ext && !f.vb) { SABE.toast('Marca el visto bueno de Control Escolar para aprobar un folio extemporáneo.'); return; }
+    m.est = 'aprobada'; m.quien = 'Lic. Valeria M. Ruiz'; m.cuando = 'ahora';
+    SABE.toast('Movimiento aprobado. Se notificó al alumno.'); renderDetail(f);
+  });
+  document.querySelectorAll('[data-re]').forEach(b => b.onclick = () => { $('#rej-' + b.dataset.re).classList.remove('hidden'); $('#mot-' + b.dataset.re).focus(); });
+  document.querySelectorAll('[data-rx]').forEach(b => b.onclick = () => $('#rej-' + b.dataset.rx).classList.add('hidden'));
+  document.querySelectorAll('[data-rc]').forEach(b => b.onclick = () => {
+    const i = +b.dataset.rc, txt = $('#mot-' + i).value.trim();
+    if (!txt) { $('#err-' + i).classList.remove('hidden'); return; }
+    const m = f.movs[i]; m.est = 'rechazada'; m.quien = 'Lic. Valeria M. Ruiz'; m.cuando = 'ahora'; m.motivo = txt;
+    SABE.toast('Movimiento rechazado. El alumno verá el motivo.'); renderDetail(f);
+  });
+}
+
+['f-text', 'f-estado', 'f-tipo'].forEach(id => { $('#' + id).addEventListener('input', renderList); $('#' + id).addEventListener('change', renderList); });
+renderKpis(); renderList();
+if (location.hash.length > 1) openFolio(decodeURIComponent(location.hash.slice(1)));
+</script><script src="../_shared/prototipo.js"></script></body></html>

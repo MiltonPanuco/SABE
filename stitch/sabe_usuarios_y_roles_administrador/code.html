@@ -1,0 +1,770 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-secondary-fixed": "#2a1700",
+          "secondary-fixed-dim": "#ffb95f",
+          "surface-container-highest": "#d3e4fe",
+          "surface": "#f8f9ff",
+          "secondary": "#855300",
+          "outline": "#73777e",
+          "primary-fixed-dim": "#a8caef",
+          "error-container": "#ffdad6",
+          "on-secondary-fixed-variant": "#653e00",
+          "on-error": "#ffffff",
+          "surface-container-high": "#dce9ff",
+          "on-primary": "#ffffff",
+          "on-surface": "#0b1c30",
+          "inverse-surface": "#213145",
+          "surface-bright": "#f8f9ff",
+          "tertiary-fixed-dim": "#4edea3",
+          "on-tertiary-container": "#00a472",
+          "on-primary-fixed-variant": "#274969",
+          "secondary-container": "#fea619",
+          "outline-variant": "#c3c7ce",
+          "tertiary-fixed": "#6ffbbe",
+          "on-tertiary-fixed-variant": "#005236",
+          "error": "#ba1a1a",
+          "on-tertiary": "#ffffff",
+          "primary": "#001629",
+          "primary-container": "#002b49",
+          "secondary-fixed": "#ffddb8",
+          "tertiary": "#00190e",
+          "tertiary-container": "#00301e",
+          "surface-variant": "#d3e4fe",
+          "on-error-container": "#93000a",
+          "surface-tint": "#406182",
+          "surface-container": "#e5eeff",
+          "surface-dim": "#cbdbf5",
+          "on-primary-fixed": "#001d34",
+          "inverse-primary": "#a8caef",
+          "on-tertiary-fixed": "#002113",
+          "on-surface-variant": "#42474d",
+          "primary-fixed": "#cfe5ff",
+          "on-background": "#0b1c30",
+          "on-primary-container": "#7293b6",
+          "on-secondary": "#ffffff",
+          "on-secondary-container": "#684000",
+          "inverse-on-surface": "#eaf1ff",
+          "background": "#f8f9ff",
+          "surface-container-low": "#eff4ff",
+          "surface-container-lowest": "#ffffff"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "space-xl": "2rem",
+          "margin-sm": "1rem",
+          "gutter-sm": "1rem",
+          "space-md": "1rem",
+          "space-sm": "0.5rem",
+          "space-lg": "1.5rem",
+          "gutter": "1.5rem",
+          "margin": "2rem",
+          "space-xs": "0.25rem"
+        },
+        "fontFamily": {
+          "body-md": [
+            "Inter"
+          ],
+          "body-sm": [
+            "Inter"
+          ],
+          "display-lg-mobile": [
+            "Plus Jakarta Sans"
+          ],
+          "label-md": [
+            "Inter"
+          ],
+          "headline-md": [
+            "Plus Jakarta Sans"
+          ],
+          "label-sm": [
+            "Inter"
+          ],
+          "body-lg": [
+            "Inter"
+          ],
+          "display-lg": [
+            "Plus Jakarta Sans"
+          ],
+          "headline-lg": [
+            "Plus Jakarta Sans"
+          ],
+          "headline-sm": [
+            "Plus Jakarta Sans"
+          ],
+          "label-lg": [
+            "Inter"
+          ]
+        },
+        "fontSize": {
+          "body-md": [
+            "0.875rem",
+            {
+              "lineHeight": "1.375rem",
+              "fontWeight": "400"
+            }
+          ],
+          "body-sm": [
+            "0.75rem",
+            {
+              "lineHeight": "1.125rem",
+              "fontWeight": "400"
+            }
+          ],
+          "display-lg-mobile": [
+            "1.75rem",
+            {
+              "lineHeight": "2.25rem",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ],
+          "label-md": [
+            "0.75rem",
+            {
+              "lineHeight": "1rem",
+              "letterSpacing": "0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-md": [
+            "1.25rem",
+            {
+              "lineHeight": "1.75rem",
+              "letterSpacing": "-0.015em",
+              "fontWeight": "600"
+            }
+          ],
+          "label-sm": [
+            "0.6875rem",
+            {
+              "lineHeight": "0.875rem",
+              "letterSpacing": "0.04em",
+              "fontWeight": "600"
+            }
+          ],
+          "body-lg": [
+            "1rem",
+            {
+              "lineHeight": "1.625rem",
+              "fontWeight": "400"
+            }
+          ],
+          "display-lg": [
+            "2.25rem",
+            {
+              "lineHeight": "2.75rem",
+              "letterSpacing": "-0.025em",
+              "fontWeight": "700"
+            }
+          ],
+          "headline-lg": [
+            "1.5rem",
+            {
+              "lineHeight": "2rem",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-sm": [
+            "1.125rem",
+            {
+              "lineHeight": "1.5rem",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "600"
+            }
+          ],
+          "label-lg": [
+            "0.875rem",
+            {
+              "lineHeight": "1.25rem",
+              "letterSpacing": "0.01em",
+              "fontWeight": "600"
+            }
+          ]
+        }
+      },
+    },
+  }</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-72 bg-surface-container-low z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)] overflow-y-auto"><div class="flex flex-col"><div class="px-space-lg pt-space-lg pb-space-md"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-primary text-[20px]">account_balance</span><span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">UAE • UAN</span></div><h2 class="font-headline-sm text-headline-sm text-primary mt-space-xs leading-snug">Unidad Académica de Economía</h2><div class="h-0.5 w-12 bg-primary-container mt-space-xs rounded-full"></div></div><nav class="px-space-md flex flex-col gap-space-xs mt-space-xs" data-active-classes="bg-primary-container text-on-primary font-semibold rounded-lg shadow-sm"><span class="px-space-sm pt-space-sm pb-space-xs font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Gestión y Accesos</span><a class="flex items-center gap-space-sm px-space-sm py-space-sm rounded-lg bg-primary-container text-on-primary font-semibold shadow-sm transition-colors" data-path="usuarios-y-roles" href="#"><span class="material-symbols-outlined text-[20px]">admin_panel_settings</span><span class="font-label-lg text-label-lg">Usuarios y Roles</span></a><a class="flex items-center gap-space-sm px-space-sm py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="periodo-y-convocatoria" href="#"><span class="material-symbols-outlined text-[20px]">date_range</span><span class="font-label-lg text-label-lg">Periodo y Convocatoria</span></a><div class="my-space-xs border-t border-outline-variant/30"></div><span class="px-space-sm pt-space-sm pb-space-xs font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Sistema y Auditoría</span><a class="flex items-center gap-space-sm px-space-sm py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="bitacora-de-auditoria" href="#"><span class="material-symbols-outlined text-[20px]">history_edu</span><span class="font-label-lg text-label-lg">Bitácora de Auditoría</span></a></nav></div><div class="p-space-md mx-space-md mb-space-md bg-surface-container-lowest rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.04)] flex items-center gap-space-sm"><img alt="Escudo UAE - SABES Control UAE" class="h-10 w-auto object-contain flex-shrink-0" src="https://lh3.googleusercontent.com/aida/AEtjO1Xnb4vs7cNlIZPan4DznYD98-E2hNUm4RYVRpvg4pZsBjEuhs9XAOSwjoQg8NZ4KCKUrPp5a18dn1srG32i6bwB0ibmRrsVQr22Owzj3Y80WY90k6rK_lYeQS0lCF5VffAvkMnCVNrjNgYRB5o03fq_MW2SETrLiUNzrpH-CJRPSwo-IwjU0ZLlIHa3Hy-UksTe0LDvKl3wJHji1zIqFeeGwY6mhJC9KiO2lYUJY54ip6QAISI4q4uQVU4"><div class="flex flex-col min-w-0"><span class="font-label-sm text-label-sm text-primary font-bold truncate">SABES Control UAE</span><span class="font-body-sm text-body-sm text-on-surface-variant truncate">Control Escolar UAN</span></div></div></aside><div class="pl-72 flex flex-col min-h-screen"><header class="fixed top-0 left-72 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-space-lg"><div class="flex items-center gap-space-md"><img alt="SABE" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCI7Kft64JUAva-yHOQ511rZVYBcsW0zRlS28XLpbMApGZG3u5mjVBRzDnTdYQOEb9RB9asQ2zjwW_wKSW_CK8reVTSmXU1L7rAdNn72iQDOhgK7my9JYwN_DGamQhv8XdpajdVQt2PTOS1-56LkSSmV1G8YFkpf6hykXnKgURPcO2Ca3ekoYV5o64mSpC7QXCOHZoXKwWpJCKeSK3CdA7ICGwH7kilp4QCZK7fp1-Vc6NwAfDcefGz3Q"><div class="flex items-center gap-space-sm"><span class="font-headline-sm text-headline-sm text-primary font-bold tracking-tight">SABE</span><span class="text-outline-variant">•</span><span class="font-body-md text-body-md text-on-surface font-medium hidden sm:inline">Sistema de Altas y Bajas</span></div><span class="inline-flex items-center px-space-sm py-0.5 rounded-full font-label-sm text-label-sm bg-primary-fixed text-on-primary-fixed font-semibold tracking-wide">Convocatoria 2026-A</span></div><div class="flex items-center gap-space-md"><div class="text-right hidden md:flex flex-col"><span class="font-label-lg text-label-lg text-on-surface font-semibold leading-tight">Lic. Valeria M. Ruiz</span><span class="font-body-sm text-body-sm text-on-surface-variant leading-tight">Ventanilla Control Escolar UAE</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0 shadow-sm"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="w-full pt-16 bg-surface flex-1 px-space-lg py-space-lg"><div class="flex flex-col w-full">
+<!-- BREADCRUMBS & TOP HEADER -->
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-space-md mb-space-lg">
+<div class="flex flex-col gap-space-xs">
+<nav class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+<span class="hover:text-primary transition-colors cursor-pointer">Ventanilla de Administración</span>
+<span class="text-outline-variant">/</span>
+<span class="hover:text-primary transition-colors cursor-pointer">Seguridad y Accesos</span>
+<span class="text-outline-variant">/</span>
+<span class="text-primary font-bold">Usuarios y Roles</span>
+</nav>
+<h1 class="font-headline-lg text-headline-lg text-primary font-bold tracking-tight">
+        Gestión de Usuarios y Roles de Acceso
+      </h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">Administración de credenciales, asignación de permisos institucionales y auditoría de accesos al sistema SABE UAE para la Convocatoria 2026-A.</p>
+</div>
+<!-- Quick Action Header -->
+<div class="flex items-center gap-space-sm flex-shrink-0">
+<button class="inline-flex items-center gap-space-xs px-space-md py-space-sm rounded-lg bg-primary-container text-on-primary font-label-lg text-label-lg shadow-sm hover:bg-primary transition-all duration-150 transform hover:-translate-y-0.5 active:translate-y-0" onclick="document.getElementById('modal-nuevo-usuario').classList.remove('hidden')">
+<span class="material-symbols-outlined text-[20px]">person_add</span>
+<span class="">+ Nuevo usuario</span>
+</button>
+</div>
+</div>
+<!-- KPI SUMMARY CARDS -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md mb-space-lg">
+<!-- Stat 1: Total -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Total Registrados</span>
+<div class="flex items-baseline gap-space-xs mt-space-xs">
+<span class="font-display-lg text-display-lg text-primary leading-none font-bold">134</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">usuarios</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-1 flex items-center gap-1"><span class="inline-block w-2 h-2 rounded-full bg-primary-container"></span> UAE • UAN Convocatoria 2026-A</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[26px]">groups</span>
+</div>
+</div>
+<!-- Stat 2: Estudiantes -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Estudiantes UAE</span>
+<div class="flex items-baseline gap-space-xs mt-space-xs">
+<span class="font-display-lg text-display-lg text-primary leading-none font-bold">120</span>
+<span class="font-label-sm text-label-sm text-on-tertiary-container font-semibold">activos</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-1">Economía &amp; Finanzas</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-surface-container-high flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[26px]">school</span>
+</div>
+</div>
+<!-- Stat 3: Control Escolar -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Control Escolar</span>
+<div class="flex items-baseline gap-space-xs mt-space-xs">
+<span class="font-display-lg text-display-lg text-secondary leading-none font-bold">10</span>
+<span class="font-label-sm text-label-sm text-secondary font-semibold">ventanillas</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-1">Revisión y Dictaminación</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-secondary-fixed flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[26px]">badge</span>
+</div>
+</div>
+<!-- Stat 4: Administradores -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Administradores</span>
+<div class="flex items-baseline gap-space-xs mt-space-xs">
+<span class="font-display-lg text-display-lg text-primary leading-none font-bold">4</span>
+<span class="font-label-sm text-label-sm text-on-primary-fixed-variant font-semibold">plenos</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-1">Privilegios totales</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[26px]" style="font-variation-settings: 'FILL' 1;">shield_person</span>
+</div>
+</div>
+</div>
+<!-- NOTICE MANDATORY RULE BANNER -->
+<div class="bg-surface-container-high rounded-xl p-space-md mb-space-lg flex items-start gap-space-md shadow-sm">
+<div class="w-10 h-10 rounded-lg bg-primary-container text-on-primary flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[22px]">info</span>
+</div>
+<div class="flex flex-col gap-space-xs flex-1">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-lg text-label-lg text-primary font-bold">Regla Institucional de Creación de Cuentas</span>
+<span class="px-space-xs py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold">Estricto</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+<strong>Nota importante:</strong> Los alumnos se crean <span class="text-primary font-semibold underline underline-offset-2">exclusivamente por importación de CSV</span> (desde el módulo de <em>Mantenimiento &gt; Importación de Datos</em>). El formulario manual de nuevo usuario está reservado de manera estricta para personal de <strong>Control Escolar</strong> y <strong>Administradores</strong> del sistema.
+      </p>
+</div>
+<div class="hidden md:flex flex-col items-end gap-1 flex-shrink-0"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Validación Interna</span><span class="font-label-md text-label-md text-primary font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">verified</span> UAE Convocatoria</span></div>
+</div>
+<!-- CONTROLS, SEARCH & FILTER BAR -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md mb-space-md shadow-sm flex flex-col lg:flex-row lg:items-center lg:justify-between gap-space-md">
+<!-- Search Input -->
+<div class="relative flex-1 min-w-[280px]">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-low rounded-lg text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container transition-all" id="userSearchInput" placeholder="Buscar por nombre, matrícula o correo @uan.edu.mx..." type="text">
+</div>
+<!-- Filter Tabs by Role -->
+<div class="flex flex-wrap items-center gap-space-xs">
+<button class="px-space-sm py-1.5 rounded-lg bg-primary-container text-on-primary font-label-md text-label-md font-semibold transition-colors flex items-center gap-1">
+<span class="">Todos</span>
+<span class="text-xs px-1.5 py-0.2 rounded-full bg-white/20">134</span>
+</button>
+<button class="px-space-sm py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-semibold transition-colors flex items-center gap-1">
+<span class="">Estudiantes</span>
+<span class="text-xs px-1.5 py-0.2 rounded-full bg-primary-fixed text-on-primary-fixed font-bold">120</span>
+</button>
+<button class="px-space-sm py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-semibold transition-colors flex items-center gap-1">
+<span class="">Control Escolar</span>
+<span class="text-xs px-1.5 py-0.2 rounded-full bg-secondary-fixed text-on-secondary-fixed font-bold">10</span>
+</button>
+<button class="px-space-sm py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-semibold transition-colors flex items-center gap-1">
+<span class="">Administradores</span>
+<span class="text-xs px-1.5 py-0.2 rounded-full bg-primary-fixed-dim text-on-primary-fixed font-bold">4</span>
+</button>
+</div>
+<!-- Status Filter & Export Button -->
+<div class="flex items-center gap-space-sm justify-between lg:justify-end">
+<div class="relative">
+<select class="appearance-none bg-surface-container-low font-label-md text-label-md text-on-surface font-semibold pl-3 pr-8 py-2 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-container">
+<option value="all">Estado: Todos</option>
+<option value="active">Activos</option>
+<option value="inactive">Inactivos</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[18px] text-outline">expand_more</span>
+</div>
+<button class="inline-flex items-center gap-space-xs px-space-md py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary font-label-md text-label-md font-semibold transition-colors" title="Descargar bitácora de usuarios para cotejo institucional">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span class="hidden sm:inline">Exportar Auditoría</span>
+</button>
+</div>
+</div>
+<!-- MAIN USERS & ROLES TABLE -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden mb-space-lg">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+<th class="py-space-md px-space-md font-semibold">Usuario / Nombre Institucional</th>
+<th class="py-space-md px-space-md font-semibold">Identificador</th>
+<th class="py-space-md px-space-md font-semibold">Rol Asignado</th>
+<th class="py-space-md px-space-md font-semibold text-center">Estado</th>
+<th class="py-space-md px-space-md font-semibold">Último Acceso</th>
+<th class="py-space-md px-space-md font-semibold text-right">Acciones</th>
+</tr>
+</thead>
+<tbody class="divide-y-0 text-body-md text-body-md">
+<!-- Row 1: Lic. Valeria M. Ruiz -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center font-bold text-label-md flex-shrink-0 shadow-sm">
+                  VR
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-lg text-label-lg text-primary font-bold truncate">Lic. Valeria M. Ruiz</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">valeria.ruiz@uan.edu.mx</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="font-mono text-body-sm bg-surface-container px-2 py-1 rounded text-primary font-semibold">valeria.ruiz@uan.edu.mx</span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px]">badge</span>
+                Control Escolar
+              </span>
+</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container text-on-tertiary-container font-label-sm text-label-sm font-bold">
+<span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>
+                Activo
+              </span>
+</td>
+<td class="py-space-md px-space-md"><div class="flex flex-col"><span class="text-on-surface font-medium text-body-sm">Hoy, 11:20 hrs</span></div></td>
+<td class="py-space-md px-space-md text-right">
+<div class="inline-flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Restablecer contraseña provisional">
+<span class="material-symbols-outlined text-[19px]">lock_reset</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-secondary hover:bg-surface-container transition-colors" title="Cambiar Rol de Funcionario">
+<span class="material-symbols-outlined text-[19px]">manage_accounts</span>
+</button>
+<label class="relative inline-flex items-center cursor-pointer ml-1" title="Activar / Desactivar">
+<input checked="" class="sr-only peer" type="checkbox">
+<div class="w-8 h-4 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+</td>
+</tr>
+<!-- Row 2: Mtro. Fernando Morales G. -->
+<tr class="bg-surface-container-low/20 hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold text-label-md flex-shrink-0 shadow-sm">
+                  FM
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-lg text-label-lg text-primary font-bold truncate">Mtro. Fernando Morales G.</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">fernando.morales@uan.edu.mx</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="font-mono text-body-sm bg-surface-container px-2 py-1 rounded text-primary font-semibold">fernando.morales@uan.edu.mx</span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">shield_person</span>
+                Administrador
+              </span>
+</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container text-on-tertiary-container font-label-sm text-label-sm font-bold">
+<span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>
+                Activo
+              </span>
+</td>
+<td class="py-space-md px-space-md"><div class="flex flex-col"><span class="text-on-surface font-medium text-body-sm">Hoy, 09:05 hrs</span></div></td>
+<td class="py-space-md px-space-md text-right">
+<div class="inline-flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Restablecer contraseña provisional">
+<span class="material-symbols-outlined text-[19px]">lock_reset</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-secondary hover:bg-surface-container transition-colors" title="Cambiar Rol de Funcionario">
+<span class="material-symbols-outlined text-[19px]">manage_accounts</span>
+</button>
+<label class="relative inline-flex items-center cursor-pointer ml-1" title="Activar / Desactivar">
+<input checked="" class="sr-only peer" type="checkbox">
+<div class="w-8 h-4 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+</td>
+</tr>
+<!-- Row 3: Lic. Roberto C. Peña -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center font-bold text-label-md flex-shrink-0 shadow-sm">
+                  RP
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-lg text-label-lg text-primary font-bold truncate">Lic. Roberto C. Peña</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">roberto.pena@uan.edu.mx</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="font-mono text-body-sm bg-surface-container px-2 py-1 rounded text-primary font-semibold">roberto.pena@uan.edu.mx</span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px]">badge</span>
+                Control Escolar
+              </span>
+</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container text-on-tertiary-container font-label-sm text-label-sm font-bold">
+<span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>
+                Activo
+              </span>
+</td>
+<td class="py-space-md px-space-md"><div class="flex flex-col"><span class="text-on-surface font-medium text-body-sm">Ayer, 19:40 hrs</span></div></td>
+<td class="py-space-md px-space-md text-right">
+<div class="inline-flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Restablecer contraseña provisional">
+<span class="material-symbols-outlined text-[19px]">lock_reset</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-secondary hover:bg-surface-container transition-colors" title="Cambiar Rol de Funcionario">
+<span class="material-symbols-outlined text-[19px]">manage_accounts</span>
+</button>
+<label class="relative inline-flex items-center cursor-pointer ml-1" title="Activar / Desactivar">
+<input checked="" class="sr-only peer" type="checkbox">
+<div class="w-8 h-4 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+</td>
+</tr>
+<!-- Row 4: Carlos E. Pérez Villa (Estudiante) -->
+<tr class="bg-surface-container-low/20 hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-surface-container-high text-primary flex items-center justify-center font-bold text-label-md flex-shrink-0 shadow-sm">
+                  CP
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-lg text-label-lg text-primary font-bold truncate">Carlos E. Pérez Villa</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">carlos.perez.v@uan.edu.mx • Lic. en Economía</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="font-mono text-body-sm bg-primary-fixed text-on-primary-fixed px-2.5 py-1 rounded font-bold">210089334</span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-primary-container font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px]">school</span>
+                Estudiante
+              </span>
+</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container text-on-tertiary-container font-label-sm text-label-sm font-bold">
+<span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>
+                Activo
+              </span>
+</td>
+<td class="py-space-md px-space-md"><div class="flex flex-col"><span class="text-on-surface font-medium text-body-sm">Hoy, 10:14 hrs</span></div></td>
+<td class="py-space-md px-space-md text-right">
+<div class="inline-flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Restablecer contraseña provisional">
+<span class="material-symbols-outlined text-[19px]">lock_reset</span>
+</button>
+<div class="relative group">
+<button class="p-1.5 rounded-lg text-outline-variant cursor-not-allowed opacity-50" disabled="">
+<span class="material-symbols-outlined text-[19px]">manage_accounts</span>
+</button>
+<div class="absolute right-0 bottom-full mb-1 hidden group-hover:block bg-inverse-surface text-inverse-on-surface text-[11px] py-1 px-2 rounded shadow-md whitespace-nowrap z-30">Rol gestionado por Control Escolar</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer ml-1" title="Activar / Desactivar">
+<input checked="" class="sr-only peer" type="checkbox">
+<div class="w-8 h-4 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+</td>
+</tr>
+<!-- Row 5: Andrea M. Ramos (Estudiante) -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-surface-container-high text-primary flex items-center justify-center font-bold text-label-md flex-shrink-0 shadow-sm">
+                  AR
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-lg text-label-lg text-primary font-bold truncate">Andrea M. Ramos</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">andrea.ramos@uan.edu.mx • Lic. en Finanzas</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="font-mono text-body-sm bg-primary-fixed text-on-primary-fixed px-2.5 py-1 rounded font-bold">200045129</span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-primary-container font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px]">school</span>
+                Estudiante
+              </span>
+</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container text-on-tertiary-container font-label-sm text-label-sm font-bold">
+<span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>
+                Activo
+              </span>
+</td>
+<td class="py-space-md px-space-md"><div class="flex flex-col"><span class="text-on-surface font-medium text-body-sm">10 Feb 2026, 16:05 hrs</span></div></td>
+<td class="py-space-md px-space-md text-right">
+<div class="inline-flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Restablecer contraseña provisional">
+<span class="material-symbols-outlined text-[19px]">lock_reset</span>
+</button>
+<div class="relative group">
+<button class="p-1.5 rounded-lg text-outline-variant cursor-not-allowed opacity-50" disabled="">
+<span class="material-symbols-outlined text-[19px]">manage_accounts</span>
+</button>
+<div class="absolute right-0 bottom-full mb-1 hidden group-hover:block bg-inverse-surface text-inverse-on-surface text-[11px] py-1 px-2 rounded shadow-md whitespace-nowrap z-30">Rol gestionado por Control Escolar</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer ml-1" title="Activar / Desactivar">
+<input checked="" class="sr-only peer" type="checkbox">
+<div class="w-8 h-4 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+</td>
+</tr>
+<!-- Row 6: Diego Armando Solís (Estudiante Inactivo) -->
+<tr class="bg-surface-container-low/20 hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm opacity-75">
+<div class="w-10 h-10 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center font-bold text-label-md flex-shrink-0 shadow-sm">
+                  DS
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-lg text-label-lg text-on-surface-variant font-bold truncate">Diego Armando Solís</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">diego.solis@uan.edu.mx • Lic. en Economía</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="font-mono text-body-sm bg-surface-container text-on-surface-variant px-2.5 py-1 rounded font-bold">220011456</span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px]">school</span>
+                Estudiante
+              </span>
+</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm font-bold">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+                Inactivo
+              </span>
+</td>
+<td class="py-space-md px-space-md"><div class="flex flex-col"><span class="text-on-surface-variant font-medium text-body-sm">Hace 12 días</span></div></td>
+<td class="py-space-md px-space-md text-right">
+<div class="inline-flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Restablecer contraseña provisional">
+<span class="material-symbols-outlined text-[19px]">lock_reset</span>
+</button>
+<div class="relative group">
+<button class="p-1.5 rounded-lg text-outline-variant cursor-not-allowed opacity-50" disabled="">
+<span class="material-symbols-outlined text-[19px]">manage_accounts</span>
+</button>
+<div class="absolute right-0 bottom-full mb-1 hidden group-hover:block bg-inverse-surface text-inverse-on-surface text-[11px] py-1 px-2 rounded shadow-md whitespace-nowrap z-30">Rol gestionado por Control Escolar</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer ml-1" title="Activar / Desactivar">
+<input class="sr-only peer" type="checkbox">
+<div class="w-8 h-4 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+</td>
+</tr>
+<!-- Row 7: Dra. Carmen Salinas (Administrador) -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold text-label-md flex-shrink-0 shadow-sm">
+                  CS
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-lg text-label-lg text-primary font-bold truncate">Dra. Carmen Salinas</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">carmen.salinas@uan.edu.mx</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="font-mono text-body-sm bg-surface-container px-2 py-1 rounded text-primary font-semibold">carmen.salinas@uan.edu.mx</span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">shield_person</span>
+                Administrador
+              </span>
+</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container text-on-tertiary-container font-label-sm text-label-sm font-bold">
+<span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>
+                Activo
+              </span>
+</td>
+<td class="py-space-md px-space-md"><div class="flex flex-col"><span class="text-on-surface font-medium text-body-sm">08 Feb 2026</span></div></td>
+<td class="py-space-md px-space-md text-right">
+<div class="inline-flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Restablecer contraseña provisional">
+<span class="material-symbols-outlined text-[19px]">lock_reset</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-secondary hover:bg-surface-container transition-colors" title="Cambiar Rol de Funcionario">
+<span class="material-symbols-outlined text-[19px]">manage_accounts</span>
+</button>
+<label class="relative inline-flex items-center cursor-pointer ml-1" title="Activar / Desactivar">
+<input checked="" class="sr-only peer" type="checkbox">
+<div class="w-8 h-4 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination & Audit Meta Footer -->
+<div class="px-space-md py-space-sm bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-sm">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Mostrando <strong class="text-on-surface font-semibold">7</strong> de <strong class="text-on-surface font-semibold">134</strong> usuarios registrados • Convocatoria 2026-A</span>
+<div class="flex items-center gap-space-xs">
+<button class="px-space-sm py-1 rounded bg-surface-container-lowest text-on-surface-variant hover:text-primary text-label-sm font-semibold transition-colors disabled:opacity-40" disabled="">
+          Anterior
+        </button>
+<span class="px-space-sm py-1 rounded bg-primary-container text-on-primary text-label-sm font-bold">1</span>
+<button class="px-space-sm py-1 rounded bg-surface-container-lowest text-on-surface-variant hover:text-primary text-label-sm font-semibold transition-colors">2</button>
+<button class="px-space-sm py-1 rounded bg-surface-container-lowest text-on-surface-variant hover:text-primary text-label-sm font-semibold transition-colors">3</button>
+<button class="px-space-sm py-1 rounded bg-surface-container-lowest text-on-surface-variant hover:text-primary text-label-sm font-semibold transition-colors">
+          Siguiente
+        </button>
+</div>
+</div>
+</div>
+<!-- INTERACTIVE MODAL / FORM "NUEVO USUARIO" -->
+<div class="fixed inset-0 z-50 bg-primary/40 backdrop-blur-sm flex items-center justify-center p-space-md hidden transition-opacity" id="modal-nuevo-usuario">
+<div class="bg-surface-container-lowest rounded-xl max-w-lg w-full shadow-2xl p-space-lg flex flex-col gap-space-md transform transition-transform">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[24px]">person_add</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-primary font-bold">Registrar Personal Escolar o Administrador</h3>
+<span class="font-body-sm text-body-sm text-on-surface-variant">UAE • Control Escolar UAN</span>
+</div>
+</div>
+<button class="w-8 h-8 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container flex items-center justify-center transition-colors" onclick="document.getElementById('modal-nuevo-usuario').classList.add('hidden')">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Warning within Modal -->
+<div class="bg-surface-container-high p-space-sm rounded-lg flex items-start gap-space-xs text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-secondary text-[18px] mt-0.5 flex-shrink-0">warning</span>
+<span class="">
+<strong>Recordatorio:</strong> No intente registrar alumnos por esta vía. Los estudiantes se habilitan automáticamente por importación del archivo CSV de alumnos.
+        </span>
+</div>
+<!-- Form Inputs -->
+<form class="flex flex-col gap-space-md" onsubmit="event.preventDefault(); document.getElementById('modal-nuevo-usuario').classList.add('hidden');">
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-md text-label-md text-on-surface font-semibold">Nombre Completo del Funcionario</label>
+<input class="w-full px-3 py-2 bg-surface-container-low rounded-lg text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container transition-all" placeholder="Ej. Lic. Mariana Gómez Torres" required="" type="text">
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-md text-label-md text-on-surface font-semibold">Correo Electrónico Institucional</label>
+<div class="relative">
+<input class="w-full pl-3 pr-10 py-2 bg-surface-container-low rounded-lg text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container transition-all" placeholder="usuario@uan.edu.mx" required="" type="email">
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">mail</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Debe pertenecer exclusivamente al dominio oficial @uan.edu.mx</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-md text-label-md text-on-surface font-semibold">Rol Institucional a Otorgar</label>
+<select class="w-full px-3 py-2 bg-surface-container-low rounded-lg font-label-md text-label-md text-on-surface font-semibold focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container transition-all" required="">
+<option value="control_escolar">Control Escolar (Ventanilla / Dictaminación UAE)</option>
+<option value="administrador">Administrador del Sistema SABE (Privilegios Plenos)</option>
+</select>
+</div>
+<div class="bg-surface-container-low p-space-sm rounded-lg flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary-container text-[20px]">mark_email_read</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">
+            Se enviará un correo con credenciales provisionales que deberá renovar en su primer ingreso a SABE.
+          </span>
+</div>
+<!-- Modal Actions -->
+<div class="flex items-center justify-end gap-space-sm pt-space-xs">
+<button class="px-space-md py-2 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md font-semibold hover:bg-surface-container-high transition-colors" onclick="document.getElementById('modal-nuevo-usuario').classList.add('hidden')" type="button">
+            Cancelar
+          </button>
+<button class="px-space-md py-2 rounded-lg bg-primary-container text-on-primary font-label-md text-label-md font-semibold shadow-sm hover:bg-primary transition-all" type="submit">
+            Crear usuario institucional
+          </button>
+</div>
+</form>
+</div>
+</div>
+<!-- INSTITUTIONAL FOOTER -->
+<footer class="mt-space-lg pt-space-md pb-space-sm border-t-0 flex flex-col md:flex-row items-center justify-between gap-space-sm text-on-surface-variant font-body-sm text-body-sm">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[18px]">verified_user</span>
+<span class="">© 2026 <strong>Universidad Autónoma de Nayarit</strong> • Unidad Académica de Economía (UAE). Convocatoria 2026-A.</span>
+</div>
+<div class="flex items-center gap-space-md">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Plataforma auxiliar UAE (Generación de archivo para Control Escolar)</span>
+<span class="px-space-xs py-0.5 rounded bg-surface-container text-primary font-mono text-[11px] font-bold">
+        BUILD v2.11-SEC
+      </span>
+</div>
+</footer>
+</div></main></div>
+
+
+
+<script src="../_shared/prototipo.js"></script>
+</body></html>

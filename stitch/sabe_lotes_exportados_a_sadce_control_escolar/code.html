@@ -1,0 +1,724 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-secondary-fixed": "#2a1700",
+          "secondary-fixed-dim": "#ffb95f",
+          "surface-container-highest": "#d3e4fe",
+          "surface": "#f8f9ff",
+          "secondary": "#855300",
+          "outline": "#73777e",
+          "primary-fixed-dim": "#a8caef",
+          "error-container": "#ffdad6",
+          "on-secondary-fixed-variant": "#653e00",
+          "on-error": "#ffffff",
+          "surface-container-high": "#dce9ff",
+          "on-primary": "#ffffff",
+          "on-surface": "#0b1c30",
+          "inverse-surface": "#213145",
+          "surface-bright": "#f8f9ff",
+          "tertiary-fixed-dim": "#4edea3",
+          "on-tertiary-container": "#00a472",
+          "on-primary-fixed-variant": "#274969",
+          "secondary-container": "#fea619",
+          "outline-variant": "#c3c7ce",
+          "tertiary-fixed": "#6ffbbe",
+          "on-tertiary-fixed-variant": "#005236",
+          "error": "#ba1a1a",
+          "on-tertiary": "#ffffff",
+          "primary": "#001629",
+          "primary-container": "#002b49",
+          "secondary-fixed": "#ffddb8",
+          "tertiary": "#00190e",
+          "tertiary-container": "#00301e",
+          "surface-variant": "#d3e4fe",
+          "on-error-container": "#93000a",
+          "surface-tint": "#406182",
+          "surface-container": "#e5eeff",
+          "surface-dim": "#cbdbf5",
+          "on-primary-fixed": "#001d34",
+          "inverse-primary": "#a8caef",
+          "on-tertiary-fixed": "#002113",
+          "on-surface-variant": "#42474d",
+          "primary-fixed": "#cfe5ff",
+          "on-background": "#0b1c30",
+          "on-primary-container": "#7293b6",
+          "on-secondary": "#ffffff",
+          "on-secondary-container": "#684000",
+          "inverse-on-surface": "#eaf1ff",
+          "background": "#f8f9ff",
+          "surface-container-low": "#eff4ff",
+          "surface-container-lowest": "#ffffff"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "space-xl": "2rem",
+          "margin-sm": "1rem",
+          "gutter-sm": "1rem",
+          "space-md": "1rem",
+          "space-sm": "0.5rem",
+          "space-lg": "1.5rem",
+          "gutter": "1.5rem",
+          "margin": "2rem",
+          "space-xs": "0.25rem"
+        },
+        "fontFamily": {
+          "body-md": [
+            "Inter"
+          ],
+          "body-sm": [
+            "Inter"
+          ],
+          "display-lg-mobile": [
+            "Plus Jakarta Sans"
+          ],
+          "label-md": [
+            "Inter"
+          ],
+          "headline-md": [
+            "Plus Jakarta Sans"
+          ],
+          "label-sm": [
+            "Inter"
+          ],
+          "body-lg": [
+            "Inter"
+          ],
+          "display-lg": [
+            "Plus Jakarta Sans"
+          ],
+          "headline-lg": [
+            "Plus Jakarta Sans"
+          ],
+          "headline-sm": [
+            "Plus Jakarta Sans"
+          ],
+          "label-lg": [
+            "Inter"
+          ]
+        },
+        "fontSize": {
+          "body-md": [
+            "0.875rem",
+            {
+              "lineHeight": "1.375rem",
+              "fontWeight": "400"
+            }
+          ],
+          "body-sm": [
+            "0.75rem",
+            {
+              "lineHeight": "1.125rem",
+              "fontWeight": "400"
+            }
+          ],
+          "display-lg-mobile": [
+            "1.75rem",
+            {
+              "lineHeight": "2.25rem",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ],
+          "label-md": [
+            "0.75rem",
+            {
+              "lineHeight": "1rem",
+              "letterSpacing": "0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-md": [
+            "1.25rem",
+            {
+              "lineHeight": "1.75rem",
+              "letterSpacing": "-0.015em",
+              "fontWeight": "600"
+            }
+          ],
+          "label-sm": [
+            "0.6875rem",
+            {
+              "lineHeight": "0.875rem",
+              "letterSpacing": "0.04em",
+              "fontWeight": "600"
+            }
+          ],
+          "body-lg": [
+            "1rem",
+            {
+              "lineHeight": "1.625rem",
+              "fontWeight": "400"
+            }
+          ],
+          "display-lg": [
+            "2.25rem",
+            {
+              "lineHeight": "2.75rem",
+              "letterSpacing": "-0.025em",
+              "fontWeight": "700"
+            }
+          ],
+          "headline-lg": [
+            "1.5rem",
+            {
+              "lineHeight": "2rem",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-sm": [
+            "1.125rem",
+            {
+              "lineHeight": "1.5rem",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "600"
+            }
+          ],
+          "label-lg": [
+            "0.875rem",
+            {
+              "lineHeight": "1.25rem",
+              "letterSpacing": "0.01em",
+              "fontWeight": "600"
+            }
+          ]
+        }
+      },
+    },
+  }</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-72 bg-surface-container-low z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)] overflow-y-auto"><div class="flex flex-col"><div class="px-space-lg pt-space-lg pb-space-md"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-primary text-[20px]">account_balance</span><span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">UAE • UAN</span></div><h2 class="font-headline-sm text-headline-sm text-primary mt-space-xs leading-snug">Unidad Académica de Economía</h2><div class="h-0.5 w-12 bg-primary-container mt-space-xs rounded-full"></div></div><nav class="px-space-md flex flex-col gap-space-xs mt-space-xs" data-active-classes="bg-primary-container text-on-primary font-semibold rounded-lg shadow-sm"><span class="px-space-sm pt-space-sm pb-space-xs font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Gestión de Trámites</span><a class="flex items-center justify-between px-space-sm py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="solicitudes-pendientes" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">pending_actions</span><span class="font-label-lg text-label-lg">Solicitudes Pendientes</span></div><span class="px-space-xs py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold">42</span></a><a class="flex items-center gap-space-sm px-space-sm py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="oferta-academica" href="#"><span class="material-symbols-outlined text-[20px]">calendar_month</span><span class="font-label-lg text-label-lg">Oferta Académica</span></a><div class="my-space-xs border-t border-outline-variant/30"></div><span class="px-space-sm pt-space-sm pb-space-xs font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Mantenimiento</span><a class="flex items-center gap-space-sm px-space-sm py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="periodo-y-convocatoria" href="#"><span class="material-symbols-outlined text-[20px]">date_range</span><span class="font-label-lg text-label-lg">Periodo y Convocatoria</span></a><a class="flex items-center gap-space-sm px-space-sm py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="cuentas-de-estudiantes" href="#"><span class="material-symbols-outlined text-[20px]">manage_accounts</span><span class="font-label-lg text-label-lg">Importación de Datos (CSV)</span></a><a aria-current="page" class="flex items-center gap-space-sm px-space-sm py-space-sm transition-colors bg-primary-container text-on-primary font-semibold rounded-lg shadow-sm" data-path="exportar-a-sadce" href="#"><span class="material-symbols-outlined text-[20px]">sync_alt</span><span class="font-label-lg text-label-lg">Exportar Excel para SADCE</span></a><a class="flex items-center gap-space-sm px-space-sm py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="bitacora-de-auditoria" href="#"><span class="material-symbols-outlined text-[20px]">history_edu</span><span class="font-label-lg text-label-lg">Bitácora de Auditoría</span></a></nav></div><div class="p-space-md mx-space-md mb-space-md bg-surface-container-lowest rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.04)] flex items-center gap-space-sm"><img alt="Escudo UAE - SABES Control UAE" class="h-10 w-auto object-contain flex-shrink-0" src="https://lh3.googleusercontent.com/aida/AEtjO1Xnb4vs7cNlIZPan4DznYD98-E2hNUm4RYVRpvg4pZsBjEuhs9XAOSwjoQg8NZ4KCKUrPp5a18dn1srG32i6bwB0ibmRrsVQr22Owzj3Y80WY90k6rK_lYeQS0lCF5VffAvkMnCVNrjNgYRB5o03fq_MW2SETrLiUNzrpH-CJRPSwo-IwjU0ZLlIHa3Hy-UksTe0LDvKl3wJHji1zIqFeeGwY6mhJC9KiO2lYUJY54ip6QAISI4q4uQVU4"><div class="flex flex-col min-w-0"><span class="font-label-sm text-label-sm text-primary font-bold truncate">SABES Control UAE</span><span class="font-body-sm text-body-sm text-on-surface-variant truncate">Control Escolar UAN</span></div></div></aside><div class="pl-72 flex flex-col min-h-screen"><header class="fixed top-0 left-72 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-space-lg"><div class="flex items-center gap-space-md"><div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-on-primary font-bold font-headline-sm text-headline-sm select-none shadow-sm">S</div><div class="flex items-center gap-space-sm"><span class="font-headline-sm text-headline-sm text-primary font-bold tracking-tight">SABE</span><span class="text-outline-variant">•</span><span class="font-body-md text-body-md text-on-surface font-medium hidden sm:inline">Sistema de Altas y Bajas</span></div><span class="inline-flex items-center px-space-sm py-0.5 rounded-full font-label-sm text-label-sm bg-primary-fixed text-on-primary-fixed font-semibold tracking-wide">Ciclo Escolar 2026-A</span></div><div class="flex items-center gap-space-md"><div class="text-right hidden md:flex flex-col"><span class="font-label-lg text-label-lg text-on-surface font-semibold leading-tight">Lic. Valeria M. Ruiz</span><span class="font-body-sm text-body-sm text-on-surface-variant leading-tight">Ventanilla Control Escolar UAE</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0 shadow-sm"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="w-full pt-16 bg-surface flex-1 px-space-lg py-space-lg"><div class="flex flex-col w-full">
+<!-- Regla Institucional Clave (Banner Superior) -->
+
+<!-- Breadcrumbs & Encabezado Principal -->
+<div class="flex flex-col gap-space-xs mb-space-lg">
+<nav class="flex items-center gap-space-xs font-label-sm text-label-sm text-on-surface-variant">
+<span class="">Ventanilla de Control Escolar</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="">Mantenimiento</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-on-surface font-semibold">Exportación a SADCE</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-primary font-bold">Lotes Exportados</span>
+</nav>
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md mt-space-xs">
+<div>
+<h1 class="font-display-lg text-display-lg text-primary tracking-tight">Exportación a SADCE — Historial de Lotes</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-3xl mt-1">Historial de Excel generados para que Control Escolar pase la información a SADCE.</p>
+</div>
+<div class="flex items-center gap-space-sm flex-wrap">
+<button class="bg-surface-container-high hover:bg-surface-container text-on-surface px-space-md py-space-sm rounded-lg font-label-lg text-label-lg font-semibold flex items-center gap-space-xs transition-colors shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">table_chart</span>
+<span class="">Ver guía de estructura plana SADCE</span>
+</button>
+<button class="bg-primary-container hover:bg-primary text-on-primary px-space-md py-space-sm rounded-lg font-label-lg text-label-lg font-semibold flex items-center gap-space-xs transition-colors shadow-md" onclick="document.getElementById('modal-lote-confirm').classList.remove('hidden')" type="button"><span class="material-symbols-outlined text-[20px]">file_download</span><span class="">Generar Excel de intercambio</span></button>
+</div>
+</div>
+</div>
+<!-- Pestañas de Navegación Sección -->
+<div class="flex items-center gap-space-sm mb-space-lg overflow-x-auto pb-1">
+<button class="bg-surface-container-lowest text-primary font-label-lg text-label-lg font-bold px-space-md py-space-sm rounded-xl shadow-sm flex items-center gap-space-xs flex-shrink-0">
+<span class="material-symbols-outlined text-[18px]">archive</span>
+<span class="">Lotes Exportados</span>
+<span class="ml-space-xs px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-bold">6 lotes</span>
+</button>
+<button class="bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-lg text-label-lg font-medium px-space-md py-space-sm rounded-xl transition-colors flex items-center gap-space-xs flex-shrink-0">
+<span class="material-symbols-outlined text-[18px]">pending_actions</span>
+<span class="">Movimientos Pendientes de Exportar</span>
+<span class="ml-space-xs px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-bold">18 pendientes</span>
+</button>
+<button class="bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-lg text-label-lg font-medium px-space-md py-space-sm rounded-xl transition-colors flex items-center gap-space-xs flex-shrink-0"><span class="material-symbols-outlined text-[18px]">description</span><span class="">Plantilla del Excel</span></button>
+</div>
+<!-- Resumen Métrico Superior (Tarjetas Estadísticas) -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-md mb-space-xl">
+<!-- Métrica 1 -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Total Movimientos Dictaminados</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">assignment_turned_in</span>
+</div>
+</div>
+<div class="my-space-sm">
+<div class="font-display-lg text-display-lg text-primary font-bold tracking-tight">148</div>
+</div>
+<div class="flex items-center gap-space-sm pt-space-xs bg-surface-container-low px-space-sm py-1 rounded-lg">
+<div class="flex items-center gap-1 font-label-sm text-label-sm font-semibold text-tertiary-container">
+<span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>
+<span class="">92 Altas</span>
+</div>
+<span class="text-outline-variant">•</span>
+<div class="flex items-center gap-1 font-label-sm text-label-sm font-semibold text-error">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="">56 Bajas</span>
+</div>
+</div>
+</div>
+<!-- Métrica 2 -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Movimientos Cargados en SADCE</span>
+<div class="w-8 h-8 rounded-lg bg-tertiary-fixed text-on-tertiary-fixed-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+</div>
+</div>
+<div class="my-space-sm flex items-baseline gap-space-sm">
+<span class="font-display-lg text-display-lg text-primary font-bold tracking-tight">118</span>
+<span class="px-space-xs py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-sm text-label-sm font-bold">80% completado</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-1.5 overflow-hidden">
+<div class="bg-on-tertiary-container h-full rounded-full" style="width: 80%;"></div>
+</div>
+</div>
+<!-- Métrica 3 -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Lotes en Espera de Carga</span>
+<div class="w-8 h-8 rounded-lg bg-secondary-fixed text-on-secondary-fixed-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">hourglass_top</span>
+</div>
+</div>
+<div class="my-space-sm flex items-baseline gap-space-sm">
+<span class="font-display-lg text-display-lg text-primary font-bold tracking-tight">2</span>
+<span class="font-body-md text-body-md text-on-surface-variant font-medium">lotes</span>
+<span class="px-space-xs py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-bold">Pendientes</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+        30 movimientos por validar en SADCE Central
+      </p>
+</div>
+<!-- Métrica 4 -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Última Exportación</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">history</span>
+</div>
+</div>
+<div class="my-space-sm">
+<span class="font-headline-md text-headline-md text-primary font-bold">Hoy, 11:20 hrs</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Por Lic. Valeria M. Ruiz</p>
+</div>
+<div class="flex items-center gap-space-xs font-label-sm text-label-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px] text-tertiary-container">verified</span>
+<span class="">LOTE-2026A-006 generado con éxito</span>
+</div>
+</div>
+</div>
+<!-- Contenedor Principal: Filtros y Tabla de Lotes Exportados -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg flex flex-col gap-space-lg mb-space-xl">
+<!-- Barra de Filtros y Búsqueda -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm flex-1 max-w-lg">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
+<input class="w-full bg-surface-container-low text-on-surface pl-10 pr-4 py-2 rounded-lg font-body-md text-body-md focus:outline-none focus:bg-surface-container-lowest shadow-inner" placeholder="Buscar por número de lote (ej. LOTE-2026A-006) o usuario..." type="text">
+</div>
+</div>
+<div class="flex items-center gap-space-sm flex-wrap">
+<div class="flex items-center gap-space-xs bg-surface-container-low p-1 rounded-lg">
+<span class="font-label-sm text-label-sm text-on-surface-variant px-space-xs uppercase">Formato:</span>
+<button class="px-space-sm py-1 bg-surface-container-lowest font-label-sm text-label-sm font-bold text-primary rounded shadow-xs">Todos</button>
+<button class="px-space-sm py-1 hover:bg-surface-container font-label-sm text-label-sm text-on-surface-variant rounded">Excel</button>
+<button class="px-space-sm py-1 hover:bg-surface-container font-label-sm text-label-sm text-on-surface-variant rounded">CSV</button>
+</div>
+<div class="flex items-center gap-space-xs bg-surface-container-low p-1 rounded-lg">
+<span class="font-label-sm text-label-sm text-on-surface-variant px-space-xs uppercase">Estado:</span>
+<button class="px-space-sm py-1 bg-surface-container-lowest font-label-sm text-label-sm font-bold text-primary rounded shadow-xs">Todos</button>
+<button class="px-space-sm py-1 hover:bg-surface-container font-label-sm text-label-sm text-on-surface-variant rounded flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span> Exportado
+          </button>
+<button class="px-space-sm py-1 hover:bg-surface-container font-label-sm text-label-sm text-on-surface-variant rounded flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-on-tertiary-container"></span> Cargado
+          </button>
+</div>
+<button class="p-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary transition-colors" title="Refrescar lista">
+<span class="material-symbols-outlined text-[20px]">refresh</span>
+</button>
+</div>
+</div>
+<!-- Tabla de Lotes -->
+<div class="overflow-x-auto">
+<table class="w-full text-left font-body-md text-body-md">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-md text-label-md uppercase tracking-wider">
+<th class="py-space-sm px-space-md rounded-l-lg">Lote ID</th>
+<th class="py-space-sm px-space-md">Fecha y Hora</th>
+<th class="py-space-sm px-space-md">Quién Exportó</th>
+<th class="py-space-sm px-space-md">Formato</th>
+<th class="py-space-sm px-space-md text-center">Movimientos</th>
+<th class="py-space-sm px-space-md">Estado SADCE</th>
+<th class="py-space-sm px-space-md text-right rounded-r-lg">Acciones de Ventanilla</th>
+</tr>
+</thead>
+<tbody class="divide-y-0">
+<!-- Fila 1 (Lote Activo del caso de uso) -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-md font-semibold text-primary">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">folder_zip</span>
+<span class="font-headline-sm text-headline-sm text-primary tracking-tight">LOTE-2026A-006</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="text-on-surface font-semibold">12 Feb 2026</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm">11:20 hrs</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Lic. Valeria M. Ruiz</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm">Ventanilla UAE</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1 px-space-xs py-0.5 rounded-full bg-surface-container text-primary font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px] text-tertiary-container">table_view</span>
+                Excel (.xlsx)
+              </span>
+</td>
+<td class="py-space-md px-space-md text-center">
+<span class="px-space-sm py-1 rounded-full bg-primary-fixed text-on-primary-fixed font-label-md text-label-md font-bold">12 movs</span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 px-space-sm py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-bold shadow-xs">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+                Exportado (Pendiente)
+              </span>
+</td>
+<td class="py-space-md px-space-md text-right">
+<div class="flex items-center justify-end gap-space-xs">
+<button class="p-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary transition-colors flex items-center gap-1 font-label-sm text-label-sm font-semibold" title="Volver a descargar archivo">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span class="hidden xl:inline">Descargar</span>
+</button>
+<button class="px-space-sm py-1.5 rounded-lg bg-secondary-container hover:bg-secondary text-on-secondary-container hover:text-on-secondary transition-colors font-label-sm text-label-sm font-bold flex items-center gap-1 shadow-sm" onclick="document.getElementById('modal-lote-confirm').classList.remove('hidden')">
+<span class="material-symbols-outlined text-[18px]">task_alt</span>
+<span class="">Marcar como cargado en SADCE</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Fila 2 -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-md font-semibold text-primary">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-outline text-[20px]">folder_zip</span>
+<span class="font-headline-sm text-headline-sm text-primary tracking-tight">LOTE-2026A-005</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="text-on-surface font-semibold">11 Feb 2026</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm">16:45 hrs</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Lic. Roberto C. Peña</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm">Coord. Escolar</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1 px-space-xs py-0.5 rounded-full bg-surface-container text-primary font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px] text-tertiary-container">table_view</span>
+                Excel (.xlsx)
+              </span>
+</td>
+<td class="py-space-md px-space-md text-center">
+<span class="px-space-sm py-1 rounded-full bg-surface-container text-on-surface font-label-md text-label-md font-bold">18 movs</span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 px-space-sm py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-bold shadow-xs">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+                Exportado (Pendiente)
+              </span>
+</td>
+<td class="py-space-md px-space-md text-right">
+<div class="flex items-center justify-end gap-space-xs">
+<button class="p-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary transition-colors flex items-center gap-1 font-label-sm text-label-sm font-semibold" title="Volver a descargar">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span class="hidden xl:inline">Descargar</span>
+</button>
+<button class="px-space-sm py-1.5 rounded-lg bg-secondary-container hover:bg-secondary text-on-secondary-container hover:text-on-secondary transition-colors font-label-sm text-label-sm font-bold flex items-center gap-1 shadow-sm" onclick="document.getElementById('modal-lote-confirm').classList.remove('hidden')">
+<span class="material-symbols-outlined text-[18px]">task_alt</span>
+<span class="">Marcar como cargado en SADCE</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Fila 3 -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-md font-semibold text-primary">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-outline text-[20px]">folder_zip</span>
+<span class="font-headline-sm text-headline-sm text-primary tracking-tight">LOTE-2026A-004</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="text-on-surface font-semibold">10 Feb 2026</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm">13:10 hrs</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Lic. Valeria M. Ruiz</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm">Ventanilla UAE</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1 px-space-xs py-0.5 rounded-full bg-surface-container text-primary font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px] text-primary">data_object</span>
+                CSV (.csv UTF-8)
+              </span>
+</td>
+<td class="py-space-md px-space-md text-center">
+<span class="px-space-sm py-1 rounded-full bg-surface-container text-on-surface font-label-md text-label-md font-bold">38 movs</span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 px-space-sm py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-sm text-label-sm font-bold">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+                Cargado en SADCE
+              </span>
+</td>
+<td class="py-space-md px-space-md text-right">
+<div class="flex items-center justify-end gap-space-xs">
+<button class="p-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary transition-colors" title="Descarga histórica">
+<span class="material-symbols-outlined text-[18px]">download</span>
+</button>
+<div class="flex items-center gap-1 px-space-sm py-1 rounded-lg bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px] text-tertiary-container">verified</span>
+<span class="">Cargado 10 Feb, 15:40</span>
+</div>
+</div>
+</td>
+</tr>
+<!-- Fila 4 -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-md font-semibold text-primary">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-outline text-[20px]">folder_zip</span>
+<span class="font-headline-sm text-headline-sm text-primary tracking-tight">LOTE-2026A-003</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="text-on-surface font-semibold">09 Feb 2026</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm">18:05 hrs</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Lic. Roberto C. Peña</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm">Coord. Escolar</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1 px-space-xs py-0.5 rounded-full bg-surface-container text-primary font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px] text-tertiary-container">table_view</span>
+                Excel (.xlsx)
+              </span>
+</td>
+<td class="py-space-md px-space-md text-center">
+<span class="px-space-sm py-1 rounded-full bg-surface-container text-on-surface font-label-md text-label-md font-bold">45 movs</span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 px-space-sm py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-sm text-label-sm font-bold">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+                Cargado en SADCE
+              </span>
+</td>
+<td class="py-space-md px-space-md text-right">
+<div class="flex items-center justify-end gap-space-xs">
+<button class="p-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary transition-colors" title="Descarga histórica">
+<span class="material-symbols-outlined text-[18px]">download</span>
+</button>
+<div class="flex items-center gap-1 px-space-sm py-1 rounded-lg bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px] text-tertiary-container">verified</span>
+<span class="">Cargado 10 Feb, 09:12</span>
+</div>
+</div>
+</td>
+</tr>
+<!-- Fila 5 -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-md font-semibold text-primary">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-outline text-[20px]">folder_zip</span>
+<span class="font-headline-sm text-headline-sm text-primary tracking-tight">LOTE-2026A-002</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="text-on-surface font-semibold">08 Feb 2026</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm">12:30 hrs</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Lic. Valeria M. Ruiz</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm">Ventanilla UAE</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1 px-space-xs py-0.5 rounded-full bg-surface-container text-primary font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px] text-tertiary-container">table_view</span>
+                Excel (.xlsx)
+              </span>
+</td>
+<td class="py-space-md px-space-md text-center">
+<span class="px-space-sm py-1 rounded-full bg-surface-container text-on-surface font-label-md text-label-md font-bold">23 movs</span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 px-space-sm py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-sm text-label-sm font-bold">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+                Cargado en SADCE
+              </span>
+</td>
+<td class="py-space-md px-space-md text-right">
+<div class="flex items-center justify-end gap-space-xs">
+<button class="p-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary transition-colors" title="Descarga histórica">
+<span class="material-symbols-outlined text-[18px]">download</span>
+</button>
+<div class="flex items-center gap-1 px-space-sm py-1 rounded-lg bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px] text-tertiary-container">verified</span>
+<span class="">Cargado 08 Feb, 14:00</span>
+</div>
+</div>
+</td>
+</tr>
+<!-- Fila 6 -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-md font-semibold text-primary">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-outline text-[20px]">folder_zip</span>
+<span class="font-headline-sm text-headline-sm text-primary tracking-tight">LOTE-2026A-001</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="text-on-surface font-semibold">06 Feb 2026</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm">09:15 hrs</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Lic. Valeria M. Ruiz</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm">Ventanilla UAE</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1 px-space-xs py-0.5 rounded-full bg-surface-container text-primary font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px] text-primary">data_object</span>
+                CSV (.csv UTF-8)
+              </span>
+</td>
+<td class="py-space-md px-space-md text-center">
+<span class="px-space-sm py-1 rounded-full bg-surface-container text-on-surface font-label-md text-label-md font-bold">12 movs</span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 px-space-sm py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-sm text-label-sm font-bold">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+                Cargado en SADCE
+              </span>
+</td>
+<td class="py-space-md px-space-md text-right">
+<div class="flex items-center justify-end gap-space-xs">
+<button class="p-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary transition-colors" title="Descarga histórica">
+<span class="material-symbols-outlined text-[18px]">download</span>
+</button>
+<div class="flex items-center gap-1 px-space-sm py-1 rounded-lg bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px] text-tertiary-container">verified</span>
+<span class="">Cargado 06 Feb, 11:30</span>
+</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Paginación y Resumen de Registros -->
+<div class="flex flex-col sm:flex-row items-center justify-between gap-space-md pt-space-md bg-surface-container-low p-space-md rounded-xl">
+<div class="font-body-sm text-body-sm text-on-surface-variant">
+        Mostrando <strong class="text-on-surface">6 de 6 lotes</strong> generados en el Ciclo 2026-A (Total acumulado: 148 movimientos)
+      </div>
+<div class="flex items-center gap-space-xs">
+<button class="px-space-sm py-1 rounded bg-surface-container-lowest text-outline-variant cursor-not-allowed font-label-sm text-label-sm" disabled="">Anterior</button>
+<button class="px-space-sm py-1 rounded bg-primary text-on-primary font-label-sm text-label-sm font-bold">1</button>
+<button class="px-space-sm py-1 rounded bg-surface-container-lowest text-outline-variant cursor-not-allowed font-label-sm text-label-sm" disabled="">Siguiente</button>
+</div>
+</div>
+</div>
+<!-- Banner Informativo de Cierre Operativo (Footer de la vista) -->
+<div class="bg-surface-container p-space-lg rounded-xl shadow-sm mb-space-xl flex flex-col md:flex-row items-start gap-space-md"><div class="flex-1"><h3 class="font-headline-sm text-headline-sm text-primary font-bold">Aviso Operativo de Cierre de Trámites</h3><p class="font-body-md text-body-md text-on-surface-variant mt-1 leading-relaxed">SABE no se conecta con SADCE. Control Escolar descarga el Excel, pasa la información a SADCE por su cuenta y después marca el lote como cargado.</p></div></div>
+<!-- MODAL DE CONFIRMACIÓN INTERACTIVO (Caso LOTE-2026A-006) -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-primary/40 backdrop-blur-sm p-space-md" id="modal-lote-confirm">
+<div class="bg-surface-container-lowest w-full max-w-xl rounded-2xl shadow-xl overflow-hidden flex flex-col transform transition-all animate-in fade-in zoom-in duration-150">
+<!-- Encabezado Modal -->
+<div class="bg-primary-container text-on-primary p-space-lg flex items-center justify-between"><div class="flex items-center gap-space-sm"><div class="w-10 h-10 rounded-xl bg-surface-container-highest/20 flex items-center justify-center text-primary-fixed"><span class="material-symbols-outlined text-[24px]">task_alt</span></div><div><h2 class="font-headline-md text-headline-md text-on-primary font-bold tracking-tight">Confirmar Carga Manual en SADCE</h2><p class="font-label-sm text-label-sm text-primary-fixed">Ventanilla de Control Escolar UAE • Convocatoria 2026-A</p></div></div><button class="p-1 rounded-lg text-surface-variant hover:text-on-primary hover:bg-surface-container-highest/20 transition-colors" onclick="document.getElementById('modal-lote-confirm').classList.add('hidden')" type="button"><span class="material-symbols-outlined text-[22px]">close</span></button></div>
+<!-- Cuerpo del Modal -->
+<div class="p-space-lg flex flex-col gap-space-md">
+<!-- Declaración Destacada -->
+<div class="p-space-md bg-secondary-fixed/50 text-on-secondary-fixed rounded-xl flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-secondary text-[22px] flex-shrink-0 mt-0.5">notification_important</span>
+<div class="font-body-md text-body-md font-medium">
+            Se marcarán <strong>12 movimientos</strong> como cargados en SADCE y se notificará a los alumnos.
+          </div>
+</div>
+<!-- Resumen Contextual del Lote -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col gap-space-sm">
+<div class="flex justify-between items-center pb-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Identificador de Lote:</span>
+<span class="font-label-lg text-label-lg font-bold text-primary px-space-xs py-0.5 rounded bg-surface-container-highest">LOTE-2026A-006</span>
+</div>
+<div class="flex justify-between items-center pb-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Población estudiantil:</span>
+<span class="font-body-md text-body-md font-semibold text-on-surface">11 alumnos de Economía y Finanzas</span>
+</div>
+<div class="flex justify-between items-center pb-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Desglose de movimientos:</span>
+<span class="font-body-md text-body-md text-on-surface">8 Altas de asignatura, 4 Bajas</span>
+</div>
+</div>
+<!-- Impacto en el Flujo Institucional -->
+
+<!-- Checkbox de Verificación y Auditoría -->
+<label class="flex items-start gap-space-sm p-space-sm rounded-lg hover:bg-surface-container-low cursor-pointer transition-colors"><input checked="" class="mt-1 h-4 w-4 rounded accent-primary text-primary focus:ring-primary cursor-pointer" id="check-auditoria" type="checkbox"><span class="font-body-sm text-body-sm text-on-surface leading-tight select-none">Confirmo que verifiqué la carga manual en el sistema SADCE de la Universidad Autónoma de Nayarit.</span></label>
+</div>
+<!-- Pie del Modal con Acciones -->
+<div class="bg-surface-container-low p-space-md flex items-center justify-end gap-space-sm">
+<button class="px-space-md py-space-sm rounded-lg font-label-lg text-label-lg font-semibold bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors" onclick="document.getElementById('modal-lote-confirm').classList.add('hidden')" type="button">
+          Cancelar
+        </button>
+<button class="px-space-md py-space-sm rounded-lg font-label-lg text-label-lg font-bold bg-tertiary-container hover:bg-tertiary text-on-tertiary flex items-center gap-space-xs transition-colors shadow-md" onclick="ejecutarConfirmacionSADCE()" type="button">
+<span class="material-symbols-outlined text-[20px]">check_circle</span>
+<span class="">Confirmar carga y notificar</span>
+</button>
+</div>
+</div>
+</div>
+<script>
+    function ejecutarConfirmacionSADCE() {
+      const checkbox = document.getElementById('check-auditoria');
+      if (!checkbox.checked) {
+        alert('Por favor marque la casilla de auditoría para confirmar que la información ya se cargó en SADCE.');
+        return;
+      }
+      // Ocultar modal
+      document.getElementById('modal-lote-confirm').classList.add('hidden');
+      // Feedback visual rápido
+      alert('Éxito: LOTE-2026A-006 marcado como cargado en SADCE. 11 alumnos notificados institucionalmente.');
+    }
+  </script>
+</div></main></div>
+
+<script src="../_shared/prototipo.js"></script>
+</body></html>

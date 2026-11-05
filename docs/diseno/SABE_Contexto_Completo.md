@@ -89,15 +89,22 @@ Ya existen la ruta crítica, diagrama de red y Gantt (carpetas `Actividades/` y 
 
 ## 9. Prototipo actual (carpeta `stitch/`)
 
-Diseño: "Academic Prestige Modern" (`stitch/DESIGN.md`). Azul marino #002B49, ámbar, verde esmeralda para altas, rojo para bajas y choques. Fuentes Plus Jakarta Sans e Inter. Son páginas HTML sueltas (Tailwind y React por CDN) que sirven de referencia visual para el frontend real.
+Diseño: "Academic Prestige Modern" (`stitch/academic_prestige_modern/DESIGN.md`). Azul marino #002B49, ámbar, verde esmeralda para altas, rojo para bajas y choques. Fuentes Plus Jakarta Sans e Inter. Son páginas HTML sueltas (Tailwind y React por CDN) que sirven de referencia visual para el frontend real.
 
-| Archivo | Contenido |
+Cada pantalla es una carpeta `stitch/sabe_*/` con su `code.html` (y `screen.png` en las que exportó Stitch). Todas cargan `stitch/_shared/prototipo.js`, que enlaza las pantallas según el rol. Se prueba abriendo el login y usando los accesos de demostración (estudiante `210089334`, Control Escolar `valeria.ruiz`, administrador `admin`; contraseña `demo1234`, o `temporal` para el primer acceso del estudiante).
+
+| Carpeta | Contenido |
 |---|---|
-| `login.html` | Login con matrícula y contraseña, recuperar contraseña, cambio obligatorio de contraseña temporal. Redirige según el usuario: matrícula numérica va a `estudiante.html`, "controlescolar" va a `control-escolar.html`, la contraseña "temporal" muestra el cambio de contraseña |
-| `estudiante.html` | Portal del estudiante con 5 vistas: Dashboard, Horario actual (retícula y lista), Catálogo y carrito (filtros, cupos, aviso de choque), Confirmación (justificación y declaración) e Historial con acuse. Incluye panel de notificaciones |
-| `control-escolar.html` | Módulo de control escolar: Gestión de solicitudes, Validación de solicitud (expediente, choques, visto bueno, motivo de rechazo), Exportación a SADCE, Catálogos (materias, grupos, docentes), Oferta académica con convocatoria, Historial y auditoría |
-| `capturas/` | 21 capturas de todas las vistas, tomadas el 4 de noviembre de 2026 desde los HTML corregidos. Ojo: los logos y la foto de la fachada se ven como marcadores porque se generaron sin internet |
-| `login.png`, `estudiante.png`, `control-escolar.png` | Capturas anteriores (desactualizadas) |
+| `sabe_inicio_de_sesi_n_...` | Login con accesos de demostración; redirige por rol |
+| `sabe_recuperar_contrase_a_...`, `sabe_cambio_obligatorio_...` | Recuperar contraseña y cambio obligatorio de la temporal |
+| `sabe_estudiantes` | Portal del estudiante: dashboard, horario, catálogo y carrito, confirmación e historial |
+| `sabe_cancelar_solicitud_...`, `sabe_detalle_de_folio_...`, `sabe_convocatoria_cerrada_...`, `sabe_panel_de_notificaciones_...` | Cancelar solicitud, detalle de folio, convocatoria cerrada o extemporánea y notificaciones del estudiante |
+| `sabe_solicitudes_control_escolar` | Bandeja y validación por movimiento (rechazo con motivo, visto bueno en extemporáneos) |
+| `sabe_oferta_academica_control_escolar` | Oferta con horario por día y hora, cupo y publicar asignatura |
+| `sabe_periodo_y_convocatoria_...`, `sabe_importaci_n_de_csv_...`, `sabe_lotes_exportados_...`, `sabe_notificaciones_de_control_escolar_...` | Periodo, importación de CSV, Excel de intercambio para SADCE con lotes, y notificaciones de Control Escolar |
+| `sabe_bitacora_auditoria` | Bitácora de solo lectura con descarga en CSV |
+| `sabe_usuarios_y_roles_administrador` | Usuarios y roles |
+| `_archivo/sabe_administrativo` | Versión vieja y monolítica del módulo administrativo, reemplazada por las pantallas de arriba |
 | `DESIGN.md` | Guía de diseño |
 
 **Problemas del HTML de control escolar:** el archivo trae 3 copias compiladas de la app en el `<head>` que fallan al cargar (React error #299 en la consola, sin efecto visible) y una instantánea estática de la pantalla donde vive "Oferta académica" (publicar materia y convocatoria), que no está conectada al menú de la app real. Conviene limpiar el archivo y conectar esa pantalla.
@@ -198,8 +205,9 @@ Estructura de `C:\dev\SABE` (reorganizada el 4 de noviembre de 2026):
   - `Actividades/`: entregas de la materia (propuesta técnica, EDT, diagrama de red, Gantt, holgura).
   - `Material de clases/`: guías y teoría, más `SABE_Contexto_Proyecto.md` (versión vieja del contexto).
   - `output/`: PDFs y Word de la actividad 9 (ruta crítica).
-  - `SABE_Contexto_Completo.md`: este archivo.
-- `stitch/`: prototipo en HTML (`login.html`, `estudiante.html`, `control-escolar.html`), capturas y `DESIGN.md`. Ver la sección 9.
+  - Este archivo vive ahora en `docs/diseno/`.
+- `stitch/`: prototipo en HTML, una carpeta por pantalla (`sabe_*/code.html`), `_shared/prototipo.js` (navegación entre pantallas y roles) y `academic_prestige_modern/DESIGN.md`. Ver la sección 9.
+- `docs/`: `requerimientos/` (Word por rol) y `diseno/` (este contexto, `SABE_Pantallas_y_Flujos.docx` y los prompts de Stitch).
 - `diagramas/`: `SABE_ERD_Backend.png` y `.mmd` (ERD corregido, 15 tablas; el .mmd es el editable en Mermaid).
 - `backend/core/`: `models.py` de Django que refleja el ERD (Django 5.1+, PostgreSQL, `AUTH_USER_MODEL = "core.Usuario"`).
 - `tmp/`: scripts y renders que se usaron para generar los documentos de la actividad 9. Se puede ignorar; sus rutas apuntan a la estructura anterior.

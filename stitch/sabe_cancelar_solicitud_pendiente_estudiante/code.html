@@ -1,0 +1,416 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "error": "#ba1a1a", "secondary-fixed": "#ffddb8", "on-primary": "#ffffff", "inverse-on-surface": "#eaf1ff", "on-primary-container": "#7293b6", "on-tertiary-fixed": "#002113", "secondary": "#855300", "on-tertiary-fixed-variant": "#005236", "on-error-container": "#93000a", "on-secondary": "#ffffff", "surface-tint": "#406182", "surface-bright": "#f8f9ff", "surface-variant": "#d3e4fe", "tertiary": "#00190e", "outline": "#73777e", "primary-fixed": "#cfe5ff", "surface": "#f8f9ff", "on-secondary-container": "#684000", "on-background": "#0b1c30", "on-tertiary": "#ffffff", "on-primary-fixed-variant": "#274969", "background": "#f8f9ff", "surface-container-low": "#eff4ff", "outline-variant": "#c3c7ce", "on-tertiary-container": "#00a472", "on-secondary-fixed-variant": "#653e00", "tertiary-fixed": "#6ffbbe", "surface-dim": "#cbdbf5", "on-surface-variant": "#42474d", "primary-container": "#002b49", "on-surface": "#0b1c30", "surface-container-highest": "#d3e4fe", "primary": "#001629", "inverse-surface": "#213145", "primary-fixed-dim": "#a8caef", "surface-container": "#e5eeff", "surface-container-high": "#dce9ff", "secondary-fixed-dim": "#ffb95f", "tertiary-container": "#00301e", "surface-container-lowest": "#ffffff", "on-secondary-fixed": "#2a1700", "on-error": "#ffffff", "inverse-primary": "#a8caef", "tertiary-fixed-dim": "#4edea3", "secondary-container": "#fea619", "error-container": "#ffdad6", "on-primary-fixed": "#001d34" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "margin": "2rem", "space-xl": "2rem", "space-sm": "0.5rem", "space-xs": "0.25rem", "space-md": "1rem", "space-lg": "1.5rem", "gutter-sm": "1rem", "margin-sm": "1rem", "gutter": "1.5rem" }, "fontFamily": { "label-sm": [ "Inter" ], "headline-md": [ "Plus Jakarta Sans" ], "label-md": [ "Inter" ], "display-lg-mobile": [ "Plus Jakarta Sans" ], "body-sm": [ "Inter" ], "label-lg": [ "Inter" ], "body-lg": [ "Inter" ], "body-md": [ "Inter" ], "headline-lg": [ "Plus Jakarta Sans" ], "display-lg": [ "Plus Jakarta Sans" ], "headline-sm": [ "Plus Jakarta Sans" ] }, "fontSize": { "label-sm": [ "0.6875rem", { "lineHeight": "0.875rem", "letterSpacing": "0.04em", "fontWeight": "600" } ], "headline-md": [ "1.25rem", { "lineHeight": "1.75rem", "letterSpacing": "-0.015em", "fontWeight": "600" } ], "label-md": [ "0.75rem", { "lineHeight": "1rem", "letterSpacing": "0.02em", "fontWeight": "600" } ], "display-lg-mobile": [ "1.75rem", { "lineHeight": "2.25rem", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "body-sm": [ "0.75rem", { "lineHeight": "1.125rem", "fontWeight": "400" } ], "label-lg": [ "0.875rem", { "lineHeight": "1.25rem", "letterSpacing": "0.01em", "fontWeight": "600" } ], "body-lg": [ "1rem", { "lineHeight": "1.625rem", "fontWeight": "400" } ], "body-md": [ "0.875rem", { "lineHeight": "1.375rem", "fontWeight": "400" } ], "headline-lg": [ "1.5rem", { "lineHeight": "2rem", "letterSpacing": "-0.02em", "fontWeight": "600" } ], "display-lg": [ "2.25rem", { "lineHeight": "2.75rem", "letterSpacing": "-0.025em", "fontWeight": "700" } ], "headline-sm": [ "1.125rem", { "lineHeight": "1.5rem", "letterSpacing": "-0.01em", "fontWeight": "600" } ] } } } };</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,43,73,0.04)] z-50 flex flex-col justify-between pt-5 pb-6"><div class="flex flex-col"><div class="px-6 pb-6 flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center"><span class="material-symbols-outlined text-primary-fixed text-2xl">account_balance</span></div><div><span class="font-headline-sm text-headline-sm text-primary block leading-none">SABE</span><span class="font-label-sm text-label-sm text-outline uppercase tracking-wider block mt-1">UAN • Economía</span></div></div><div class="px-4 mb-2"><span class="px-3 font-label-sm text-label-sm uppercase tracking-wider text-outline block mb-2">Navegación Académica</span><nav class="space-y-1" data-active-classes="bg-primary-container text-on-primary font-semibold"><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="resumen-general" href="#"><span class="material-symbols-outlined text-[20px]">dashboard</span><span class="font-label-lg text-label-lg">Resumen General</span></a><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="horario-semestral" href="#"><span class="material-symbols-outlined text-[20px]">calendar_month</span><span class="font-label-lg text-label-lg">Horario Semestral</span></a><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="catalogo-de-asignaturas" href="#"><span class="material-symbols-outlined text-[20px]">menu_book</span><span class="font-label-lg text-label-lg">Catálogo de Asignaturas</span></a><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="historial-y-tramites" href="#"><span class="material-symbols-outlined text-[20px]">history_edu</span><span class="font-label-lg text-label-lg">Historial y Trámites</span></a><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="avisos-y-convocatoria" href="#"><span class="material-symbols-outlined text-[20px]">campaign</span><span class="font-label-lg text-label-lg">Avisos y Convocatoria</span></a></nav></div></div><div class="px-6 pt-4"><div class="p-4 rounded-xl bg-surface-container-low flex items-center gap-3 shadow-[0_1px_4px_rgba(0,43,73,0.03)]"><div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-primary text-xl">school</span></div><div class="min-w-0 flex-1"><span class="font-label-sm text-label-sm text-primary block leading-tight truncate font-semibold">UAE • UAN</span><span class="font-body-sm text-body-sm text-outline truncate block">Unidad Académica de Economía</span></div></div></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,43,73,0.04)] z-40 px-gutter flex items-center justify-between"><div class="flex items-center gap-4 min-w-0"><img alt="SABE" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCI7Kft64JUAva-yHOQ511rZVYBcsW0zRlS28XLpbMApGZG3u5mjVBRzDnTdYQOEb9RB9asQ2zjwW_wKSW_CK8reVTSmXU1L7rAdNn72iQDOhgK7my9JYwN_DGamQhv8XdpajdVQt2PTOS1-56LkSSmV1G8YFkpf6hykXnKgURPcO2Ca3ekoYV5o64mSpC7QXCOHZoXKwWpJCKeSK3CdA7ICGwH7kilp4QCZK7fp1-Vc6NwAfDcefGz3Q"><div class="hidden sm:flex flex-col"><span class="font-headline-sm text-headline-sm text-primary leading-tight font-bold">SABE</span><span class="font-body-sm text-body-sm text-outline leading-tight">Facultad de Economía • UAN</span></div><div class="h-6 w-px bg-outline-variant/40 hidden md:block ml-2"></div><div class="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-high"><span class="w-2 h-2 rounded-full bg-on-tertiary-container animate-pulse"></span><span class="font-label-sm text-label-sm text-primary font-semibold">Ciclo Escolar 2026-A</span></div></div><div class="flex items-center gap-space-lg shrink-0"><div class="relative flex items-center"><button aria-label="Notificaciones" class="p-2 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors relative" type="button"><span class="material-symbols-outlined text-2xl">notifications</span><span class="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] px-1 bg-error text-on-error rounded-full font-label-sm text-[10px] leading-tight flex items-center justify-center font-bold">3</span></button></div><div class="flex items-center gap-3 pl-3"><div class="text-right hidden sm:block"><span class="font-label-lg text-label-lg text-primary block leading-tight font-bold">Carlos E. Pérez Villa</span><span class="font-body-sm text-body-sm text-outline block leading-tight">Mat. 210089334 • Lic. en Economía</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-16 bg-surface px-gutter min-h-[calc(100vh-4rem)] flex flex-col justify-between"><div><div class="flex flex-col w-full relative">
+<!-- Interactive Controller Floating Bar -->
+
+<!-- Section Top Banner: Convocatoria Ciclo 2026-A -->
+<div class="w-full rounded-2xl bg-gradient-to-r from-primary-container via-primary to-primary-container p-6 shadow-md text-on-primary mb-8 relative overflow-hidden">
+<div class="absolute -right-8 -bottom-10 w-52 h-52 rounded-full bg-secondary-container/10 pointer-events-none blur-2xl"></div>
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+<div class="space-y-2">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-lowest/15 backdrop-blur-md">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed animate-ping"></span>
+<span class="font-label-sm text-label-sm text-surface-variant font-bold uppercase tracking-wider">Convocatoria 2026-A</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-on-primary tracking-tight">Historial y Trámites de Solicitud</h1>
+<p class="font-body-md text-body-md text-surface-variant/90 max-w-2xl leading-relaxed">Ciclo Escolar 2026-A (02 Feb – 13 Feb 2026). Consulta el estado de tus folios, da seguimiento a revisiones escolares o cancela oportunamente movimientos en curso.</p>
+</div>
+<div class="flex items-center gap-4 bg-surface-container-lowest/10 backdrop-blur-md p-3.5 rounded-xl shrink-0">
+<img alt="SABE Economía" class="h-10 w-auto object-contain bg-surface-container-lowest/90 rounded-lg p-1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCI7Kft64JUAva-yHOQ511rZVYBcsW0zRlS28XLpbMApGZG3u5mjVBRzDnTdYQOEb9RB9asQ2zjwW_wKSW_CK8reVTSmXU1L7rAdNn72iQDOhgK7my9JYwN_DGamQhv8XdpajdVQt2PTOS1-56LkSSmV1G8YFkpf6hykXnKgURPcO2Ca3ekoYV5o64mSpC7QXCOHZoXKwWpJCKeSK3CdA7ICGwH7kilp4QCZK7fp1-Vc6NwAfDcefGz3Q">
+<div class="h-8 w-px bg-on-primary/20"></div>
+<img alt="UAE UAN" class="h-10 w-auto object-contain bg-surface-container-lowest/90 rounded-lg p-1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAZfsFc_EM9vpopbguV12IfOADRACYSr4zfWqaTs9iN3s8TKUkU-U86I0QAdLGCEIatZzt3wvvLfZPk0VZ_HWMXe-muUwwQ9PUkVriFLAVoNIctbK_4e-zmC1uP1qVydMJT3KF68VTB3-EVuwWC8kwvHaRxdQIVtpG1qMbSMOwxmFiwpZbw0mswMeSJxTkn_hsq_dQp44ptEY7VyUs3E4OgjGuQco6c9SvqqWRkTtlBDxP68EPzPleSg">
+</div>
+</div>
+</div>
+<!-- Breadcrumbs & Stats Overview Grid -->
+<div class="grid grid-cols-1 gap-4 mb-8 md:flex">
+<div class="p-4 rounded-xl bg-surface-container-lowest shadow-sm flex items-center justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-outline uppercase block">Folios Registrados</span>
+<span class="font-headline-md text-headline-md text-primary font-bold">1</span>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-xl">description</span>
+</div>
+</div>
+<div class="p-4 rounded-xl bg-surface-container-lowest shadow-sm flex items-center justify-between"><div><span class="font-label-sm text-label-sm text-outline uppercase block">Movimientos Solicitados</span><span class="font-headline-md text-headline-md text-primary font-bold">2 Registrados</span></div><div class="w-10 h-10 rounded-lg bg-primary-fixed flex items-center justify-center"><span class="material-symbols-outlined text-primary text-xl">checklist</span></div></div>
+
+<div class="p-4 rounded-xl bg-surface-container-lowest shadow-sm flex items-center justify-between"><div><span class="font-label-sm text-label-sm text-outline uppercase block">Validación</span><span class="font-headline-md text-headline-md text-primary font-bold">Control Escolar</span></div><div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-primary text-xl">verified</span></div></div>
+</div>
+<!-- Primary Application Card: SABE-2026-014 -->
+<section class="w-full rounded-2xl bg-surface-container-lowest shadow-md overflow-hidden mb-8">
+<!-- Card Top Header Bar -->
+<div class="p-6 bg-surface-container-low flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex items-center gap-3.5">
+<div class="w-12 h-12 rounded-xl bg-primary-container flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-primary-fixed text-2xl">receipt_long</span>
+</div>
+<div>
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-headline-md text-headline-md text-primary font-bold tracking-tight">Folio #SABE-2026-014</span>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-label-sm text-label-sm font-bold tracking-wide" id="badge-status-pill">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span id="badge-status-text" class="">Pendiente de Dictamen</span>
+</span>
+</div>
+<p class="font-body-sm text-body-sm text-outline mt-0.5" id="text-application-timestamp">Registrada el 12 de Febrero 2026 a las 09:30 hrs</p>
+</div>
+</div>
+<!-- Header Action Controls -->
+<div class="flex items-center gap-3" id="wrapper-primary-actions">
+<button class="px-4 py-2.5 rounded-xl bg-error-container hover:bg-error/20 text-error font-label-md text-label-md flex items-center gap-2 transition-all shadow-sm active:scale-95" id="btn-trigger-cancel" type="button">
+<span class="material-symbols-outlined text-[18px]">cancel</span>
+<span class="">Cancelar Solicitud</span>
+</button>
+<button class="px-4 py-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-primary font-label-md text-label-md flex items-center gap-2 transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">print</span>
+<span class="hidden sm:inline">Comprobante</span>
+</button>
+</div>
+<!-- Re-application Container (Hidden by default, shown upon cancellation) -->
+<div class="hidden flex-col sm:flex-row items-stretch sm:items-center gap-3" id="wrapper-cancelled-actions">
+<span class="font-label-sm text-label-sm text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-base">info</span> Folio liberado sin efectos académicos
+        </span>
+<button class="px-5 py-2.5 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95" id="btn-restart-flow" type="button">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+<span class="">Iniciar Nueva Solicitud</span>
+</button>
+</div>
+</div>
+<!-- Movement Details Breakdown -->
+<div class="p-6 space-y-6">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-primary font-bold">Movimientos Registrados (2)</span>
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Unidad Académica de Economía • UAN</span>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+<!-- Movimiento 1: ALTA Macroeconomía II -->
+<div class="p-5 rounded-xl bg-surface-container-low flex flex-col justify-between gap-4 transition-all">
+<div>
+<div class="flex items-center justify-between gap-2 mb-3">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-tertiary-fixed/30 text-on-tertiary-container font-label-sm text-label-sm font-bold">
+<span class="material-symbols-outlined text-[15px]">add_box</span>
+                ALTA
+              </span>
+
+</div>
+<h2 class="font-headline-sm text-headline-sm text-primary font-bold leading-tight">Macroeconomía II</h2>
+<div class="mt-2 space-y-1 font-body-sm text-body-sm text-on-surface-variant">
+<p class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-[18px]">group</span>
+<span class=""><strong>Grupo:</strong> 02 • Licenciatura en Economía</span>
+</p>
+<p class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-[18px]">person</span>
+<span class=""><strong>Docente:</strong> Dr. Javier Medina</span>
+</p>
+<p class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-[18px]">schedule</span>
+<span class="">Lunes y Miércoles 08:00 – 10:00 hrs (Aula E-104)</span>
+</p>
+</div>
+</div>
+<div class="pt-3 flex items-center justify-between bg-surface-container-lowest/70 p-3 rounded-lg">
+<span class="font-label-sm text-label-sm text-outline">Cupo en aula al registrar:</span>
+<span class="font-label-sm text-label-sm text-primary font-semibold">28 / 30 alumnos</span>
+</div>
+</div>
+<!-- Movimiento 2: BAJA Econometría -->
+<div class="p-5 rounded-xl bg-surface-container-low flex flex-col justify-between gap-4 transition-all">
+<div>
+<div class="flex items-center justify-between gap-2 mb-3">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-error-container text-error font-label-sm text-label-sm font-bold">
+<span class="material-symbols-outlined text-[15px]">indeterminate_check_box</span>
+                BAJA
+              </span>
+
+</div>
+<h2 class="font-headline-sm text-headline-sm text-primary font-bold leading-tight">Econometría</h2>
+<div class="mt-2 space-y-1 font-body-sm text-body-sm text-on-surface-variant">
+<p class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-[18px]">group</span>
+<span class=""><strong>Grupo:</strong> 01 • Turno Matutino</span>
+</p>
+<p class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-[18px]">person</span>
+<span class=""><strong>Docente:</strong> Mtra. Rosalía Campos</span>
+</p>
+<p class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-[18px]">schedule</span>
+<span class="">Martes y Jueves 10:00 – 12:00 hrs (Laboratorio L-02)</span>
+</p>
+</div>
+</div>
+<div class="pt-3 flex items-center justify-between bg-surface-container-lowest/70 p-3 rounded-lg">
+<span class="font-label-sm text-label-sm text-outline">Motivo declarado:</span>
+<span class="font-label-sm text-label-sm text-primary font-semibold">Ajuste de Carga Curricular</span>
+</div>
+</div>
+</div>
+<!-- Institutional Notice regarding pending review -->
+<div class="p-4 rounded-xl bg-surface-container-high/60 flex items-start gap-3" id="notice-cancellation-policy">
+<span class="material-symbols-outlined text-outline text-xl shrink-0 mt-0.5">help_outline</span>
+<div class="space-y-1">
+<span class="font-label-md text-label-md text-primary font-bold block">Reglamento General de Trámites SABE</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Las solicitudes en estado <strong>Pendiente de Dictamen</strong> pueden ser canceladas por el estudiante en cualquier momento antes de que Control Escolar emita resolución. Los folios procesados de forma definitiva no pueden revertirse mediante esta pantalla.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Prior Closed Folios Reference Section -->
+<section class="w-full rounded-2xl bg-surface-container-lowest p-6 shadow-sm mb-12">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">folder_shared</span>
+<h3 class="font-headline-sm text-headline-sm text-primary font-bold">Folios Anteriores Concluidos</h3>
+</div>
+<span class="font-label-sm text-label-sm text-outline">Histórico 2025-B</span>
+</div>
+<div class="p-4 rounded-xl bg-surface-container-low flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="font-label-lg text-label-lg text-primary font-bold">#SABE-2025-089</span>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm">Concluido</span>
+</div>
+<p class="font-body-sm text-body-sm text-outline">1 Alta aprobada • Concluido el 18 de Agosto 2025</p>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-3.5 py-2 rounded-lg bg-surface-container text-primary hover:bg-surface-variant font-label-sm text-label-sm transition-colors flex items-center gap-1.5" type="button">
+<span class="material-symbols-outlined text-base">visibility</span>
+<span class="">Ver Detalles</span>
+</button>
+</div>
+</div>
+</section>
+<!-- ======================================================== -->
+<!-- MODAL DE CONFIRMACIÓN DE CANCELACIÓN (CENTRADOR Y BACKDROP) -->
+<!-- ======================================================== -->
+<div class="fixed inset-0 z-50 bg-primary/60 backdrop-blur-sm flex items-center justify-center p-4 transition-all duration-300 opacity-100 visible" id="modal-cancel-backdrop">
+<div class="w-full max-w-xl rounded-2xl bg-surface-container-lowest shadow-2xl overflow-hidden flex flex-col transform transition-all duration-300 scale-100" id="modal-cancel-card">
+<!-- Modal Header -->
+<div class="p-6 bg-surface-container-low flex items-start justify-between gap-4">
+<div class="flex items-start gap-3.5">
+<div class="w-12 h-12 rounded-xl bg-error-container text-error flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-2xl">warning</span>
+</div>
+<div>
+<h2 class="font-headline-md text-headline-md text-primary font-bold leading-tight">
+              ¿Cancelar solicitud SABE-2026-014?
+            </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+              Solo puedes cancelar movimientos que aún están pendientes. Después podrás volver a solicitar en el catálogo de la Facultad.
+            </p>
+</div>
+</div>
+<button aria-label="Cerrar modal" class="p-2 rounded-lg text-outline hover:bg-surface-container hover:text-on-surface transition-colors" id="btn-modal-close-icon" type="button">
+<span class="material-symbols-outlined text-xl">close</span>
+</button>
+</div>
+<!-- Modal Body: Movimientos a Anular -->
+<div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider block">
+          Movimientos que serán retirados de revisión:
+        </span>
+<!-- Detalle Movimiento 1 -->
+<div class="p-3.5 rounded-xl bg-surface-container-low flex items-start justify-between gap-3">
+<div class="space-y-1"><div class="flex items-center gap-2"><span class="px-2 py-0.5 rounded-full bg-tertiary-fixed/30 text-on-tertiary-container font-label-sm text-label-sm font-bold">ALTA</span><span class="font-label-lg text-label-lg text-primary font-bold">Macroeconomía II</span></div><p class="font-body-sm text-body-sm text-on-surface-variant">Grupo 02 • Docente: Dr. Javier Medina</p><p class="font-body-sm text-body-sm text-outline">Lunes y Miércoles 08:00 – 10:00 hrs</p></div>
+
+</div>
+<!-- Detalle Movimiento 2 -->
+<div class="p-3.5 rounded-xl bg-surface-container-low flex items-start justify-between gap-3">
+<div class="space-y-1"><div class="flex items-center gap-2"><span class="px-2 py-0.5 rounded-full bg-error-container text-error font-label-sm text-label-sm font-bold">BAJA</span><span class="font-label-lg text-label-lg text-primary font-bold">Econometría</span></div><p class="font-body-sm text-body-sm text-on-surface-variant">Grupo 01 • Docente: Mtra. Rosalía Campos</p><p class="font-body-sm text-body-sm text-outline">Martes y Jueves 10:00 – 12:00 hrs</p></div>
+
+</div>
+<!-- Alerta Institucional de Liberación de Cupos -->
+<div class="p-4 rounded-xl bg-error-container/20 flex items-start gap-3">
+<span class="material-symbols-outlined text-error text-xl shrink-0 mt-0.5">info</span>
+<p class="font-body-sm text-body-sm text-on-surface">
+<strong>Aviso:</strong> Al cancelar esta solicitud, los lugares reservados se liberarán inmediatamente para el catálogo general de la Facultad y deberás registrar un nuevo folio si deseas hacer ajustes.
+          </p>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="p-6 bg-surface-container-low flex flex-col-reverse sm:flex-row items-center justify-end gap-3">
+<button class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-surface-container-lowest hover:bg-surface-container text-primary font-label-md text-label-md transition-colors shadow-sm" id="btn-modal-cancel-keep" type="button">
+          Mantener solicitud
+        </button>
+<button class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-error hover:bg-error/90 text-on-error font-label-md text-label-md flex items-center justify-center gap-2 transition-all shadow-md active:scale-95" id="btn-modal-confirm-delete" type="button">
+<span class="material-symbols-outlined text-[18px]">delete_forever</span>
+<span class="">Sí, cancelar solicitud</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Toast Notification Floating Widget -->
+<div class="fixed bottom-6 right-6 z-50 transform translate-y-32 opacity-0 pointer-events-none transition-all duration-300 max-w-md w-[calc(100vw-3rem)]" id="toast-cancelled-notification">
+<div class="rounded-xl bg-inverse-surface text-inverse-on-surface p-4 shadow-xl flex items-start gap-3.5">
+<div class="w-8 h-8 rounded-lg bg-surface-container-highest text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-lg">check_circle</span>
+</div>
+<div class="flex-1 pr-2">
+<div class="flex items-center gap-2">
+<span class="font-label-lg text-label-lg text-inverse-on-surface font-bold">Solicitud cancelada</span>
+<span class="px-2 py-0.2 rounded bg-surface-variant/20 text-inverse-on-surface font-label-sm text-label-sm">SABE-2026-014</span>
+</div>
+<p class="font-body-sm text-body-sm text-inverse-on-surface/80 mt-0.5">
+          El folio ha sido dado de baja exitosamente. Los cupos fueron devueltos al catálogo.
+        </p>
+</div>
+<button class="text-inverse-on-surface/60 hover:text-inverse-on-surface" id="btn-toast-close" type="button">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+</div>
+</div>
+</div>
+<script>
+  (function () {
+    const modalBackdrop = document.getElementById('modal-cancel-backdrop');
+    const modalContent = document.getElementById('modal-cancel-card');
+    const btnCloseIcon = document.getElementById('btn-modal-close-icon');
+    const btnKeep = document.getElementById('btn-modal-cancel-keep');
+    const btnConfirmDelete = document.getElementById('btn-modal-confirm-delete');
+    
+    const btnTriggerCancel = document.getElementById('btn-trigger-cancel');
+    const btnToggleModal = document.getElementById('btn-toggle-modal');
+    const btnToggleState = document.getElementById('btn-toggle-state');
+    const labelStateToggle = document.getElementById('label-state-toggle');
+    const btnRestartFlow = document.getElementById('btn-restart-flow');
+    
+    const toast = document.getElementById('toast-cancelled-notification');
+    const btnToastClose = document.getElementById('btn-toast-close');
+
+    const badgeStatusPill = document.getElementById('badge-status-pill');
+    const badgeStatusText = document.getElementById('badge-status-text');
+    const textAppTimestamp = document.getElementById('text-application-timestamp');
+    const wrapperPrimaryActions = document.getElementById('wrapper-primary-actions');
+    const wrapperCancelledActions = document.getElementById('wrapper-cancelled-actions');
+    const noticeCancellationPolicy = document.getElementById('notice-cancellation-policy');
+
+    let isCancelled = false;
+
+    function openModal() {
+      modalBackdrop.classList.remove('opacity-0', 'pointer-events-none', 'invisible');
+      modalBackdrop.classList.add('opacity-100', 'visible');
+      modalContent.classList.remove('scale-95');
+      modalContent.classList.add('scale-100');
+    }
+
+    function closeModal() {
+      modalBackdrop.classList.add('opacity-0', 'pointer-events-none');
+      modalBackdrop.classList.remove('opacity-100', 'visible');
+      modalContent.classList.add('scale-95');
+      modalContent.classList.remove('scale-100');
+    }
+
+    function showToast() {
+      toast.classList.remove('translate-y-32', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        hideToast();
+      }, 5000);
+    }
+
+    function hideToast() {
+      toast.classList.add('translate-y-32', 'opacity-0', 'pointer-events-none');
+      toast.classList.remove('translate-y-0', 'opacity-100');
+    }
+
+    function applyCancelledState() {
+      isCancelled = true;
+      badgeStatusPill.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm font-bold tracking-wide";
+      badgeStatusPill.innerHTML = '<span class="material-symbols-outlined text-[15px]">cancel</span><span>Cancelada por el Estudiante</span>';
+      
+      textAppTimestamp.textContent = "Cancelada el 12 Feb 2026 a las 11:15 hrs • Liberado de lista de dictamen";
+      
+      wrapperPrimaryActions.classList.add('hidden');
+      wrapperCancelledActions.classList.remove('hidden');
+      wrapperCancelledActions.classList.add('flex');
+
+      noticeCancellationPolicy.classList.replace('bg-surface-container-high/60', 'bg-surface-container-low');
+      noticeCancellationPolicy.innerHTML = `
+        <span class="material-symbols-outlined text-outline text-xl shrink-0 mt-0.5">check_circle</span>
+        <div class="space-y-1">
+          <span class="font-label-md text-label-md text-primary font-bold block">Folio inactivo para dictamen</span>
+          <p class="font-body-sm text-body-sm text-on-surface-variant">
+            Esta solicitud ya no genera reservación horaria ni cruces en SADCE. Puedes ingresar al catálogo de asignaturas para formular una nueva solicitud si el período 2026-A continúa habilitado.
+          </p>
+        </div>
+      `;
+
+      if (labelStateToggle) labelStateToggle.textContent = "Revertir a Pendiente";
+    }
+
+    function applyPendingState() {
+      isCancelled = false;
+      badgeStatusPill.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-label-sm text-label-sm font-bold tracking-wide";
+      badgeStatusPill.innerHTML = '<span class="w-2 h-2 rounded-full bg-secondary"></span><span id="badge-status-text">Pendiente de Dictamen</span>';
+      
+      textAppTimestamp.textContent = "Registrada el 12 de Febrero 2026 a las 09:30 hrs • Convocatoria 2026-A";
+
+      wrapperPrimaryActions.classList.remove('hidden');
+      wrapperCancelledActions.classList.add('hidden');
+      wrapperCancelledActions.classList.remove('flex');
+
+      noticeCancellationPolicy.classList.replace('bg-surface-container-low', 'bg-surface-container-high/60');
+      noticeCancellationPolicy.innerHTML = `
+        <span class="material-symbols-outlined text-outline text-xl shrink-0 mt-0.5">help_outline</span>
+        <div class="space-y-1">
+          <span class="font-label-md text-label-md text-primary font-bold block">Reglamento General de Trámites SABE</span>
+          <p class="font-body-sm text-body-sm text-on-surface-variant">
+            Las solicitudes en estado <strong>Pendiente de Dictamen</strong> pueden ser canceladas por el alumno en cualquier momento antes de que la Control Escolar emita resolución. Los folios con dictamen definitivo no pueden revertirse mediante esta pantalla.
+          </p>
+        </div>
+      `;
+
+      if (labelStateToggle) labelStateToggle.textContent = "Simular Estado: Cancelada";
+    }
+
+    // Modal Events
+    btnTriggerCancel.addEventListener('click', openModal);
+    if (btnToggleModal) btnToggleModal.addEventListener('click', openModal);
+    btnCloseIcon.addEventListener('click', closeModal);
+    btnKeep.addEventListener('click', closeModal);
+
+    // Confirm Cancellation action
+    btnConfirmDelete.addEventListener('click', () => {
+      closeModal();
+      applyCancelledState();
+      showToast();
+    });
+
+    // Toggle simulated state
+    if (btnToggleState) btnToggleState.addEventListener('click', () => {
+      if (isCancelled) {
+        applyPendingState();
+      } else {
+        applyCancelledState();
+        showToast();
+      }
+    });
+
+    // Restart flow action
+    btnRestartFlow.addEventListener('click', () => {
+      applyPendingState();
+      const notification = document.createElement('div');
+      notification.className = "fixed top-20 right-6 z-50 bg-primary text-on-primary p-4 rounded-xl shadow-lg font-label-md text-label-md";
+      notification.textContent = "Redirigiendo a Catálogo de Asignaturas para nuevo folio...";
+      document.body.appendChild(notification);
+      setTimeout(() => notification.remove(), 2500);
+    });
+
+    // Close toast button
+    btnToastClose.addEventListener('click', hideToast);
+
+    // Background backdrop click dismiss
+    modalBackdrop.addEventListener('click', (e) => {
+      if (e.target === modalBackdrop) {
+        closeModal();
+      }
+    });
+  })();
+</script></div><footer class="w-full py-6 mt-space-xl"><div class="text-center font-body-sm text-body-sm text-outline">Convocatoria 2026-A • Unidad Académica de Economía, UAN • Control Escolar</div></footer></main></div>
+
+
+
+<script src="../_shared/prototipo.js"></script>
+</body></html>

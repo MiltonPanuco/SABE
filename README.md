@@ -14,7 +14,7 @@ Proyecto universitario, 7mo semestre. SABE es independiente: **no se integra a P
 | Autenticación | JWT con `djangorestframework-simplejwt` (login con matrícula) | Recomendado, por confirmar |
 | Exportación a SADCE | `openpyxl` (xlsx) y `csv` | Recomendado, por confirmar |
 | Frontend: datos y rutas | TanStack Query + React Router | Recomendado, por confirmar |
-| Frontend: estilos | Tailwind CSS (paleta de `stitch/DESIGN.md`) | Recomendado, por confirmar |
+| Frontend: estilos | Tailwind CSS (paleta de `stitch/academic_prestige_modern/DESIGN.md`) | Recomendado, por confirmar |
 | Documentación de API | `drf-spectacular` (Swagger en `/api/docs/`) | Incluido |
 | Contenedores | Docker Compose, solo para PostgreSQL | Opcional |
 
@@ -26,8 +26,9 @@ Proyecto universitario, 7mo semestre. SABE es independiente: **no se integra a P
 backend/      API en Django (config/ y core/ con los modelos)
 frontend/     Interfaz en React + TypeScript
 diagramas/    ERD del backend (SABE_ERD_Backend.png y .mmd editable)
-stitch/       Prototipo en HTML (login, estudiante, control-escolar) y DESIGN.md
-Clases/       Documentación y entregas de la materia (análisis, diseño, EDT)
+stitch/       Prototipo navegable en HTML (16 pantallas por rol), DESIGN.md y _shared/prototipo.js
+docs/         Requerimientos (docs/requerimientos) y diseño: contexto, flujos y prompts (docs/diseno)
+Clases/       Entregas y material de la materia (análisis, diseño, EDT)
 ```
 
 ## Cómo arrancar
@@ -101,16 +102,16 @@ Si cambias un modelo: `python manage.py makemigrations` y sube la migración en 
 - [ ] Administrador: usuarios y roles
 
 **Diseño**
-- [ ] Pantallas que faltan (ver `Clases/SABE_Contexto_Completo.md`, sección 10): cancelar solicitud, detalle de rechazo, periodo y convocatoria, importación de CSV, usuarios y roles
+- [x] Pantallas del prototipo completas (ver `docs/diseno/SABE_Pantallas_y_Flujos.docx`). Para verlo, abre `stitch/sabe_inicio_de_sesi_n_institucional_uan_uae/code.html` y usa los accesos de demostración
 - [ ] Definir con control escolar el formato exacto del reporte para SADCE
 
-Más contexto del proyecto en `Clases/SABE_Contexto_Completo.md`.
+Más contexto del proyecto en `docs/diseno/SABE_Contexto_Completo.md`.
 
 ## Equipo y responsables
 
 | Persona | Responsabilidad |
 |---|---|
-| Milton Cruz Panuco Castillo | Líder, revisión de código |
+| Milton Cruz Panuco Castillo | En lo q haga falta |
 | Fernando Osuna Manzo | Backend y frontend |
 | Irving García Rosas | Backend y frontend |
 | Rafael Gil Samaniego Vázquez | Diseño UI/UX |
@@ -120,6 +121,6 @@ Más contexto del proyecto en `Clases/SABE_Contexto_Completo.md`.
 
 1. Nadie sube directo a `main`. Crea una rama por tarea: `feature/choques-horario`, `fix/login`.
 2. Haz commits pequeños con mensajes claros en español.
-3. Abre un Pull Request y pide revisión a Milton antes de fusionar.
+3. Abre un Pull Request y pide revisión antes de fusionar.
 4. Antes de empezar, `git pull` en `main` para traer lo último.
 5. Nunca subas el archivo `.env` ni contraseñas.

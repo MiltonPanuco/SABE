@@ -1,0 +1,665 @@
+<!DOCTYPE html><html class="h-full" lang="es"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Iniciar Sesión | SABE - Unidad Académica de Economía (UAN)</title>
+<!-- Font & Icons -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 with Forms Plugin -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script data-purpose="tailwind-config" id="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            uan: {
+              navy: '#002B49',
+              dark: '#001a2d',
+              gold: '#F59E0B',
+              blue: '#0284C7',
+              accent: '#2563EB',
+              lightBlue: '#38BDF8',
+            }
+          },
+          boxShadow: {
+            'custom': '0 20px 40px -15px rgba(0, 43, 73, 0.08), 0 0 1px 1px rgba(0, 43, 73, 0.05)',
+            'floating': '0 25px 50px -12px rgba(2, 44, 73, 0.25)',
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Styles: Micro-adjustments and animations -->
+<style data-purpose="custom-animations">
+    @keyframes subtlePulse {
+      0%, 100% { opacity: 0.9; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.02); }
+    }
+    .badge-glow {
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.35);
+    }
+    .frost-glass {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+  </style>
+<meta content="web_standard" name="shell-type"></head>
+<body class="h-full bg-slate-50 font-sans text-slate-800 antialiased selection:bg-sky-500 selection:text-white" data-mode="connect">
+<!-- BEGIN: MainContainer -->
+<main class="flex min-h-screen w-full flex-col lg:flex-row overflow-x-hidden"><div class="flex flex-col w-full">
+<!-- Bar Demo Selector Rápido para Evaluador -->
+
+<!-- Layout Principal Dividido en 2 Columnas (Estilo Institucional Login UAE / SABE) -->
+<div class="flex flex-col lg:flex-row w-full min-h-[calc(100vh-45px)]">
+<!-- COLUMNA IZQUIERDA: Fotografía institucional, Escudo UAE y Credenciales UAN -->
+<aside class="relative hidden lg:flex lg:w-1/2 xl:w-5/12 overflow-hidden flex-col justify-between p-12 bg-primary-container text-on-primary">
+<!-- Imagen de Fondo Institucional Edificio de Economía con Overlay Degradado -->
+<div class="absolute inset-0 z-0">
+<div class="w-full h-full bg-cover bg-center scale-105 transform hover:scale-100 transition-transform duration-1000 ease-out" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCYWHHO99lCVP4jrVBdJhq0rnJnc8iFnp2LZ8DS3Ucu-PE2YDSUrWvJduw3uRA650ZvjMUz5Owjpm5XQnXmacco1guyngbVmJulO9kTC5QHHVwb8mvX2l_PoQ7bsfbRJkj7aTw5fbg0VgvQK2POzvn6b75-uVNVdUM6NuesIOgwt6AO1CduS0qLaIMVCbRPmUolHBowBm5P28LkgcqZwEkg6asGU6sGoUIv2Q3g9OgacSrAcyPKSjf4YQ');"></div>
+<!-- Gradiente institucional azul marino #002b49 multicapa -->
+<div class="absolute inset-0 bg-gradient-to-t from-primary-container via-primary-container/90 to-primary-container/75 mix-blend-multiply"></div>
+<div class="absolute inset-0 bg-gradient-to-r from-primary-container via-primary-container/85 to-transparent"></div>
+</div>
+<!-- Contenido Izquierdo Superior: Escudo UAE & Identidad -->
+<div class="relative z-10">
+<div class="flex items-center gap-4">
+<div class="p-2.5 bg-surface-container-lowest/10 backdrop-blur-md rounded-xl shadow-lg border border-white/10">
+<img alt="Escudo Oficial Facultad de Economía UAE UAN" class="h-14 w-auto object-contain drop-shadow" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2p-f7LbKbda0ymLJTHmECGjAHEbn8IJk-W_SDA8g6uXdAT0ClaCkTAxplQWuERCd8uE_Q-GLP0qpjwxKPcxakI205QVbWuoC0E8Ph99n6dpDsO4JtDIaNoMf6E-CysmIR5OZ7xBBRvi5hZyhxzXmcASG6CUwWt0bHrA0n1UQ36X4ib6ccDUiUBJ9MxZzPuleirKXS_vGdIjka9cjmx4z0lUcesta9Lai22ZWCw1Ws7Uoo0KOjCPqZ8g">
+</div>
+<div>
+<span class="inline-block px-2.5 py-0.5 mb-1 text-label-sm font-label-sm rounded-full bg-secondary-container text-on-secondary-fixed font-semibold tracking-wider uppercase">Convocatoria 2026-A</span>
+<h1 class="font-headline-md text-headline-md text-on-primary font-bold tracking-tight">
+              Facultad de Economía
+            </h1>
+<p class="font-body-sm text-body-sm text-on-primary-container font-medium tracking-wide">
+              Universidad Autónoma de Nayarit
+            </p>
+</div>
+</div>
+</div>
+<!-- Contenido Izquierdo Centro: Gráfico decorativo de seguridad y pertenencia -->
+<div class="relative z-10 py-10 space-y-6"><div class="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-on-primary-container text-label-md font-label-md"><span class="material-symbols-outlined text-secondary-container text-base">lock_reset</span>Ventanilla de Control Escolar - UAE</div><blockquote class="space-y-2"><p class="font-display-lg text-display-lg text-on-primary font-bold leading-tight">Recuperación de credenciales de acceso.</p><p class="font-body-md text-body-md text-on-primary-container leading-relaxed">El Sistema de Altas y Bajas de Economía (SABE) permite a la comunidad estudiantil gestionar sus unidades de aprendizaje durante la Convocatoria 2026-A.</p></blockquote><div class="grid grid-cols-2 gap-4 pt-4"><div class="bg-surface-container-lowest/10 backdrop-blur-md p-4 rounded-xl"><div class="flex items-center gap-2 text-secondary-fixed mb-1"><span class="material-symbols-outlined text-xl">school</span><span class="font-label-md text-label-md">Alumnos UAE</span></div><p class="font-body-sm text-body-sm text-on-primary-container">Acceso exclusivo con matrícula institucional asignada.</p></div><div class="bg-surface-container-lowest/10 backdrop-blur-md p-4 rounded-xl"><div class="flex items-center gap-2 text-secondary-fixed mb-1"><span class="material-symbols-outlined text-xl">support_agent</span><span class="font-label-md text-label-md">Atención Presencial</span></div><p class="font-body-sm text-body-sm text-on-primary-container">Ventanilla de Control Escolar en el Edificio A de la Facultad.</p></div></div></div>
+<!-- Contenido Izquierdo Inferior: Footer Institucional Legal -->
+<footer class="relative z-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-on-primary-container font-body-sm text-body-sm gap-2">
+<span class="">© 2026 Universidad Autónoma de Nayarit</span>
+<span class="inline-flex items-center gap-1.5 text-label-sm font-label-sm">
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-tertiary-fixed"></span>
+          Plataforma Institucional SABE
+        </span>
+</footer>
+</aside>
+<!-- COLUMNA DERECHA: Área de Interacción, Formularios Centrados & Estados -->
+<main class="w-full lg:w-1/2 xl:w-7/12 flex flex-col justify-between p-6 sm:p-10 lg:p-14 bg-surface">
+<!-- Cabecera Mobile (Solo visible en pantallas pequeñas) -->
+<div class="lg:hidden flex items-center justify-between pb-6 border-b border-surface-container-high mb-6">
+<div class="flex items-center gap-3">
+<img alt="Logo UAE" class="h-10 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2p-f7LbKbda0ymLJTHmECGjAHEbn8IJk-W_SDA8g6uXdAT0ClaCkTAxplQWuERCd8uE_Q-GLP0qpjwxKPcxakI205QVbWuoC0E8Ph99n6dpDsO4JtDIaNoMf6E-CysmIR5OZ7xBBRvi5hZyhxzXmcASG6CUwWt0bHrA0n1UQ36X4ib6ccDUiUBJ9MxZzPuleirKXS_vGdIjka9cjmx4z0lUcesta9Lai22ZWCw1Ws7Uoo0KOjCPqZ8g">
+<div>
+<h2 class="font-label-lg text-label-lg text-primary font-bold">UAE • UAN</h2>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Convocatoria 2026-A</p>
+</div>
+</div>
+<span class="px-2.5 py-1 rounded bg-secondary-container/20 text-secondary font-label-sm text-label-sm font-bold">
+          SABE
+        </span>
+</div>
+<!-- Contenedor Central Dinámico (Cambia según Estado 1, 2 o 3) -->
+<section class="w-full max-w-lg mx-auto my-auto py-4">
+<!-- LOGOTIPO OFICIAL SABE EN LA PARTE SUPERIOR -->
+<div class="text-center mb-8">
+<img alt="SABE" class="h-16 sm:h-20 w-auto mx-auto object-contain drop-shadow-sm mb-3" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCI7Kft64JUAva-yHOQ511rZVYBcsW0zRlS28XLpbMApGZG3u5mjVBRzDnTdYQOEb9RB9asQ2zjwW_wKSW_CK8reVTSmXU1L7rAdNn72iQDOhgK7my9JYwN_DGamQhv8XdpajdVQt2PTOS1-56LkSSmV1G8YFkpf6hykXnKgURPcO2Ca3ekoYV5o64mSpC7QXCOHZoXKwWpJCKeSK3CdA7ICGwH7kilp4QCZK7fp1-Vc6NwAfDcefGz3Q">
+<p class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">
+            Facultad de Economía • Universidad Autónoma de Nayarit
+          </p>
+</div>
+<!-- ========================================== -->
+<!-- ESTADO 1: RECUPERA TU ACCESO (SOLICITAR)   -->
+<!-- ========================================== -->
+<article class="transition-opacity duration-300" id="state-1">
+<div class="bg-surface-container-lowest rounded-2xl shadow-xl p-8 sm:p-10 relative overflow-hidden">
+<header class="mb-6">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm mb-3">
+<span class="material-symbols-outlined text-sm text-primary">key</span>
+                Paso 1 de 2: Solicitud
+              </span>
+<h2 class="font-display-lg text-headline-lg font-bold text-on-surface tracking-tight">
+                Recupera tu acceso
+              </h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2">
+                Ingresa tu matrícula institucional de 9 dígitos para recibir las instrucciones de restablecimiento.
+              </p>
+</header>
+<!-- Alerta Informativa / Error -->
+<div class="hidden mb-6 p-4 rounded-xl bg-error-container text-on-error-container items-start gap-3 animate-pulse" id="state1-error">
+<span class="material-symbols-outlined text-error text-xl shrink-0 mt-0.5">error</span>
+<div>
+<p class="font-label-md text-label-md font-bold">Matrícula no válida</p>
+<p class="font-body-sm text-body-sm">Asegúrate de ingresar exactamente 9 dígitos numéricos correspondientes a tu registro escolar.</p>
+</div>
+</div>
+<form class="space-y-6" onsubmit="handleRequestLink(event)">
+<div>
+<label class="block font-label-md text-label-md text-on-surface font-semibold mb-2" for="student-matricula">
+                  Matrícula Institucional
+                </label>
+<div class="relative rounded-xl shadow-sm">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-xl">badge</span>
+</div>
+<input class="block w-full pl-11 pr-4 py-3 bg-surface rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest transition-colors shadow-inner" id="student-matricula" inputmode="numeric" maxlength="9" name="matricula" oninput="validateMatriculaInput(this)" pattern="[0-9]{9}" placeholder="Ej. 210089334" required="" type="text" value="210089334">
+<div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-label-sm font-label-sm text-outline" id="matricula-counter">
+                    9/9
+                  </div>
+</div>
+<p class="mt-2 font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm text-secondary">info</span>
+                  Solo números. Ejemplo para estudiantes vigentes de Economía: <span class="font-semibold text-primary">210089334</span>
+</p>
+</div>
+<button class="w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-primary-container hover:bg-on-primary-fixed-variant active:scale-[0.99] text-on-primary font-label-lg text-label-lg shadow-md hover:shadow-lg transition-all duration-200" id="btn-send-link" type="submit">
+<span class="">Enviar enlace</span>
+<span class="material-symbols-outlined text-base">arrow_forward</span>
+</button>
+</form>
+<footer class="mt-8 pt-6 text-center border-t border-surface-container">
+<a class="inline-flex items-center gap-2 font-label-md text-label-md text-primary font-semibold hover:text-on-primary-fixed-variant transition-colors group" href="#" onclick="simulateBackToLogin(event)">
+<span class="material-symbols-outlined text-base transition-transform group-hover:-translate-x-1">arrow_back</span>
+                Volver a iniciar sesión
+              </a>
+</footer>
+</div>
+</article>
+<!-- ========================================== -->
+<!-- ESTADO 2: INSTRUCCIONES ENVIADAS           -->
+<!-- ========================================== -->
+<article class="hidden transition-opacity duration-300" id="state-2">
+<div class="bg-surface-container-lowest rounded-2xl shadow-xl p-8 sm:p-10 relative overflow-hidden">
+<!-- Icono verde esmeralda #10b981 con fondo sutil -->
+<div class="w-16 h-16 rounded-2xl bg-tertiary-fixed/30 flex items-center justify-center mx-auto mb-6 shadow-sm">
+<span class="material-symbols-outlined text-on-tertiary-container text-4xl" style="font-variation-settings: 'FILL' 1;">
+                mark_email_read
+              </span>
+</div>
+<header class="text-center mb-6">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-tertiary-fixed/20 text-on-tertiary-container font-label-sm text-label-sm mb-2 font-semibold">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+                Petición Procesada
+              </span>
+<h2 class="font-display-lg text-headline-lg font-bold text-on-surface tracking-tight">
+                Instrucciones enviadas
+              </h2>
+</header>
+<!-- Mensaje de seguridad estándar obligatorio -->
+<div class="bg-surface-container p-4 rounded-xl mb-5 space-y-3">
+<p class="font-body-md text-body-md text-on-surface leading-relaxed">
+                Si la matrícula existe, enviamos un enlace de restablecimiento al correo institucional registrado.
+              </p>
+<div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container-lowest shadow-sm text-on-surface">
+<span class="material-symbols-outlined text-base text-primary">account_circle</span>
+<span class="font-label-md text-label-md">Matrícula indicada:</span>
+<span class="font-bold text-primary tracking-wide" id="display-matricula-ref">210089334</span>
+</div>
+</div>
+<!-- Nota obligatoria destacada: Control Escolar -->
+<div class="p-4 rounded-xl bg-secondary-fixed/30 text-on-secondary-fixed flex items-start gap-3 mb-6">
+<span class="material-symbols-outlined text-secondary-container text-2xl shrink-0 mt-0.5">help</span>
+<div class="space-y-1">
+<p class="font-label-md text-label-md font-bold text-on-surface">¿No tienes correo registrado? Acude a Control Escolar.</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                  Atención en ventanilla de la Unidad Académica de Economía (Edificio A, Planta Baja), de lunes a viernes en horario de 8:00 a 19:00 hrs.
+                </p>
+</div>
+</div>
+<!-- Botones de Acción y Simulación Interactiva -->
+<div class="space-y-3">
+
+<div class="flex items-center justify-between pt-4 border-t border-surface-container">
+<button class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors inline-flex items-center gap-1.5" onclick="switchStep(1)" type="button">
+<span class="material-symbols-outlined text-sm">replay</span>
+                  Probar otra matrícula
+                </button>
+<a class="font-label-md text-label-md text-primary font-semibold hover:text-on-primary-fixed-variant transition-colors inline-flex items-center gap-1" href="#" onclick="simulateBackToLogin(event)">
+                  Volver al inicio de sesión
+                  <span class="material-symbols-outlined text-sm">login</span>
+</a>
+</div>
+</div>
+</div>
+</article>
+<!-- ================================================= -->
+<!-- VISTA 3: CREAR CONTRASEÑA NUEVA (ENLACE DEL CORREO) -->
+<!-- ================================================= -->
+<article class="hidden transition-opacity duration-300" id="state-3">
+<div class="bg-surface-container-lowest rounded-2xl shadow-xl p-8 sm:p-10 relative overflow-hidden">
+<header class="mb-5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container/20 text-on-secondary-fixed font-label-sm text-label-sm mb-2 font-semibold">
+<span class="material-symbols-outlined text-sm text-secondary">security</span>
+                Paso 2 de 2: Clave Nueva
+              </span>
+<h2 class="font-display-lg text-headline-lg font-bold text-on-surface tracking-tight">
+                Crear contraseña nueva
+              </h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">
+                Define una nueva contraseña segura para tu cuenta de SABE.
+              </p>
+</header>
+<!-- Card de Alumno o Usuario Detectado -->
+<div class="bg-surface-container p-4 rounded-xl mb-6 flex items-center gap-3.5">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold text-label-lg shrink-0">
+                CP
+              </div>
+<div class="min-w-0 flex-1">
+<p class="font-label-md text-label-md font-bold text-primary truncate">
+                  Carlos E. Pérez Villa
+                </p>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">
+                  Matrícula: 210089334 • Licenciatura en Economía
+                </p>
+</div>
+<span class="material-symbols-outlined text-on-tertiary-container shrink-0 text-xl" title="Token verificado">
+                verified
+              </span>
+</div>
+<!-- Formulario de Cambio de Contraseña -->
+<form class="space-y-5" onsubmit="handleSavePassword(event)">
+<!-- Campo: Nueva Contraseña -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface font-semibold mb-2" for="new-password">
+                  Nueva contraseña
+                </label>
+<div class="relative rounded-xl shadow-sm">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-xl">lock</span>
+</div>
+<input class="block w-full pl-11 pr-12 py-3 bg-surface rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest transition-colors shadow-inner" id="new-password" oninput="validatePasswordStrength()" placeholder="Mínimo 8 caracteres y 1 número/símbolo" required="" type="password">
+<button aria-label="Mostrar u ocultar contraseña" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-outline hover:text-primary transition-colors focus:outline-none" onclick="togglePasswordInput('new-password', 'eye-icon-1')" type="button">
+<span class="material-symbols-outlined text-xl" id="eye-icon-1">visibility</span>
+</button>
+</div>
+</div>
+<!-- Campo: Confirmar Contraseña -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface font-semibold mb-2" for="confirm-password">
+                  Confirmar contraseña
+                </label>
+<div class="relative rounded-xl shadow-sm">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-xl">lock_clock</span>
+</div>
+<input class="block w-full pl-11 pr-12 py-3 bg-surface rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest transition-colors shadow-inner" id="confirm-password" oninput="validatePasswordMatch()" placeholder="Vuelve a escribir la contraseña" required="" type="password">
+<button aria-label="Mostrar u ocultar confirmación de contraseña" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-outline hover:text-primary transition-colors focus:outline-none" onclick="togglePasswordInput('confirm-password', 'eye-icon-2')" type="button">
+<span class="material-symbols-outlined text-xl" id="eye-icon-2">visibility</span>
+</button>
+</div>
+</div>
+<!-- Indicadores Dinámicos de Seguridad -->
+<div class="bg-surface p-4 rounded-xl space-y-2">
+<span class="block font-label-sm text-label-sm font-bold text-on-surface-variant uppercase tracking-wider mb-1">
+                  Requisitos de seguridad
+                </span>
+<div class="flex items-center gap-2 text-on-surface-variant font-label-sm text-label-sm transition-colors duration-200" id="rule-length">
+<span class="material-symbols-outlined text-base" id="rule-length-icon">radio_button_unchecked</span>
+<span class="">Mínimo 8 caracteres</span>
+</div>
+
+<div class="flex items-center gap-2 text-on-surface-variant font-label-sm text-label-sm transition-colors duration-200" id="rule-match"><span class="material-symbols-outlined text-base" id="rule-match-icon">radio_button_unchecked</span><span class="">Las contraseñas coinciden</span></div>
+</div>
+<!-- Botón Principal: Guardar contraseña (dinámico) -->
+<button class="w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-surface-container-high text-outline cursor-not-allowed font-label-lg text-label-lg shadow-sm transition-all duration-200" disabled="" id="btn-save-password" type="submit">
+<span class="material-symbols-outlined text-base">check_circle</span>
+<span class="">Guardar contraseña</span>
+</button>
+</form>
+<footer class="mt-6 pt-4 text-center border-t border-surface-container">
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" href="#" onclick="switchStep(1)">
+                ← Cancelar y volver a solicitar
+              </a>
+</footer>
+</div>
+</article>
+<!-- ================================================= -->
+<!-- MODAL / BANNER DE ÉXITO FINAL TRAS GUARDAR CLAVE  -->
+<!-- ================================================= -->
+<div class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-primary/70 backdrop-blur-sm" id="success-modal">
+<div class="bg-surface-container-lowest max-w-md w-full rounded-2xl shadow-2xl p-8 text-center space-y-6 transform transition-all scale-100 animate-in fade-in zoom-in">
+<div class="w-20 h-20 rounded-full bg-tertiary-fixed/30 text-on-tertiary-container flex items-center justify-center mx-auto shadow-md">
+<span class="material-symbols-outlined text-5xl" style="font-variation-settings: 'FILL' 1;">
+                task_alt
+              </span>
+</div>
+<div class="space-y-2">
+<span class="inline-block px-3 py-1 rounded-full bg-tertiary-fixed/20 text-on-tertiary-container font-label-sm text-label-sm font-bold">
+                Actualización Exitosa
+              </span>
+<h3 class="font-headline-lg text-headline-lg font-bold text-on-surface">
+                ¡Contraseña actualizada con éxito!
+              </h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                Ahora puedes iniciar sesión en el Sistema de Altas y Bajas de Economía (SABE) con tu nueva contraseña.
+              </p>
+</div>
+<div class="p-3.5 bg-surface-container rounded-xl text-left font-body-sm text-body-sm text-on-surface flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-xl">info</span>
+<div>
+<p class="font-bold text-primary">Próximo paso:</p>
+<p class="">Accede con tu matrícula <span class="font-semibold">210089334</span> y la nueva contraseña configurada.</p>
+</div>
+</div>
+<button class="w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-primary-container hover:bg-on-primary-fixed-variant text-on-primary font-label-lg text-label-lg shadow-md hover:shadow-lg transition-all" onclick="simulateBackToLogin(event)" type="button">
+<span class="">Ir a Iniciar Sesión</span>
+<span class="material-symbols-outlined text-base">login</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Pie de Página Institucional Obligatorio -->
+<footer class="w-full text-center py-4 border-t border-surface-container mt-6">
+<p class="font-label-sm text-label-sm text-on-surface-variant">Convocatoria 2026-A • Facultad de Economía • Universidad Autónoma de Nayarit</p>
+</footer>
+</main>
+</div>
+</div>
+<script>
+  let currentStep = 1;
+  let hasValidLength = false;
+  let hasValidSpecial = false;
+  let hasValidMatch = false;
+
+  function switchStep(step) {
+    currentStep = step;
+    
+    // Ocultar modal si estuviera abierto
+    const modal = document.getElementById('success-modal');
+    if (modal) modal.classList.add('hidden');
+
+    // Manejo de contenedores
+    const s1 = document.getElementById('state-1');
+    const s2 = document.getElementById('state-2');
+    const s3 = document.getElementById('state-3');
+
+    s1.classList.add('hidden');
+    s2.classList.add('hidden');
+    s3.classList.add('hidden');
+
+    // Desactivar botones superiores del selector de prueba
+    const btn1 = document.getElementById('tab-step-1');
+    const btn2 = document.getElementById('tab-step-2');
+    const btn3 = document.getElementById('tab-step-3');
+
+    const inactiveClass = 'px-3 py-1 rounded text-label-sm font-label-sm transition-all duration-200 text-on-surface-variant hover:text-on-surface hover:bg-surface-container';
+    const activeClass = 'px-3 py-1 rounded text-label-sm font-label-sm transition-all duration-200 bg-primary-container text-on-primary shadow-sm';
+
+    if (btn1) btn1.className = inactiveClass;
+    if (btn2) btn2.className = inactiveClass;
+    if (btn3) btn3.className = inactiveClass;
+
+    if (step === 1) {
+      s1.classList.remove('hidden');
+      if (btn1) btn1.className = activeClass;
+    } else if (step === 2) {
+      s2.classList.remove('hidden');
+      if (btn2) btn2.className = activeClass;
+      // Actualizar matrícula si se capturó
+      const val = document.getElementById('student-matricula').value.trim();
+      if (val) {
+        document.getElementById('display-matricula-ref').textContent = val;
+      }
+    } else if (step === 3) {
+      s3.classList.remove('hidden');
+      if (btn3) btn3.className = activeClass;
+      // Limpiar o resetear validaciones
+      validatePasswordStrength();
+      validatePasswordMatch();
+    }
+  }
+
+  function validateMatriculaInput(input) {
+    input.value = input.value.replace(/[^0-9]/g, '');
+    const counter = document.getElementById('matricula-counter');
+    if (counter) {
+      counter.textContent = `${input.value.length}/9`;
+      if (input.value.length === 9) {
+        counter.classList.add('text-on-tertiary-container');
+        counter.classList.remove('text-outline');
+      } else {
+        counter.classList.remove('text-on-tertiary-container');
+        counter.classList.add('text-outline');
+      }
+    }
+    const err = document.getElementById('state1-error');
+    if (err && input.value.length === 9) {
+      err.classList.add('hidden');
+      err.classList.remove('flex');
+    }
+  }
+
+  function handleRequestLink(event) {
+    event.preventDefault();
+    const matricula = document.getElementById('student-matricula').value.trim();
+    const err = document.getElementById('state1-error');
+    const btn = document.getElementById('btn-send-link');
+
+    if (matricula.length !== 9) {
+      if (err) {
+        err.classList.remove('hidden');
+        err.classList.add('flex');
+      }
+      return;
+    }
+
+    if (err) {
+      err.classList.add('hidden');
+      err.classList.remove('flex');
+    }
+
+    // Efecto de carga
+    const originalContent = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `
+      <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      Verificando en SABE...
+    `;
+
+    setTimeout(() => {
+      btn.innerHTML = originalContent;
+      btn.disabled = false;
+      switchStep(2);
+    }, 600);
+  }
+
+  function togglePasswordInput(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    if (!input || !icon) return;
+
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.textContent = 'visibility_off';
+    } else {
+      input.type = 'password';
+      icon.textContent = 'visibility';
+    }
+  }
+
+  function validatePasswordStrength() {
+    const pass = document.getElementById('new-password').value;
+    const ruleLen = document.getElementById('rule-length');
+    const ruleLenIcon = document.getElementById('rule-length-icon');
+    const ruleSpec = document.getElementById('rule-special');
+    const ruleSpecIcon = document.getElementById('rule-special-icon');
+
+    // 1. Mínimo 8 caracteres
+    if (pass.length >= 8) {
+      hasValidLength = true;
+      ruleLen.className = 'flex items-center gap-2 text-on-tertiary-container font-label-sm text-label-sm font-semibold';
+      ruleLenIcon.textContent = 'check_circle';
+      ruleLenIcon.style.color = '#10b981';
+    } else {
+      hasValidLength = false;
+      ruleLen.className = 'flex items-center gap-2 text-on-surface-variant font-label-sm text-label-sm';
+      ruleLenIcon.textContent = 'radio_button_unchecked';
+      ruleLenIcon.style.color = '';
+    }
+
+    // La regla de símbolo especial ya no se pide (solo mínimo 8 y coincidencia)
+    hasValidSpecial = true;
+
+    validatePasswordMatch();
+    updateSubmitButton();
+  }
+
+  function validatePasswordMatch() {
+    const pass = document.getElementById('new-password').value;
+    const confirm = document.getElementById('confirm-password').value;
+    const ruleMatch = document.getElementById('rule-match');
+    const ruleMatchIcon = document.getElementById('rule-match-icon');
+
+    if (pass.length > 0 && pass === confirm) {
+      hasValidMatch = true;
+      ruleMatch.className = 'flex items-center gap-2 text-on-tertiary-container font-label-sm text-label-sm font-semibold';
+      ruleMatchIcon.textContent = 'check_circle';
+      ruleMatchIcon.style.color = '#10b981';
+    } else {
+      hasValidMatch = false;
+      ruleMatch.className = 'flex items-center gap-2 text-on-surface-variant font-label-sm text-label-sm';
+      ruleMatchIcon.textContent = 'radio_button_unchecked';
+      ruleMatchIcon.style.color = '';
+    }
+
+    updateSubmitButton();
+  }
+
+  function updateSubmitButton() {
+    const btn = document.getElementById('btn-save-password');
+    if (!btn) return;
+
+    if (hasValidLength && hasValidSpecial && hasValidMatch) {
+      btn.disabled = false;
+      btn.className = 'w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-primary-container hover:bg-on-primary-fixed-variant active:scale-[0.99] text-on-primary font-label-lg text-label-lg shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer';
+    } else {
+      btn.disabled = true;
+      btn.className = 'w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-surface-container-high text-outline cursor-not-allowed font-label-lg text-label-lg shadow-sm transition-all duration-200';
+    }
+  }
+
+  function handleSavePassword(event) {
+    event.preventDefault();
+    if (!hasValidLength || !hasValidSpecial || !hasValidMatch) return;
+
+    const btn = document.getElementById('btn-save-password');
+    const originalContent = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `
+      <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      Cifrando y actualizando...
+    `;
+
+    setTimeout(() => {
+      btn.innerHTML = originalContent;
+      // Mostrar modal de éxito
+      const modal = document.getElementById('success-modal');
+      if (modal) modal.classList.remove('hidden');
+    }, 800);
+  }
+
+  function simulateBackToLogin(event) {
+    if (event) event.preventDefault();
+    const modal = document.getElementById('success-modal');
+    if (modal) modal.classList.add('hidden');
+    
+    // Regresar al estado 1 simulando el login original
+    switchStep(1);
+    alert('Simulación: Redirigiendo al Login Institucional ({{DATA:SCREEN:SCREEN_21}})...');
+  }
+
+  // Inicializar estado al cargar
+  document.addEventListener('DOMContentLoaded', () => {
+    switchStep(1);
+  });
+</script></main>
+<!-- END: MainContainer -->
+<!-- BEGIN: InteractiveScripts -->
+<!-- Script para alternar visibilidad de contraseña y simular envío -->
+<script data-purpose="form-interactions">
+    function togglePasswordVisibility() {
+      const passwordInput = document.getElementById('password');
+      const eyeIcon = document.getElementById('eye-icon');
+      const eyeSlashIcon = document.getElementById('eye-slash-icon');
+
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.classList.add('hidden');
+        eyeSlashIcon.classList.remove('hidden');
+      } else {
+        passwordInput.type = 'password';
+        eyeIcon.classList.remove('hidden');
+        eyeSlashIcon.classList.add('hidden');
+      }
+    }
+
+    function handleFormSubmit() {
+      const matricula = document.getElementById('student-id').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const feedbackAlert = document.getElementById('feedback-alert');
+      const feedbackMsg = document.getElementById('feedback-message');
+      const submitBtn = document.getElementById('submit-button');
+
+      if (!matricula || !password) {
+        feedbackMsg.textContent = 'Por favor ingresa tanto tu matrícula como tu contraseña.';
+        feedbackAlert.classList.remove('hidden');
+        feedbackAlert.classList.add('flex');
+        return;
+      }
+
+      // Animación de carga en el botón
+      const originalText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `
+        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Validando en SABE...
+      `;
+
+      feedbackAlert.classList.add('hidden');
+      feedbackAlert.classList.remove('flex');
+
+      // Simulación de acceso exitoso
+      setTimeout(() => {
+        submitBtn.innerHTML = `
+          <svg class="h-4 w-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          ¡Acceso Concedido!
+        `;
+        submitBtn.classList.remove('bg-uan-navy');
+        submitBtn.classList.add('bg-emerald-600');
+        
+        setTimeout(() => {
+          alert('¡Bienvenido(a) a SABE! Redirigiendo al panel de selección de unidades de aprendizaje (Ciclo 2025-A).');
+          submitBtn.innerHTML = originalText;
+          submitBtn.disabled = false;
+          submitBtn.classList.remove('bg-emerald-600');
+          submitBtn.classList.add('bg-uan-navy');
+        }, 600);
+      }, 1200);
+    }
+  </script>
+<!-- END: InteractiveScripts -->
+
+
+<script src="../_shared/prototipo.js"></script>
+</body></html>

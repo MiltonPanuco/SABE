@@ -1,0 +1,366 @@
+<!DOCTYPE html><html lang="es-MX"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>SABE — Cambio Obligatorio de Contraseña (UAN - UAE)</title>
+<!-- Google Fonts: Plus Jakarta Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 with forms & container queries plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            uan: {
+              navy: '#002b49',
+              'navy-hover': '#001e33',
+              gold: '#f59e0b',
+              accent: '#0d4e78',
+              surface: '#f8f9ff',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-utilities">
+    /* Subtle background and smooth transitions */
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    }
+    .strength-bar-transition {
+      transition: width 0.3s ease, background-color 0.3s ease;
+    }
+  </style>
+</head>
+<body class="bg-uan-surface text-slate-800 antialiased min-h-screen flex flex-col">
+<!-- BEGIN: TopHeaderNotice -->
+<!-- Barra superior con el flujo actual del sistema -->
+<header class="w-full bg-white border-b border-slate-200/80 px-4 md:px-8 py-2.5 flex items-center justify-between text-xs md:text-sm font-medium z-20">
+<div class="flex items-center space-x-2 text-slate-700">
+<span class="inline-block w-2 h-2 rounded-full bg-uan-gold"></span>
+<span class="font-bold tracking-wide text-uan-navy uppercase">CAMBIO OBLIGATORIO DE CONTRASEÑA • UAN</span>
+</div>
+
+</header>
+<!-- END: TopHeaderNotice -->
+<!-- BEGIN: MainContentLayout -->
+<main class="flex-1 grid grid-cols-1 lg:grid-cols-12 min-h-[calc(100vh-45px)]">
+<!-- BEGIN: LeftBrandColumn -->
+<!-- Columna Izquierda: Imagen del campus, detalles institucionales y estética UAN -->
+<section aria-label="Información Institucional" class="relative hidden lg:flex lg:col-span-5 xl:col-span-5 flex-col justify-between p-8 xl:p-12 overflow-hidden text-white min-h-[640px]">
+<!-- Imagen de fondo de la Facultad de Economía -->
+<img alt="Fachada de la Facultad de Economía UAN" class="absolute inset-0 w-full h-full object-cover object-center" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzDMzrSkG2W20S36yY-7udOP2pToNy6FajAnu3PHWCXu3s1lb8-6Eza9rC9PDhH3023FvMA-l4RCfKJ3bq5CCirIcsf63qaPjHSQmfpcW3U_VYj9oGv_o5_I5915sGuLkp-Z_YpQGOHH61y4hOJfPczef9RHA-tYUJ_ygtnE0v5N2tbR7SkdyDsxTRt3FI1rDntL1XEo_pNqu5kiYPY08Y-Tlh-SuvVe-sRMH5exI-jHKvLSuO2jyzlw">
+<!-- Superposición de degradado institucional con glassmorphism -->
+<div class="absolute inset-0 bg-gradient-to-b from-[#002b49]/95 via-[#002b49]/80 to-[#001728]/95 backdrop-blur-[2px]"></div>
+<!-- Cabecera Institucional Superior Izquierda -->
+<div class="relative z-10">
+<div class="flex items-center gap-4">
+<div class="bg-white/95 p-2 rounded-xl shadow-lg shadow-black/20 ring-1 ring-white/30 backdrop-blur-md">
+<img alt="Escudo Oficial de la UAE Economía" class="w-12 h-14 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJN-d60CsiKhz6b1AxjB7WGTJ3EWm8uJ8OVVXAuraInooyNWof8k93LuM2KoM0DAP_OG0VTsQKDuFIlYzZhQfE-PH8wqbBd6-JxbcBFVe7cVlaJMIWFtBia7e-ZAeRmyqmOZmR1mfO4ycLTPoOujJskNsMFCIKUfggdL4jJYrsDpqHbE0k5G71fUg3HWiwn3cJyBbm5wonWcbZnUpoS9pnHdp2hylemyoCpDu8oGAAsQsPdQwFhN120A">
+</div>
+<div>
+<span class="text-[11px] font-bold tracking-widest uppercase text-uan-gold">Ciclo Escolar 2026-A</span>
+<h2 class="text-lg font-extrabold tracking-tight text-white leading-tight">Facultad de Economía</h2>
+<p class="text-xs text-slate-300 font-medium">Universidad Autónoma de Nayarit</p>
+</div>
+</div>
+<!-- Banner de Módulo Oficial de Seguridad -->
+<div class="mt-8 bg-white/10 border border-white/20 rounded-2xl p-4 backdrop-blur-md shadow-inner"><div class="flex items-start gap-3"><div class="p-2 bg-uan-gold/20 text-uan-gold rounded-lg mt-0.5"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round"></path></svg></div><div><h3 class="text-sm font-bold text-white">Ventanilla de Control Escolar - Unidad Académica de Economía</h3><p class="text-xs text-slate-200 mt-1 leading-relaxed">Primer inicio de sesión detectado. Actualización obligatoria de clave temporal asignada por Control Escolar para la Convocatoria 2026-A.</p></div></div></div>
+</div>
+<!-- Bloque informativo central: Garantía y Control Escolar -->
+<div class="relative z-10 my-8 space-y-4"><div class=""><h4 class="text-base font-bold text-white tracking-tight">Garantiza tu acceso para el proceso de altas y bajas</h4><p class="text-xs text-slate-200 mt-1 leading-relaxed">El Sistema de Altas y Bajas de Economía (SABE) es gestionado por Control Escolar para la Convocatoria 2026-A.</p></div><div class="grid grid-cols-2 gap-3 pt-2"><div class="bg-white/10 backdrop-blur-md rounded-xl p-3.5 border border-white/15"><div class="flex items-center gap-2 mb-1.5"><svg class="w-4 h-4 text-uan-gold" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="text-xs font-semibold text-white">Control Escolar</span></div><p class="text-[11px] text-slate-300 leading-snug">Ventanilla y soporte presencial en la Facultad.</p></div><div class="bg-white/10 backdrop-blur-md rounded-xl p-3.5 border border-white/15"><div class="flex items-center gap-2 mb-1.5"><svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="text-xs font-semibold text-white">Acceso Oficial</span></div><p class="text-[11px] text-slate-300 leading-snug">Gestión directa de cuentas para estudiantes autorizados.</p></div></div></div>
+<!-- Pie de página institucional columna izquierda -->
+<div class="relative z-10 pt-4 border-t border-white/20 flex flex-wrap justify-between items-center text-[11px] text-slate-300 gap-2">
+<span class="">© 2026 Universidad Autónoma de Nayarit</span>
+<span class="font-medium text-white/90">Plataforma Institucional SABE</span>
+</div>
+</section>
+<!-- END: LeftBrandColumn -->
+<!-- BEGIN: RightFormColumn -->
+<!-- Columna Derecha: Tarjeta obligatoria de actualización de clave -->
+<section aria-label="Formulario de actualización de contraseña" class="col-span-1 lg:col-span-7 xl:col-span-7 bg-[#f8f9ff] flex flex-col justify-between p-4 sm:p-8 xl:p-12 overflow-y-auto">
+<div class="max-w-xl w-full mx-auto my-auto py-4">
+<!-- Logotipo SABE e Institucional -->
+<div class="text-center mb-6">
+<div class="inline-flex justify-center items-center mb-2">
+<img alt="SABE" class="h-14 sm:h-16 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCI7Kft64JUAva-yHOQ511rZVYBcsW0zRlS28XLpbMApGZG3u5mjVBRzDnTdYQOEb9RB9asQ2zjwW_wKSW_CK8reVTSmXU1L7rAdNn72iQDOhgK7my9JYwN_DGamQhv8XdpajdVQt2PTOS1-56LkSSmV1G8YFkpf6hykXnKgURPcO2Ca3ekoYV5o64mSpC7QXCOHZoXKwWpJCKeSK3CdA7ICGwH7kilp4QCZK7fp1-Vc6NwAfDcefGz3Q">
+</div>
+<h1 class="text-xs sm:text-sm font-bold tracking-wider text-uan-navy uppercase mt-1">
+            FACULTAD DE ECONOMÍA • UNIVERSIDAD AUTÓNOMA DE NAYARIT
+          </h1>
+</div>
+<!-- Tarjeta Flotante Principal -->
+<div class="bg-white rounded-2xl shadow-xl shadow-slate-200/70 border border-slate-200/80 p-6 sm:p-8 relative">
+<!-- Encabezado de la Tarjeta y Badge de Obligatoriedad -->
+<div class="flex items-center justify-between gap-2 mb-3">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+<svg class="w-3.5 h-3.5 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z" fill-rule="evenodd"></path></svg>
+              Paso Obligatorio • Seguridad de Acceso
+            </span>
+
+</div>
+<h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+            Cambia tu contraseña temporal
+          </h2>
+<!-- Aviso Institucional Destacado (Alerta de Primer Acceso) -->
+<div class="mt-3 bg-amber-50/90 border-l-4 border-uan-gold p-3.5 rounded-r-xl flex items-start gap-3 text-amber-900">
+<svg class="w-5 h-5 text-uan-gold flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<p class="text-xs sm:text-[13px] font-medium leading-relaxed">
+<strong class="font-bold">Es tu primer acceso.</strong> Debes crear una contraseña personal para continuar. Esta clave será tu nuevo acceso oficial para altas, bajas y consulta de horario.
+            </p>
+</div>
+<!-- Información del Usuario Contextualizada -->
+<div class="mt-4 px-3.5 py-2.5 bg-slate-50 border border-slate-200/90 rounded-xl flex flex-wrap items-center justify-between text-xs text-slate-600 gap-2">
+<div class="flex items-center gap-2">
+<span class="font-bold text-uan-navy">Matrícula:</span>
+<span class="font-mono bg-white px-2 py-0.5 rounded border border-slate-200 font-semibold text-slate-800">210089334</span>
+</div>
+<div class="text-slate-500 font-medium">Licenciatura en Economía</div>
+<div class="text-xs font-semibold text-uan-gold bg-amber-50 px-2 py-0.5 rounded">Convocatoria 2026-A</div>
+</div>
+<!-- Formulario de Cambio de Contraseña -->
+<form class="mt-5 space-y-4" id="changePasswordForm" onsubmit="event.preventDefault(); handlePasswordChange();">
+<!-- Campo 1: Contraseña Actual (Temporal) -->
+<div>
+<label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="currentPassword">
+                Contraseña actual (temporal)
+              </label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+<input class="w-full pl-10 pr-10 py-2.5 text-sm bg-slate-50/50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-uan-navy focus:border-uan-navy transition text-slate-900 placeholder:text-slate-400" id="currentPassword" name="currentPassword" placeholder="Ingresa la clave temporal entregada" required="" type="password">
+<button aria-label="Mostrar u ocultar contraseña actual" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none" data-purpose="toggle-password" onclick="toggleVisibility('currentPassword', 'eyeIcon1')" type="button">
+<svg class="w-4 h-4" fill="none" id="eyeIcon1" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"></path><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+</div>
+</div>
+<!-- Campo 2: Nueva Contraseña -->
+<div>
+<label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="newPassword">
+                Nueva contraseña
+              </label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+<input class="w-full pl-10 pr-10 py-2.5 text-sm bg-slate-50/50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-uan-navy focus:border-uan-navy transition text-slate-900 placeholder:text-slate-400" id="newPassword" name="newPassword" oninput="evaluatePasswordStrength()" placeholder="Define tu nueva clave personal" required="" type="password">
+<button aria-label="Mostrar u ocultar nueva contraseña" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none" data-purpose="toggle-password" onclick="toggleVisibility('newPassword', 'eyeIcon2')" type="button">
+<svg class="w-4 h-4" fill="none" id="eyeIcon2" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"></path><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+</div>
+<!-- Barra interactiva de fuerza de contraseña -->
+<div class="mt-2">
+<div class="flex items-center justify-between text-[11px] mb-1">
+<span class="text-slate-500 font-medium">Seguridad de la clave:</span>
+<span class="font-bold text-slate-500" id="strengthText">Pendiente</span>
+</div>
+<div class="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+<div class="h-full w-0 strength-bar-transition bg-slate-300" id="strengthBar"></div>
+</div>
+</div>
+</div>
+<!-- Campo 3: Confirmar Nueva Contraseña -->
+<div>
+<label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="confirmPassword">
+                Confirmar contraseña
+              </label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+<input class="w-full pl-10 pr-10 py-2.5 text-sm bg-slate-50/50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-uan-navy focus:border-uan-navy transition text-slate-900 placeholder:text-slate-400" id="confirmPassword" name="confirmPassword" oninput="evaluatePasswordStrength()" placeholder="Repite exactamente tu nueva contraseña" required="" type="password">
+<button aria-label="Mostrar u ocultar confirmación de contraseña" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none" data-purpose="toggle-password" onclick="toggleVisibility('confirmPassword', 'eyeIcon3')" type="button">
+<svg class="w-4 h-4" fill="none" id="eyeIcon3" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"></path><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+</div>
+</div>
+<!-- Requisitos de Seguridad en Tiempo Real -->
+<div class="bg-slate-50 rounded-xl p-3 border border-slate-200/80 space-y-2 text-xs">
+<div class="flex items-center gap-2 text-slate-500 font-medium transition-colors" id="ruleLength">
+<span class="w-4 h-4 rounded-full bg-slate-200 flex items-center justify-center text-[10px] text-slate-600 font-bold" id="iconLength">✕</span>
+<span class="">Mínimo 8 caracteres</span>
+</div>
+<div class="flex items-center gap-2 text-slate-500 font-medium transition-colors" id="ruleMatch">
+<span class="w-4 h-4 rounded-full bg-slate-200 flex items-center justify-center text-[10px] text-slate-600 font-bold" id="iconMatch">✕</span>
+<span class="">Coincide con la confirmación</span>
+</div>
+</div>
+<!-- Botón de Acción Principal (Sin opción de cancelar ni omitir) -->
+<div class="pt-2">
+<button class="w-full flex items-center justify-center gap-2 py-3 px-4 bg-uan-navy hover:bg-uan-navy-hover active:scale-[0.99] text-white font-bold text-sm rounded-xl shadow-lg shadow-uan-navy/20 transition duration-150 focus:ring-4 focus:ring-uan-navy/30" id="submitBtn" type="submit">
+<span class="">Guardar y continuar</span>
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+</div>
+</form>
+<!-- Nota informativa de seguridad obligatoria -->
+<div class="mt-4 text-center"><p class="text-[11px] text-slate-400">Ventanilla de Control Escolar - Unidad Académica de Economía • Convocatoria 2026-A</p></div>
+</div>
+</div>
+<!-- Pie de Página Columna Derecha -->
+<footer class="mt-6 pt-4 border-t border-slate-200 text-center text-xs text-slate-500"><p class="">Convocatoria 2026-A • Facultad de Economía, UAN • Ventanilla de Control Escolar</p></footer>
+</section>
+<!-- END: RightFormColumn -->
+</main>
+<!-- END: MainContentLayout -->
+<!-- BEGIN: SuccessModal -->
+<!-- Modal interactivo que se activa tras completar la actualización con éxito -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300" id="successModal">
+<div class="bg-white rounded-2xl max-w-md w-full mx-4 p-6 sm:p-8 text-center shadow-2xl transform transition-transform duration-300 scale-95 border border-slate-100" id="modalCard">
+<div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 ring-8 ring-emerald-50">
+<svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+<h3 class="text-xl font-bold text-slate-900 mb-2">¡Contraseña actualizada con éxito!</h3>
+<p class="text-xs sm:text-sm text-slate-600 mb-6">Tus nuevas credenciales han sido verificadas y registradas para la <strong class="text-uan-navy">Convocatoria 2026-A</strong> por Control Escolar. Redirigiendo a tu portal institucional de altas y bajas...</p>
+<div class="flex items-center justify-center gap-3 text-xs font-semibold text-uan-navy">
+<svg class="animate-spin h-5 w-5 text-uan-navy" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" d="M4 12a8 8 0 018-8v8H4z" fill="currentColor"></path></svg>
+<span class="">Accediendo al módulo de Economía...</span>
+</div>
+</div>
+</div>
+<!-- END: SuccessModal -->
+<!-- BEGIN: InteractiveScript -->
+<script data-purpose="password-interaction">
+    /**
+     * Alternar visibilidad de contraseña (Toggle Eye)
+     */
+    function toggleVisibility(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+
+      if (input.type === 'password') {
+        input.type = 'text';
+        // Icono de ojo tachado
+        icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />`;
+      } else {
+        input.type = 'password';
+        // Icono de ojo normal
+        icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>`;
+      }
+    }
+
+    /**
+     * Validación de requisitos y medidor de seguridad
+     */
+    function evaluatePasswordStrength() {
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      const ruleLength = document.getElementById('ruleLength');
+      const iconLength = document.getElementById('iconLength');
+      const ruleMatch = document.getElementById('ruleMatch');
+      const iconMatch = document.getElementById('iconMatch');
+
+      const strengthBar = document.getElementById('strengthBar');
+      const strengthText = document.getElementById('strengthText');
+
+      // Validar regla de longitud (mínimo 8 caracteres)
+      const hasMinLength = newPassword.length >= 8;
+      if (hasMinLength) {
+        ruleLength.className = 'flex items-center gap-2 text-emerald-600 font-semibold transition-colors';
+        iconLength.className = 'w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center text-[10px] text-emerald-600 font-bold';
+        iconLength.textContent = '✓';
+      } else {
+        ruleLength.className = 'flex items-center gap-2 text-slate-500 font-medium transition-colors';
+        iconLength.className = 'w-4 h-4 rounded-full bg-slate-200 flex items-center justify-center text-[10px] text-slate-600 font-bold';
+        iconLength.textContent = '✕';
+      }
+
+      // Validar coincidencia con confirmación
+      const isMatching = newPassword.length > 0 && newPassword === confirmPassword;
+      if (isMatching) {
+        ruleMatch.className = 'flex items-center gap-2 text-emerald-600 font-semibold transition-colors';
+        iconMatch.className = 'w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center text-[10px] text-emerald-600 font-bold';
+        iconMatch.textContent = '✓';
+      } else {
+        ruleMatch.className = 'flex items-center gap-2 text-slate-500 font-medium transition-colors';
+        iconMatch.className = 'w-4 h-4 rounded-full bg-slate-200 flex items-center justify-center text-[10px] text-slate-600 font-bold';
+        iconMatch.textContent = '✕';
+      }
+
+      // Medir fuerza de la contraseña
+      if (newPassword.length === 0) {
+        strengthBar.style.width = '0%';
+        strengthBar.className = 'h-full w-0 strength-bar-transition bg-slate-300';
+        strengthText.textContent = 'Pendiente';
+        strengthText.className = 'font-bold text-slate-500';
+      } else if (newPassword.length < 8) {
+        strengthBar.style.width = '33%';
+        strengthBar.className = 'h-full strength-bar-transition bg-red-500';
+        strengthText.textContent = 'Débil';
+        strengthText.className = 'font-bold text-red-500';
+      } else {
+        // Longitud mayor o igual a 8: checar complejidad simple (números o caracteres variados)
+        const hasNumbers = /\d/.test(newPassword);
+        const hasUpper = /[A-Z]/.test(newPassword);
+        const hasSpecial = /[^A-Za-z0-9]/.test(newPassword);
+
+        if (newPassword.length >= 10 && (hasNumbers && (hasUpper || hasSpecial))) {
+          strengthBar.style.width = '100%';
+          strengthBar.className = 'h-full strength-bar-transition bg-emerald-500';
+          strengthText.textContent = 'Segura';
+          strengthText.className = 'font-bold text-emerald-600';
+        } else {
+          strengthBar.style.width = '66%';
+          strengthBar.className = 'h-full strength-bar-transition bg-amber-500';
+          strengthText.textContent = 'Media';
+          strengthText.className = 'font-bold text-amber-600';
+        }
+      }
+    }
+
+    /**
+     * Procesar guardado y simular redirección
+     */
+    function handlePasswordChange() {
+      const current = document.getElementById('currentPassword').value.trim();
+      const newPass = document.getElementById('newPassword').value;
+      const confirmPass = document.getElementById('confirmPassword').value;
+
+      if (!current) {
+        alert('Por favor introduce tu contraseña actual temporal.');
+        document.getElementById('currentPassword').focus();
+        return;
+      }
+
+      if (newPass.length < 8) {
+        alert('La nueva contraseña debe contener al menos 8 caracteres.');
+        document.getElementById('newPassword').focus();
+        return;
+      }
+
+      if (newPass !== confirmPass) {
+        alert('Las contraseñas no coinciden. Por favor verifica.');
+        document.getElementById('confirmPassword').focus();
+        return;
+      }
+
+      // Mostrar modal de éxito
+      const modal = document.getElementById('successModal');
+      const card = document.getElementById('modalCard');
+      modal.classList.remove('hidden');
+
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        card.classList.remove('scale-95');
+        card.classList.add('scale-100');
+      }, 20);
+
+      // Simulación de redirección tras 2.8 segundos
+      setTimeout(() => {
+        window.location.href='../sabe_estudiantes/code.html';
+      }, 2800);
+    }
+  </script>
+<!-- END: InteractiveScript -->
+
+
+<script src="../_shared/prototipo.js"></script>
+</body></html>
