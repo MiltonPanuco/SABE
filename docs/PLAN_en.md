@@ -87,7 +87,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 - **Business rules:** while `debe_cambiar_password` is `True`, the frontend only allows the change-password screen. The new password must pass Django's validators.
 - **Done when:** backend tests for permissions by role; the 3 demo users reach their dashboard; the `temporal` user is forced to change it; a student cannot open Control Escolar routes.
 - **Target date:** Nov 11.
-- **Status:** Pending.
+- **Status:** Done.
 
 ### F3. Catalog and student schedule
 

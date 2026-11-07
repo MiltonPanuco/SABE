@@ -3,6 +3,7 @@
 /* Paleta y tipografía tomadas de stitch/DESIGN.md ("Academic Prestige Modern") */
 @theme {
   --color-primary: #002b49;
+  --color-primary-oscuro: #001629;
   --color-secondary: #f59e0b;
   --color-alta: #10b981; /* altas */
   --color-baja: #dc2626; /* bajas y choques de horario */

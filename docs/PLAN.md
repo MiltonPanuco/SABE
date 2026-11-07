@@ -85,7 +85,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 - **Reglas de negocio:** mientras `debe_cambiar_password` sea `True`, el frontend solo permite la pantalla de cambio. La nueva contraseña pasa los validadores de Django.
 - **Terminado cuando:** pruebas de permisos por rol en backend; los 3 usuarios demo entran a su panel; el usuario con `temporal` es forzado a cambiarla; un estudiante no puede abrir rutas de control escolar.
 - **Fecha objetivo:** 11 nov.
-- **Estado:** Pendiente.
+- **Estado:** Hecho.
 
 ### F3. Catálogo y horario del estudiante
 

@@ -98,14 +98,14 @@ Si cambias un modelo: `python manage.py makemigrations` y sube la migración en 
 - [ ] Importador de CSV: alumnos y cargas académicas (vista previa de errores, reimportar sin duplicar, contraseña temporal)
 - [ ] Endpoints de solicitudes: crear folio, listar, cancelar
 - [ ] Aprobar y rechazar con bloqueo de cupo (`transaction.atomic` + `select_for_update`)
-- [ ] Permisos por rol (estudiante, control escolar, administrador)
+- [x] Permisos por rol (estudiante, control escolar, administrador)
 - [ ] Exportación a SADCE (xlsx/csv) y registro del lote
 - [ ] Comprobante PDF del folio (el dashboard tiene el acceso "Comprobantes")
 - [ ] Notificaciones y bitácora
 - [x] Datos de prueba (seed) iguales a los del prototipo
 
 **Frontend** (el diseño de referencia está en `stitch/`)
-- [ ] Login, recuperar contraseña y cambio obligatorio de contraseña
+- [x] Login, recuperar contraseña y cambio obligatorio de contraseña
 - [ ] Estudiante: dashboard, horario, catálogo y carrito (alta y baja), confirmación, historial con acuse y notificaciones
 - [ ] Estudiante: cancelar solicitud pendiente y ver motivo de rechazo
 - [ ] Control escolar: bandeja, validación, exportación, catálogos, oferta, bitácora
