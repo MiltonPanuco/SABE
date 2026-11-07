@@ -207,7 +207,7 @@ Estructura de `C:\dev\SABE` (reorganizada el 4 de noviembre de 2026):
   - `output/`: PDFs y Word de la actividad 9 (ruta crítica).
   - Este archivo vive ahora en `docs/diseno/`.
 - `stitch/`: prototipo en HTML, una carpeta por pantalla (`sabe_*/code.html`), `_shared/prototipo.js` (navegación entre pantallas y roles) y `academic_prestige_modern/DESIGN.md`. Ver la sección 9.
-- `docs/`: `requerimientos/` (Word por rol) y `diseno/` (este contexto, `SABE_Pantallas_y_Flujos.docx` y los prompts de Stitch).
+- `docs/`: `requerimientos/` (Word por rol) y `diseno/` (este contexto y `Pantallas y Flujos.docx`).
 - `diagramas/`: `SABE_ERD_Backend.png` y `.mmd` (ERD corregido, 15 tablas; el .mmd es el editable en Mermaid).
 - `backend/core/`: `models.py` de Django que refleja el ERD (Django 5.1+, PostgreSQL, `AUTH_USER_MODEL = "core.Usuario"`).
 - `tmp/`: scripts y renders que se usaron para generar los documentos de la actividad 9. Se puede ignorar; sus rutas apuntan a la estructura anterior.

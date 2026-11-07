@@ -55,12 +55,23 @@ python -m venv .venv
 source .venv/bin/activate      (Mac/Linux)
 pip install -r requirements.txt
 python manage.py migrate
-python manage.py createsuperuser
+python manage.py seed_demo            (datos de demostración, se puede repetir)
 python manage.py runserver
 ```
 - API: http://localhost:8000/api/health/
 - Documentación de la API: http://localhost:8000/api/docs/
 - Panel de administración de Django: http://localhost:8000/admin/
+
+Usuarios de demostración que crea `seed_demo` (iguales al prototipo):
+
+| Rol | Usuario | Contraseña |
+|---|---|---|
+| Estudiante | `210089334` | `demo1234` |
+| Estudiante, primer acceso (debe cambiar contraseña) | `230012345` | `temporal` |
+| Control escolar | `valeria.ruiz` | `demo1234` |
+| Administrador (también entra a `/admin/`) | `admin` | `demo1234` |
+
+`python manage.py seed_demo --convocatoria-cerrada` deja la convocatoria cerrada para probar solicitudes extemporáneas.
 
 ### 4. Frontend
 ```
@@ -91,7 +102,7 @@ Si cambias un modelo: `python manage.py makemigrations` y sube la migración en 
 - [ ] Exportación a SADCE (xlsx/csv) y registro del lote
 - [ ] Comprobante PDF del folio (el dashboard tiene el acceso "Comprobantes")
 - [ ] Notificaciones y bitácora
-- [ ] Datos de prueba (seed) iguales a los del prototipo
+- [x] Datos de prueba (seed) iguales a los del prototipo
 
 **Frontend** (el diseño de referencia está en `stitch/`)
 - [ ] Login, recuperar contraseña y cambio obligatorio de contraseña
@@ -102,7 +113,7 @@ Si cambias un modelo: `python manage.py makemigrations` y sube la migración en 
 - [ ] Administrador: usuarios y roles
 
 **Diseño**
-- [x] Pantallas del prototipo completas (ver `docs/diseno/SABE_Pantallas_y_Flujos.docx`). Para verlo, abre `stitch/sabe_inicio_de_sesi_n_institucional_uan_uae/code.html` y usa los accesos de demostración
+- [x] Pantallas del prototipo completas (ver `docs/diseno/Pantallas y Flujos.docx`). Para verlo, abre `stitch/sabe_inicio_de_sesi_n_institucional_uan_uae/code.html` y usa los accesos de demostración
 - [ ] Definir con control escolar el formato exacto del reporte para SADCE
 
 Más contexto del proyecto en `docs/diseno/SABE_Contexto_Completo.md`.
