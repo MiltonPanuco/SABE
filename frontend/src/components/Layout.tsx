@@ -34,7 +34,7 @@ export function Layout() {
             </Link>
             <button
               onClick={salir}
-              className="rounded-lg bg-secondary px-3 py-1.5 font-semibold text-primary hover:brightness-95"
+              className="rounded-lg bg-secondary-container px-3 py-1.5 font-semibold text-primary hover:brightness-95"
             >
               Cerrar sesión
             </button>

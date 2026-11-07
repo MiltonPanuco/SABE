@@ -52,6 +52,7 @@ F12 se puede preparar desde H2 (Dockerfiles y settings de producción) para no d
 - Toda regla de negocio vive en el backend, en `core/services/`. El frontend solo muestra lo que responde la API.
 - Cada servicio de backend lleva pruebas (`python manage.py test`). Si cambias un modelo, la migración va en el mismo commit.
 - Swagger (`/api/docs/`) es el contrato vivo. Este archivo resume, Swagger manda en el detalle.
+- Cada pantalla debe parecerse lo más posible a su diseño en `stitch/` (estructura, imágenes, iconos, textos y colores). Si el diseño choca con una regla de negocio, el backend o un dato que no existe, no se decide en silencio: se avisa al equipo y se acuerda cómo reconciliarlo.
 
 ---
 

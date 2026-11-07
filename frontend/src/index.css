@@ -1,17 +1,121 @@
 @import "tailwindcss";
 
-/* Paleta y tipografía tomadas de stitch/DESIGN.md ("Academic Prestige Modern") */
+/*
+ * Tokens tomados tal cual de stitch/:
+ *  - Paleta "Academic Prestige Modern" (stitch/academic_prestige_modern/DESIGN.md), que usan casi todas las pantallas.
+ *  - Colores uan-* del login y del cambio obligatorio de contraseña.
+ * Regla del equipo: cada pantalla debe parecerse lo más posible a su diseño en stitch/.
+ */
 @theme {
-  --color-primary: #002b49;
-  --color-primary-oscuro: #001629;
-  --color-secondary: #f59e0b;
-  --color-alta: #10b981; /* altas */
-  --color-baja: #dc2626; /* bajas y choques de horario */
-  --color-fondo: #f8fafc;
+  /* DESIGN.md */
+  --color-surface: #f8f9ff;
+  --color-surface-dim: #cbdbf5;
+  --color-surface-bright: #f8f9ff;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #eff4ff;
+  --color-surface-container: #e5eeff;
+  --color-surface-container-high: #dce9ff;
+  --color-surface-container-highest: #d3e4fe;
+  --color-on-surface: #0b1c30;
+  --color-on-surface-variant: #42474d;
+  --color-inverse-surface: #213145;
+  --color-inverse-on-surface: #eaf1ff;
+  --color-outline: #73777e;
+  --color-outline-variant: #c3c7ce;
+  --color-surface-tint: #406182;
+  --color-primary: #001629;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #002b49;
+  --color-on-primary-container: #7293b6;
+  --color-inverse-primary: #a8caef;
+  --color-secondary: #855300;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #fea619;
+  --color-on-secondary-container: #684000;
+  --color-tertiary: #00190e;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #00301e;
+  --color-on-tertiary-container: #00a472;
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+  --color-primary-fixed: #cfe5ff;
+  --color-primary-fixed-dim: #a8caef;
+  --color-on-primary-fixed: #001d34;
+  --color-on-primary-fixed-variant: #274969;
+  --color-secondary-fixed: #ffddb8;
+  --color-secondary-fixed-dim: #ffb95f;
+  --color-on-secondary-fixed: #2a1700;
+  --color-on-secondary-fixed-variant: #653e00;
+  --color-tertiary-fixed: #6ffbbe;
+  --color-tertiary-fixed-dim: #4edea3;
+  --color-on-tertiary-fixed: #002113;
+  --color-on-tertiary-fixed-variant: #005236;
+  --color-background: #f8f9ff;
+  --color-on-background: #0b1c30;
+  --color-surface-variant: #d3e4fe;
+
+  /* Login y cambio de contraseña */
+  --color-uan-navy: #002b49;
+  --color-uan-navy-hover: #001e33;
+  --color-uan-dark: #001a2d;
+  --color-uan-gold: #f59e0b;
+
+  /* Movimientos */
+  --color-alta: #10b981;
+  --color-baja: #dc2626;
+
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --shadow-custom: 0 20px 40px -15px rgba(0, 43, 73, 0.08), 0 0 1px 1px rgba(0, 43, 73, 0.05);
+
+  /* Escala tipográfica de DESIGN.md */
+  --text-display-lg: 2.25rem;
+  --text-display-lg--line-height: 2.75rem;
+  --text-display-lg--letter-spacing: -0.025em;
+  --text-headline-lg: 1.5rem;
+  --text-headline-lg--line-height: 2rem;
+  --text-headline-lg--letter-spacing: -0.02em;
+  --text-headline-md: 1.25rem;
+  --text-headline-md--line-height: 1.75rem;
+  --text-headline-md--letter-spacing: -0.015em;
+  --text-label-lg: 0.875rem;
+  --text-label-lg--line-height: 1.25rem;
+  --text-label-lg--letter-spacing: 0.01em;
+  --text-label-md: 0.75rem;
+  --text-label-md--line-height: 1rem;
+  --text-label-md--letter-spacing: 0.02em;
+  --text-label-sm: 0.6875rem;
+  --text-label-sm--line-height: 0.875rem;
+  --text-label-sm--letter-spacing: 0.04em;
+  --text-body-md: 0.875rem;
+  --text-body-md--line-height: 1.375rem;
+  --text-body-sm: 0.75rem;
+  --text-body-sm--line-height: 1.125rem;
 }
 
 body {
-  @apply bg-fondo text-slate-900 font-sans;
+  @apply bg-slate-50 font-sans text-slate-800 antialiased;
+}
+
+/* Iconos de Material Symbols, como en stitch/ */
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+.frost-glass {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }

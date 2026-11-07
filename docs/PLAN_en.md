@@ -54,6 +54,7 @@ F12 can be prepared starting in H2 (Dockerfiles and production settings) so it i
 - All business rules live in the backend, in `core/services/`. The frontend only shows what the API returns.
 - Every backend service has tests (`python manage.py test`). If you change a model, the migration goes in the same commit.
 - Swagger (`/api/docs/`) is the living contract. This file summarizes; Swagger wins on details.
+- Every screen must match its `stitch/` design as closely as possible (layout, images, icons, copy and colors). If the design conflicts with a business rule, the backend or data that doesn't exist, don't decide silently: raise it with the team and agree on a reconciliation.
 
 ---
 
