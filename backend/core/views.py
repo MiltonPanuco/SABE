@@ -1,7 +1,7 @@
 from django.db.models import Prefetch
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status, viewsets
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -14,9 +14,11 @@ from .serializers import (
     HorarioEstudianteSerializer,
     MeSerializer,
     PeriodoActivoSerializer,
+    ValidacionSerializer,
+    ValidarMovimientosSerializer,
 )
 from .services.catalogo import con_cupo, grupos_catalogo, periodo_activo
-from .services.choques import choques_con_carga
+from .services.validacion import Contexto, revisar_alta, validar_movimientos
 
 
 class MeView(APIView):
@@ -70,12 +72,19 @@ class PeriodoActivoView(APIView):
         OpenApiParameter(
             "programa", str, description="Nombre del programa. Para un alumno, por defecto el suyo."
         ),
+        OpenApiParameter(
+            "altas", str, description="Ids de grupos con alta en el carrito, separados por comas (alumnos)."
+        ),
+        OpenApiParameter(
+            "bajas", str, description="Ids de grupos con baja en el carrito, separados por comas (alumnos)."
+        ),
     ]
 )
 class GrupoViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Oferta del periodo activo (solo grupos visibles), con cupo disponible.
-    Para un alumno, `choques` dice con qué materias de su carga choca cada grupo.
+    Para un alumno, `choques` y `errores` dicen qué pasaría si pidiera el alta de cada grupo,
+    tomando en cuenta su carga, sus trámites pendientes y el carrito (`altas` y `bajas`).
     F7 lo convierte en ModelViewSet para que control escolar edite la oferta.
     """
 
@@ -105,10 +114,32 @@ class GrupoViewSet(viewsets.ReadOnlyModelViewSet):
             programa=programa.strip(),
         )
 
+    def _ids(self, nombre: str) -> list[int]:
+        valor = self.request.query_params.get(nombre, "").strip()
+        if not valor:
+            return []
+        try:
+            return [int(parte) for parte in valor.split(",")]
+        except ValueError:
+            raise ValidationError({nombre: ["Debe ser una lista de ids separados por comas."]}) from None
+
     def _contexto(self, grupos):
         contexto = self.get_serializer_context()
-        if self.estudiante and self.periodo:
-            contexto["choques"] = choques_con_carga(self.estudiante, self.periodo, grupos)
+        if not (self.estudiante and self.periodo):
+            return contexto
+        altas, bajas = self._ids("altas"), self._ids("bajas")
+        carrito = {}
+        if altas or bajas:
+            carrito = {g.pk: g for g in con_cupo(Grupo.objects.filter(pk__in=altas + bajas))}
+        revision = Contexto.para(
+            self.estudiante,
+            self.periodo,
+            altas=[carrito[i] for i in altas if i in carrito],
+            bajas=[carrito[i] for i in bajas if i in carrito],
+        )
+        revisados = {grupo.pk: revisar_alta(grupo, revision) for grupo in grupos}
+        contexto["choques"] = {pk: choques for pk, (choques, _) in revisados.items()}
+        contexto["errores"] = {pk: errores for pk, (_, errores) in revisados.items()}
         return contexto
 
     def list(self, request, *args, **kwargs):
@@ -161,4 +192,30 @@ class HorarioEstudianteView(APIView):
                 "inscritas": GrupoSerializer(inscritas, many=True).data,
                 "en_tramite": EnTramiteSerializer(en_tramite, many=True).data,
             }
+        )
+
+
+class ValidarMovimientosView(APIView):
+    """
+    Revisa una lista de altas y bajas (el carrito) sin guardar nada: choques de horario
+    y errores de cada movimiento. Al crear el folio (F5) se vuelve a validar igual.
+    """
+
+    permission_classes = [EsEstudiante]
+
+    @extend_schema(request=ValidarMovimientosSerializer, responses=ValidacionSerializer)
+    def post(self, request):
+        periodo = periodo_activo()
+        if periodo is None:
+            raise NotFound("No hay un periodo activo.")
+        estudiante = estudiante_de(request.user)
+        if estudiante is None:
+            raise PermissionDenied("Tu usuario no tiene perfil de estudiante.")
+        entrada = ValidarMovimientosSerializer(data=request.data)
+        entrada.is_valid(raise_exception=True)
+        resultados = validar_movimientos(estudiante, periodo, entrada.validated_data["movimientos"])
+        return Response(
+            ValidacionSerializer(
+                {"valido": all(r.valido for r in resultados), "movimientos": resultados}
+            ).data
         )

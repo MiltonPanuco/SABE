@@ -4,15 +4,15 @@ from io import StringIO
 from django.core.management import call_command
 from django.test import TestCase, override_settings
 
-from core.models import Estudiante, Grupo, HorarioGrupo, PeriodoEscolar
-from core.services.choques import choques_con_carga
+from core.models import DetalleSolicitud, Estudiante, Grupo, HorarioGrupo, PeriodoEscolar, Solicitud
+from core.services.choques import Origen, choques_con_carga, choques_contra, ocupacion
 
 D = HorarioGrupo.Dia
 
 
 @override_settings(DEBUG=True)
 class ChoquesConCargaTests(TestCase):
-    """Comparación de un grupo contra la carga inscrita. F4 agrega aquí las reglas del folio."""
+    """Comparación de un grupo contra la carga inscrita."""
 
     @classmethod
     def setUpTestData(cls):
@@ -73,3 +73,72 @@ class ChoquesConCargaTests(TestCase):
         )
         g = self.grupo("EC606")
         self.assertEqual(choques_con_carga(self.alumno, otro, [g])[g.pk], [])
+
+
+@override_settings(DEBUG=True)
+class OcupacionTests(TestCase):
+    """Qué ocupa el horario del alumno: carga inscrita, bajas que pide y trámites pendientes (F4)."""
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_demo", stdout=StringIO())
+        cls.periodo = PeriodoEscolar.objects.get(activo=True)
+        cls.alumno = Estudiante.objects.get(matricula="210089334")
+
+    def grupo(self, clave):
+        return Grupo.objects.get(materia__clave=clave, periodo=self.periodo)
+
+    def folio(self, numero, movimientos, estado="pendiente"):
+        solicitud = Solicitud.objects.create(
+            folio_digital=f"SABE-2026-{numero:03d}", estudiante=self.alumno, periodo=self.periodo
+        )
+        for clave, tipo in movimientos:
+            extra = {"motivo_rechazo": "x"} if estado == "rechazada" else {}
+            DetalleSolicitud.objects.create(
+                solicitud=solicitud, grupo=self.grupo(clave), tipo_tramite=tipo, estado=estado, **extra
+            )
+        return solicitud
+
+    def choques(self, clave, **opciones):
+        return choques_contra(self.grupo(clave), ocupacion(self.alumno, self.periodo, **opciones))
+
+    def nuevo_grupo(self, dia, inicio, fin):
+        base = self.grupo("EC701")
+        g = Grupo.objects.create(
+            materia=base.materia, docente=base.docente, periodo=self.periodo,
+            num_grupo="07", turno="matutino", cupo_maximo=20,
+        )
+        HorarioGrupo.objects.create(grupo=g, dia_semana=dia, hora_inicio=time(inicio), hora_fin=time(fin))
+        return Grupo.objects.prefetch_related("horarios").get(pk=g.pk)
+
+    def test_baja_del_mismo_folio_libera_el_horario(self):
+        # D2: baja de EC601 + alta de EC606 es un cambio de grupo, no un choque.
+        self.assertEqual(len(self.choques("EC606")), 1)
+        self.assertEqual(self.choques("EC606", bajas=[self.grupo("EC601")]), [])
+
+    def test_alta_pendiente_de_otro_folio_ocupa_horario(self):
+        self.folio(1, [("EC605", "ALTA")])  # mar y jue 11-13
+        nuevo = self.nuevo_grupo(D.JUEVES, 12, 14)
+        [choque] = choques_contra(nuevo, ocupacion(self.alumno, self.periodo))
+        self.assertEqual((choque.choca_con, choque.origen, choque.dias), (self.grupo("EC605"), Origen.EN_TRAMITE, [D.JUEVES]))
+
+    def test_baja_pendiente_de_otro_folio_libera_el_horario(self):
+        self.folio(1, [("EC601", "BAJA")])
+        self.assertEqual(self.choques("EC606"), [])
+
+    def test_solo_cuentan_los_pendientes(self):
+        self.folio(1, [("EC601", "BAJA")], estado="rechazada")
+        self.assertEqual(len(self.choques("EC606")), 1)
+
+    def test_sin_contar_pendientes_solo_la_carga(self):
+        # Así valida F6 al aprobar: una baja pendiente todavía puede rechazarse.
+        self.folio(1, [("EC601", "BAJA")])
+        self.assertEqual(len(self.choques("EC606", contar_pendientes=False)), 1)
+
+    def test_excluir_el_folio_que_se_revisa(self):
+        folio = self.folio(1, [("EC601", "BAJA")])
+        self.assertEqual(len(self.choques("EC606", excluir_solicitud=folio)), 1)
+
+    def test_origen_inscrita(self):
+        [choque] = self.choques("EC606")
+        self.assertEqual(choque.origen, Origen.INSCRITA)

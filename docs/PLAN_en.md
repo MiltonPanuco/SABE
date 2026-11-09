@@ -43,7 +43,7 @@ F12 can be prepared starting in H2 (Dockerfiles and production settings) so it i
 | # | Question | Recommendation | Decide by |
 |---|---|---|---|
 | D1 | Exact columns of the SADCE Excel file | Matrícula, name, program, course code, course, group, teacher, type (ALTA/BAJA), folio, approval date. Confirm with Control Escolar | Nov 13 |
-| D2 | Does an add that clashes with a drop in the same folio count as a clash? | No (it's a group change) | Nov 11 |
+| D2 | Does an add that clashes with a drop in the same folio count as a clash? | **Decided:** no, the drop in the same folio frees the slot (group change) | Nov 11 |
 | D3 | "~24 business hours" resolution text | Remove it | Nov 11 |
 | D4 | Password recovery: real email or reset by Control Escolar? | Email if SMTP is ready in H4; otherwise Control Escolar resets to a temporary password (F11) | Nov 18 |
 | D5 | Folio receipt: server-side PDF or printable view? | Printable view in the frontend (`window.print`), no new dependencies | Nov 14 |
@@ -103,6 +103,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
   - `GET /api/grupos/?q=&materia=&turno=&programa=` → `[{id, materia: {clave, nombre, creditos}, num_grupo, docente, turno, cupo_maximo, cupo_disponible, horarios: [{dia_semana, hora_inicio, hora_fin, aula}], choques: [{grupo, materia, num_grupo, dias, hora_inicio, hora_fin}]}]`. Empty `choques` = no clash.
   - `GET /api/estudiante/horario/` → `{ciclo, inscritas: [...groups], en_tramite: [{id, grupo, tipo_tramite, folio}]}`
 - **Business rules:** only groups with `visible = True` in the active period. Students see their own program's offering by default. `choques` compares against the enrolled load of the active period; F4 adds the folio rules.
+- **Accepted differences from stitch:** "{semestre}° Semestre" chip instead of "Alumno Regular"; bell with no badge, empty until F10; "en trámite" class with a dashed border and label; Seminario de Tesis fills both of its grid rows; cart starts closed on phones; catalog sorted by course code; open or closed convocatoria badge without dates.
 - **Done when:** the demo student sees their schedule and the filterable catalog; the full group shows no seats; the screens match their `stitch/` design.
 - **Target date:** Nov 14.
 - **Status:** Pending.
@@ -111,11 +112,19 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 
 - **Goal:** a single backend service decides whether a set of moves creates clashes.
 - **Depends on:** F1 (data to test with).
-- **Backend:** extends `core/services/choques.py` (created in F3) with a function that takes the student and a list of moves `{grupo, tipo}` and returns the clashes found. Uses `HorarioGrupo.traslapa_con`. Used in F3, F5 (on create) and F6 (on approve).
-- **Frontend:** mark the courses that clash in the catalog and cart, with the reason.
+- **Backend:** extends `core/services/choques.py` (created in F3) with the student's occupied slots (enrolled load plus pending moves) and creates `core/services/validacion.py` with `validar_movimientos(estudiante, periodo, movimientos)`, which returns clashes and errors per move. Uses `HorarioGrupo.traslapa_con`. Used by the catalog, F5 (on create) and F6 (on approve). F5 adds its rules to `validacion.py`.
+- **Frontend:** the catalog sends the cart and marks what clashes with it; the cart marks an invalid move in red with its reason and blocks going to confirmation.
 - **API contract:**
-  - `POST /api/solicitudes/validar/` `{movimientos: [{grupo, tipo}]}` → `{valido, choques: [{grupo, choca_con, dia, horario}], errores: [...]}`
-- **Business rules:** compare against the enrolled schedule, excluding drops in the same folio (D2), and against the other adds in the same folio. Touching edges (10:00 to 10:00) is not a clash. A course with a clash cannot be requested (there is no "force").
+  - `POST /api/solicitudes/validar/` `{movimientos: [{grupo, tipo}]}` → `{valido, movimientos: [{grupo, tipo, choques: [...], errores: [{codigo, detalle}]}]}`. `400` if the list is empty, a group doesn't exist or the type isn't `ALTA`/`BAJA`.
+  - Each clash: `{grupo, materia, num_grupo, dias, hora_inicio, hora_fin, origen}`, with `origen` = `inscrita`, `carrito` or `en_tramite`.
+  - `GET /api/grupos/?altas=12,14&bajas=5` → the catalog computes `choques` and `errores` with the cart.
+  - Error codes: `repetido` (same group twice), `ya_inscrito`, `no_disponible` (outside the active period or hidden), `sin_cupo`, `misma_materia` (already taking or requested that course in another group) and `no_inscrito` (drop of a group the student doesn't have).
+- **Business rules:**
+  - Compare against the enrolled load, excluding drops in the same folio (D2), and against the other adds in the same folio (both are flagged).
+  - Pending moves in other folios count: their adds take the slot and their drops free it. On approval (F6) only the enrolled load counts.
+  - No other group of a course the student is already taking or requested, unless the same folio drops it.
+  - If the student removes a drop an add depended on, the add stays in the cart marked red and they can't continue.
+  - Touching edges (10:00 to 10:00) is not a clash. A course with a clash cannot be requested (there is no "force").
 - **Done when:** unit tests covering: no clash, clash with enrollment, clash between two adds, an add replacing a drop in the same folio, touching edges, different days; the screens match their `stitch/` design.
 - **Target date:** Nov 13.
 - **Status:** Pending.
@@ -136,6 +145,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
   - Justification is required; longer if the request is late.
   - ALTA (add): the group has seats, the student isn't already enrolled in it, and it doesn't clash (F4). BAJA (drop): the student is enrolled in it.
   - A group can't have a pending move in another folio of the same student.
+  - Validates with F4's `validar_movimientos` (pending moves in other folios count) and adds its rules there.
   - Outside the enrollment window the folio is marked as late (submitted after `convocatoria_fin`) and can only be approved with `visto_bueno`.
   - Only moves in `pendiente` status can be canceled.
 - **Done when:** tests for the creation service (each rule above); the full flow works in the browser with the demo student; the folio appears in the history and schedule as "in progress"; the screens match their `stitch/` design.
@@ -152,7 +162,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
   - `GET /api/solicitudes/?estado=&extemporanea=&q=` (Control Escolar sees all)
   - `POST /api/movimientos/{id}/aprobar/` `{visto_bueno?}` → updated move
   - `POST /api/movimientos/{id}/rechazar/` `{motivo}` → updated move
-- **Business rules:** on approval, seats and clashes are validated again (they may have changed since submission). Rejecting without a reason returns `400`. A late request without `visto_bueno` cannot be approved. `revisado_por` and `fecha_resolucion` are saved.
+- **Business rules:** on approval, seats and clashes are validated again (they may have changed since submission), against the enrolled load only (`contar_pendientes=False`). Rejecting without a reason returns `400`. A late request without `visto_bueno` cannot be approved. `revisado_por` and `fecha_resolucion` are saved.
 - **Done when:** tests for approving the last seat (two simultaneous approvals don't exceed capacity), rejection without reason, late request without sign-off; full flow in the browser; the screens match their `stitch/` design.
 - **Target date:** Nov 20.
 - **Status:** Pending.

@@ -1,5 +1,5 @@
 // Textos del portal del estudiante con el mismo formato que stitch/sabe_estudiantes.
-import type { DiaSemana, Grupo, HorarioClase } from "../api/tipos";
+import type { Choque, DiaSemana, Grupo, HorarioClase, OrigenChoque } from "../api/tipos";
 
 export const DIAS: Record<DiaSemana, string> = {
   1: "Lunes",
@@ -32,6 +32,16 @@ export function unir(partes: string[]): string {
 /** Días con nombre completo: "Lunes y Miércoles". */
 export function diasLargos(dias: DiaSemana[]): string {
   return unir(dias.map((d) => DIAS[d]));
+}
+
+/** Lo que se agrega al final de la frase del choque según de dónde viene el grupo con el que choca. */
+export function sufijoOrigen(origen: OrigenChoque): string {
+  return { inscrita: "", carrito: " (en tu carrito)", en_tramite: " (en trámite)" }[origen];
+}
+
+/** "Choca con Macroeconomía III el Lunes y Miércoles de 07:00 a 09:00 hrs." (para texto sin formato). */
+export function textoChoque(c: Choque): string {
+  return `Choca con ${c.materia}${sufijoOrigen(c.origen)} el ${diasLargos(c.dias)} de ${hora(c.hora_inicio)} a ${hora(c.hora_fin)} hrs.`;
 }
 
 /** Agrupa los días que comparten horario: [{dias, inicio, fin, aula}] ordenado por día. */

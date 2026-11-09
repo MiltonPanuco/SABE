@@ -1,16 +1,17 @@
 // Vista 3 de stitch/sabe_estudiantes: catálogo de asignaturas con cupo y choques, y el carrito flotante.
+// Los choques y errores vienen del backend, calculados con el carrito (F4).
 import { useMemo, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { useGrupos, useMiHorario } from "../api/estudiante";
-import type { Choque, Grupo } from "../api/tipos";
+import { useGrupos, useMiHorario, useValidarCarrito } from "../api/estudiante";
+import type { Choque, Grupo, ResultadoMovimiento } from "../api/tipos";
 import { Simbolo, Spinner } from "../components/acceso";
 import { useCarrito } from "./Carrito";
-import { claveGrupo, diasLargos, hora, horarioTexto, normalizar } from "./formato";
+import { claveGrupo, diasLargos, hora, horarioTexto, normalizar, sufijoOrigen, textoChoque } from "./formato";
 
 export function CatalogoPage() {
-  const grupos = useGrupos();
+  const { items, movimientos, abierto, setAbierto } = useCarrito();
+  const grupos = useGrupos(movimientos);
   const horario = useMiHorario();
-  const { items, abierto, setAbierto } = useCarrito();
   const [busqueda, setBusqueda] = useState("");
 
   // Lo ya inscrito no se ofrece; las altas en trámite se muestran como tales.
@@ -109,7 +110,8 @@ function Cupo({ disponible }: { disponible: number }) {
 function TextoChoque({ choque }: { choque: Choque }) {
   return (
     <span>
-      Choca con <strong>{choque.materia}</strong> el <strong>{diasLargos(choque.dias)}</strong> de{" "}
+      Choca con <strong>{choque.materia}</strong>
+      {sufijoOrigen(choque.origen)} el <strong>{diasLargos(choque.dias)}</strong> de{" "}
       <strong>
         {hora(choque.hora_inicio)} a {hora(choque.hora_fin)} hrs
       </strong>
@@ -123,6 +125,9 @@ function Tarjeta({ grupo, enTramite }: { grupo: Grupo; enTramite: boolean }) {
   const choque = grupo.choques[0];
   const sinCupo = grupo.cupo_disponible <= 0;
   const enCarrito = Boolean(buscar(grupo.id));
+  // Otro grupo de una materia que ya cursa, ya pidió o trae en el carrito.
+  const mismaMateria = grupo.errores.find((e) => e.codigo === "misma_materia");
+  const conflicto = Boolean(choque || mismaMateria);
 
   const deshabilitado = "flex flex-1 cursor-not-allowed items-center justify-center gap-1 rounded-lg bg-surface-container py-2 font-label-md font-semibold text-outline";
 
@@ -131,6 +136,22 @@ function Tarjeta({ grupo, enTramite }: { grupo: Grupo; enTramite: boolean }) {
     accion = (
       <button type="button" disabled className={`${deshabilitado} text-label-md`}>
         <Simbolo nombre="hourglass_top" className="text-[18px]!" /> Alta en trámite
+      </button>
+    );
+  } else if (enCarrito) {
+    accion = (
+      <button
+        type="button"
+        onClick={() => quitar(grupo.id)}
+        className="flex flex-1 cursor-pointer items-center justify-center gap-1 rounded-lg border border-on-tertiary-container/40 py-2 font-label-md text-label-md font-semibold text-on-tertiary-container transition-colors hover:bg-on-tertiary-container/10"
+      >
+        <Simbolo nombre="check_circle" className="text-[18px]!" /> En el carrito
+      </button>
+    );
+  } else if (mismaMateria) {
+    accion = (
+      <button type="button" disabled title={mismaMateria.detalle} className={`${deshabilitado} text-xs`}>
+        <Simbolo nombre="error" className="text-[16px]!" /> Ya tienes esta materia en otro grupo
       </button>
     );
   } else if (choque) {
@@ -143,16 +164,6 @@ function Tarjeta({ grupo, enTramite }: { grupo: Grupo; enTramite: boolean }) {
     accion = (
       <button type="button" disabled className={`${deshabilitado} text-label-md`}>
         <Simbolo nombre="block" className="text-[18px]!" /> Sin cupo disponible
-      </button>
-    );
-  } else if (enCarrito) {
-    accion = (
-      <button
-        type="button"
-        onClick={() => quitar(grupo.id)}
-        className="flex flex-1 cursor-pointer items-center justify-center gap-1 rounded-lg border border-on-tertiary-container/40 py-2 font-label-md text-label-md font-semibold text-on-tertiary-container transition-colors hover:bg-on-tertiary-container/10"
-      >
-        <Simbolo nombre="check_circle" className="text-[18px]!" /> En el carrito
       </button>
     );
   } else {
@@ -170,8 +181,8 @@ function Tarjeta({ grupo, enTramite }: { grupo: Grupo; enTramite: boolean }) {
   return (
     <div
       className={`flex flex-col justify-between rounded-xl bg-surface-container-lowest p-space-md shadow-sm transition-all hover:shadow-md ${
-        choque ? "border border-error/30" : ""
-      } ${sinCupo && !choque ? "opacity-80" : ""}`}
+        conflicto ? "border border-error/30" : ""
+      } ${sinCupo && !conflicto ? "opacity-80" : ""}`}
     >
       <div>
         <div className="mb-2 flex items-start justify-between gap-2">
@@ -182,17 +193,18 @@ function Tarjeta({ grupo, enTramite }: { grupo: Grupo; enTramite: boolean }) {
         <span className="mt-1 block font-body-sm text-body-sm text-on-surface-variant">Docente: {grupo.docente}</span>
         <div
           className={`mt-space-sm flex items-center gap-1.5 font-label-sm ${
-            choque ? "text-xs font-bold text-error" : "text-label-sm text-on-surface"
+            conflicto ? "text-xs font-bold text-error" : "text-label-sm text-on-surface"
           }`}
         >
-          <Simbolo nombre="schedule" className={`text-[16px]! ${choque ? "" : "text-primary-container"}`} />
+          <Simbolo nombre="schedule" className={`text-[16px]! ${conflicto ? "" : "text-primary-container"}`} />
           <span>{horarioTexto(grupo.horarios)}</span>
         </div>
-        {grupo.choques.length > 0 && (
+        {conflicto && (
           <div className="mt-2 rounded border border-error/20 bg-error-container/30 p-2 text-xs text-on-error-container">
             <span className="flex items-center gap-1 font-bold">
               <Simbolo nombre="block" className="text-[15px]!" /> Conflicto:
             </span>
+            {mismaMateria && <span className="block">{mismaMateria.detalle}</span>}
             {grupo.choques.map((c) => (
               <TextoChoque key={`${c.grupo}-${c.hora_inicio}`} choque={c} />
             ))}
@@ -206,8 +218,15 @@ function Tarjeta({ grupo, enTramite }: { grupo: Grupo; enTramite: boolean }) {
 
 /** Cajón flotante del carrito (cart-drawer de stitch). */
 function CajonCarrito() {
-  const { items, quitar, abierto, setAbierto } = useCarrito();
+  const { items, movimientos, quitar, abierto, setAbierto } = useCarrito();
   const navigate = useNavigate();
+  const validacion = useValidarCarrito(movimientos);
+  // Con datos de un carrito anterior (placeholder) todavía no se sabe si el actual es válido.
+  const revisando = items.length > 0 && (validacion.isPending || validacion.isPlaceholderData);
+  const resultados = new Map<number, ResultadoMovimiento>(
+    (validacion.data?.movimientos ?? []).map((r) => [r.grupo, r]),
+  );
+  const invalido = items.length > 0 && !revisando && validacion.data?.valido === false;
 
   return (
     <div
@@ -242,14 +261,21 @@ function CajonCarrito() {
         ) : (
           items.map(({ grupo, tipo }) => {
             const alta = tipo === "ALTA";
+            const resultado = revisando ? undefined : resultados.get(grupo.id);
+            const problemas = [
+              ...(resultado?.errores.map((e) => e.detalle) ?? []),
+              ...(resultado?.choques.map(textoChoque) ?? []),
+            ];
             return (
               <div
                 key={grupo.id}
-                className={`flex items-center justify-between gap-2 rounded-lg border bg-surface-container-low p-2.5 ${
-                  alta ? "border-on-tertiary-container/30" : "border-error/30"
+                className={`flex items-center justify-between gap-2 rounded-lg border p-2.5 ${
+                  problemas.length
+                    ? "border-error bg-error-container/20"
+                    : `bg-surface-container-low ${alta ? "border-on-tertiary-container/30" : "border-error/30"}`
                 }`}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-start gap-2">
                   <Simbolo
                     nombre={alta ? "add_circle" : "remove_circle"}
                     className={`text-[20px]! ${alta ? "text-on-tertiary-container" : "text-error"}`}
@@ -259,6 +285,11 @@ function CajonCarrito() {
                       {tipo}: {grupo.materia.nombre}
                     </span>
                     <span className="font-mono text-[10px] text-on-surface-variant">{claveGrupo(grupo)}</span>
+                    {problemas.map((texto) => (
+                      <span key={texto} className="mt-0.5 flex items-start gap-1 text-[11px] leading-snug font-semibold text-error">
+                        <Simbolo nombre="block" className="mt-px text-[13px]!" /> {texto}
+                      </span>
+                    ))}
                   </div>
                 </div>
                 <button
@@ -275,9 +306,14 @@ function CajonCarrito() {
           })
         )}
       </div>
+      {validacion.isError ? (
+        <p className="mt-space-sm text-xs font-semibold text-error">{validacion.error.message}</p>
+      ) : invalido ? (
+        <p className="mt-space-sm text-xs font-semibold text-error">Corrige los movimientos marcados para continuar.</p>
+      ) : null}
       <button
         type="button"
-        disabled={items.length === 0}
+        disabled={items.length === 0 || revisando || invalido || validacion.isError}
         tabIndex={abierto ? 0 : -1}
         onClick={() => navigate("/estudiante/confirmacion")}
         className="mt-space-md flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary-container py-2.5 font-label-md text-label-md font-bold text-on-primary shadow-sm transition-all hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"

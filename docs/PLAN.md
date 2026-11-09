@@ -41,7 +41,7 @@ F12 se puede preparar desde H2 (Dockerfiles y settings de producción) para no d
 | # | Pregunta | Recomendación | Fecha límite |
 |---|---|---|---|
 | D1 | Columnas exactas del Excel para SADCE | Matrícula, nombre, programa, clave de materia, materia, grupo, docente, tipo (ALTA/BAJA), folio, fecha de aprobación. Confirmar con control escolar | 13 nov |
-| D2 | ¿Una alta que choca con una baja del mismo folio cuenta como choque? | No cuenta (cambio de grupo) | 11 nov |
+| D2 | ¿Una alta que choca con una baja del mismo folio cuenta como choque? | **Decidida:** no cuenta, la baja del mismo folio libera el horario (cambio de grupo) | 11 nov |
 | D3 | Texto "~24 hrs hábiles" de resolución | Quitarlo | 11 nov |
 | D4 | Recuperar contraseña: ¿correo real o reinicio por control escolar? | Correo si hay SMTP listo en H4; si no, control escolar reinicia a contraseña temporal (F11) | 18 nov |
 | D5 | Comprobante del folio: ¿PDF en el servidor o vista imprimible? | Vista imprimible en el frontend (`window.print`), sin dependencias nuevas | 14 nov |
@@ -101,6 +101,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
   - `GET /api/grupos/?q=&materia=&turno=&programa=` → `[{id, materia: {clave, nombre, creditos}, num_grupo, docente, turno, cupo_maximo, cupo_disponible, horarios: [{dia_semana, hora_inicio, hora_fin, aula}], choques: [{grupo, materia, num_grupo, dias, hora_inicio, hora_fin}]}]`. `choques` vacío = no choca.
   - `GET /api/estudiante/horario/` → `{ciclo, inscritas: [...grupos], en_tramite: [{id, grupo, tipo_tramite, folio}]}`
 - **Reglas de negocio:** solo grupos `visible = True` del periodo activo. Al alumno se le muestra por defecto la oferta de su programa. `choques` compara contra la carga inscrita del periodo activo; las reglas del folio las agrega F4.
+- **Diferencias aceptadas con stitch:** chip "{semestre}° Semestre" en lugar de "Alumno Regular"; campana sin contador y vacía hasta F10; clase "en trámite" con borde punteado y etiqueta; Seminario de Tesis ocupa sus dos filas de la retícula; carrito cerrado de inicio en celular; catálogo ordenado por clave; insignia de convocatoria abierta o cerrada sin fechas.
 - **Terminado cuando:** el alumno demo ve su horario y el catálogo filtrable; el grupo lleno aparece sin cupo; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 14 nov.
 - **Estado:** Pendiente.
@@ -109,11 +110,19 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 
 - **Objetivo:** un único servicio en el backend decide si un conjunto de movimientos genera choques.
 - **Depende de:** F1 (datos para probar).
-- **Backend:** amplía `core/services/choques.py` (creado en F3) con una función que recibe al estudiante y una lista de movimientos `{grupo, tipo}` y devuelve los choques encontrados. Usa `HorarioGrupo.traslapa_con`. Se usa en F3, F5 (al crear) y F6 (al aprobar).
-- **Frontend:** marcar en el catálogo y el carrito las materias que chocan, con el motivo.
+- **Backend:** amplía `core/services/choques.py` (creado en F3) con la ocupación del alumno (carga inscrita más movimientos pendientes) y crea `core/services/validacion.py` con `validar_movimientos(estudiante, periodo, movimientos)`, que devuelve choques y errores por movimiento. Usa `HorarioGrupo.traslapa_con`. Se usa en el catálogo, F5 (al crear) y F6 (al aprobar). F5 agrega sus reglas en `validacion.py`.
+- **Frontend:** el catálogo envía el carrito y marca lo que choca con él; el carrito marca en rojo el movimiento inválido con su motivo y no deja pasar a confirmación.
 - **Contrato de API:**
-  - `POST /api/solicitudes/validar/` `{movimientos: [{grupo, tipo}]}` → `{valido, choques: [{grupo, choca_con, dia, horario}], errores: [...]}`
-- **Reglas de negocio:** se compara contra la carga inscrita, quitando las bajas del mismo folio (D2), y contra las otras altas del mismo folio. Tocar extremos (10:00 a 10:00) no es choque. Una materia con choque no se puede solicitar (no existe "forzar").
+  - `POST /api/solicitudes/validar/` `{movimientos: [{grupo, tipo}]}` → `{valido, movimientos: [{grupo, tipo, choques: [...], errores: [{codigo, detalle}]}]}`. `400` si la lista está vacía, el grupo no existe o el tipo no es `ALTA`/`BAJA`.
+  - Cada choque: `{grupo, materia, num_grupo, dias, hora_inicio, hora_fin, origen}`, con `origen` = `inscrita`, `carrito` o `en_tramite`.
+  - `GET /api/grupos/?altas=12,14&bajas=5` → el catálogo calcula `choques` y `errores` con el carrito.
+  - Códigos de error: `repetido` (mismo grupo dos veces), `ya_inscrito`, `no_disponible` (fuera del periodo activo u oculto), `sin_cupo`, `misma_materia` (ya cursa o pidió esa materia en otro grupo) y `no_inscrito` (baja de un grupo que no tiene).
+- **Reglas de negocio:**
+  - Se compara contra la carga inscrita, quitando las bajas del mismo folio (D2), y contra las otras altas del mismo folio (se marcan ambas).
+  - Los movimientos pendientes de otros folios cuentan: sus altas ocupan horario y sus bajas lo liberan. Al aprobar (F6) solo cuenta la carga inscrita.
+  - No se pide otro grupo de una materia que ya se cursa o se pidió, salvo que el mismo folio la dé de baja.
+  - Si el alumno quita una baja de la que dependía una alta, la alta se queda en el carrito marcada en rojo y no se puede continuar.
+  - Tocar extremos (10:00 a 10:00) no es choque. Una materia con choque no se puede solicitar (no existe "forzar").
 - **Terminado cuando:** pruebas unitarias que cubran: sin choque, choque con carga, choque entre dos altas, alta que reemplaza una baja del mismo folio, extremos que se tocan, días distintos; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 13 nov.
 - **Estado:** Pendiente.
@@ -134,6 +143,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
   - Justificación obligatoria; más larga si es extemporánea.
   - ALTA: el grupo tiene cupo, el alumno no lo tiene inscrito y no choca (F4). BAJA: el alumno lo tiene inscrito.
   - No se repite un grupo con un movimiento pendiente en otro folio del mismo alumno.
+  - Valida con `validar_movimientos` de F4 (cuenta los pendientes de otros folios) y agrega aquí sus reglas.
   - Fuera de la convocatoria el folio se marca como extemporáneo (fecha de envío posterior a `convocatoria_fin`) y solo se aprueba con `visto_bueno`.
   - Solo se cancelan movimientos en estado `pendiente`.
 - **Terminado cuando:** pruebas del servicio de creación (cada regla de arriba); flujo completo en el navegador con el alumno demo; el folio aparece en historial y horario como "en trámite"; las pantallas coinciden con su diseño en `stitch/`.
@@ -150,7 +160,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
   - `GET /api/solicitudes/?estado=&extemporanea=&q=` (control escolar ve todas)
   - `POST /api/movimientos/{id}/aprobar/` `{visto_bueno?}` → movimiento actualizado
   - `POST /api/movimientos/{id}/rechazar/` `{motivo}` → movimiento actualizado
-- **Reglas de negocio:** al aprobar se vuelve a validar cupo y choques (pudo cambiar desde que se envió). Rechazo sin motivo devuelve `400`. Extemporáneo sin `visto_bueno` no se aprueba. Se guardan `revisado_por` y `fecha_resolucion`.
+- **Reglas de negocio:** al aprobar se vuelve a validar cupo y choques (pudo cambiar desde que se envió), solo contra la carga inscrita (`contar_pendientes=False`). Rechazo sin motivo devuelve `400`. Extemporáneo sin `visto_bueno` no se aprueba. Se guardan `revisado_por` y `fecha_resolucion`.
 - **Terminado cuando:** pruebas de aprobar con último cupo (dos aprobaciones simultáneas no sobrepasan el cupo), rechazo sin motivo, extemporáneo sin visto bueno; flujo completo en el navegador; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 20 nov.
 - **Estado:** Pendiente.

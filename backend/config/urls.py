@@ -5,7 +5,14 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import SimpleRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from core.views import CambiarPasswordView, GrupoViewSet, HorarioEstudianteView, MeView, PeriodoActivoView
+from core.views import (
+    CambiarPasswordView,
+    GrupoViewSet,
+    HorarioEstudianteView,
+    MeView,
+    PeriodoActivoView,
+    ValidarMovimientosView,
+)
 
 router = SimpleRouter()
 router.register("grupos", GrupoViewSet, basename="grupo")
@@ -27,6 +34,8 @@ urlpatterns = [
     # Catálogo y horario del estudiante (F3).
     path("api/periodos/activo/", PeriodoActivoView.as_view(), name="periodo_activo"),
     path("api/estudiante/horario/", HorarioEstudianteView.as_view(), name="horario_estudiante"),
+    # Choques y validación del carrito (F4). Va antes del router de solicitudes de F5.
+    path("api/solicitudes/validar/", ValidarMovimientosView.as_view(), name="validar_movimientos"),
     path("api/", include(router.urls)),
     # Documentación de la API (contrato para el frontend).
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),

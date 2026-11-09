@@ -4,6 +4,9 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from .models import DetalleSolicitud, Estudiante, Grupo, HorarioGrupo, PeriodoEscolar, Usuario
+from .services.catalogo import con_cupo
+from .services.choques import Origen
+from .services.validacion import Codigo, Movimiento
 
 
 class PerfilEstudianteSerializer(serializers.ModelSerializer):
@@ -82,7 +85,7 @@ class MateriaResumenSerializer(serializers.Serializer):
 
 
 class ChoqueSerializer(serializers.Serializer):
-    """Con qué grupo inscrito choca, qué días y a qué hora (horario del grupo inscrito)."""
+    """Con qué grupo choca, qué días y a qué hora (horario de ese grupo), y por qué ocupa el horario."""
 
     grupo = serializers.IntegerField(source="choca_con.pk")
     materia = serializers.CharField(source="choca_con.materia.nombre_materia")
@@ -90,12 +93,19 @@ class ChoqueSerializer(serializers.Serializer):
     dias = serializers.ListField(child=serializers.IntegerField())
     hora_inicio = serializers.TimeField()
     hora_fin = serializers.TimeField()
+    origen = serializers.ChoiceField(choices=[o.value for o in Origen])
+
+
+class ErrorMovimientoSerializer(serializers.Serializer):
+    codigo = serializers.ChoiceField(choices=[c.value for c in Codigo])
+    detalle = serializers.CharField()
 
 
 class GrupoSerializer(serializers.ModelSerializer):
     """
     Grupo del catálogo. Espera un queryset pasado por `services.catalogo.con_cupo`
-    (trae `cupo_libre`) y, para alumnos, `context["choques"]` = {grupo_id: [Choque]}.
+    (trae `cupo_libre`) y, para alumnos, `context["choques"]` = {grupo_id: [Choque]}
+    y `context["errores"]` = {grupo_id: [ErrorMovimiento]} si pidiera el alta.
     """
 
     materia = MateriaResumenSerializer()
@@ -103,18 +113,24 @@ class GrupoSerializer(serializers.ModelSerializer):
     cupo_disponible = serializers.IntegerField(source="cupo_libre")
     horarios = HorarioSerializer(many=True)
     choques = serializers.SerializerMethodField()
+    errores = serializers.SerializerMethodField()
 
     class Meta:
         model = Grupo
         fields = [
             "id", "materia", "num_grupo", "docente", "turno",
-            "cupo_maximo", "cupo_disponible", "horarios", "choques",
+            "cupo_maximo", "cupo_disponible", "horarios", "choques", "errores",
         ]
 
     @extend_schema_field(ChoqueSerializer(many=True))
     def get_choques(self, grupo):
         choques = self.context.get("choques", {}).get(grupo.pk, [])
         return ChoqueSerializer(choques, many=True).data
+
+    @extend_schema_field(ErrorMovimientoSerializer(many=True))
+    def get_errores(self, grupo):
+        errores = self.context.get("errores", {}).get(grupo.pk, [])
+        return ErrorMovimientoSerializer(errores, many=True).data
 
 
 class EnTramiteSerializer(serializers.ModelSerializer):
@@ -132,3 +148,41 @@ class HorarioEstudianteSerializer(serializers.Serializer):
     ciclo = serializers.CharField(allow_null=True)
     inscritas = GrupoSerializer(many=True)
     en_tramite = EnTramiteSerializer(many=True)
+
+
+# ---------------------------------------------------------------------------
+# Validación de movimientos (F4)
+# ---------------------------------------------------------------------------
+
+
+class MovimientoEntradaSerializer(serializers.Serializer):
+    grupo = serializers.IntegerField(min_value=1)
+    tipo = serializers.ChoiceField(choices=DetalleSolicitud.Tipo.choices)
+
+
+class ValidarMovimientosSerializer(serializers.Serializer):
+    """Entrada de /api/solicitudes/validar/. Devuelve `movimientos` como lista de `Movimiento`."""
+
+    movimientos = MovimientoEntradaSerializer(many=True, allow_empty=False)
+
+    def validate_movimientos(self, movimientos):
+        # Una sola consulta para todos los grupos (PrimaryKeyRelatedField haría una por movimiento).
+        ids = {m["grupo"] for m in movimientos}
+        grupos = {g.pk: g for g in con_cupo(Grupo.objects.filter(pk__in=ids))}
+        if faltan := sorted(ids - grupos.keys()):
+            raise serializers.ValidationError(
+                f"No existe el grupo {', '.join(map(str, faltan))}."
+            )
+        return [Movimiento(grupos[m["grupo"]], m["tipo"]) for m in movimientos]
+
+
+class ResultadoMovimientoSerializer(serializers.Serializer):
+    grupo = serializers.IntegerField(source="grupo.pk")
+    tipo = serializers.ChoiceField(choices=DetalleSolicitud.Tipo.choices)
+    choques = ChoqueSerializer(many=True)
+    errores = ErrorMovimientoSerializer(many=True)
+
+
+class ValidacionSerializer(serializers.Serializer):
+    valido = serializers.BooleanField()
+    movimientos = ResultadoMovimientoSerializer(many=True)

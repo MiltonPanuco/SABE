@@ -33,7 +33,8 @@ class BaseCatalogoTest(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {r.data['access']}")
 
     def grupo(self, clave):
-        return Grupo.objects.get(materia__clave=clave, periodo=self.periodo)
+        # El grupo del seed (los que crean las pruebas usan números más altos).
+        return Grupo.objects.filter(materia__clave=clave, periodo=self.periodo).order_by("num_grupo").first()
 
     def catalogo(self, **params):
         r = self.client.get("/api/grupos/", params)
@@ -79,6 +80,7 @@ class CatalogoTests(BaseCatalogoTest):
             ],
         )
         self.assertEqual(g["choques"], [])
+        self.assertEqual(g["errores"], [])
 
     def test_grupo_lleno_sin_cupo(self):
         self.entrar()
@@ -103,6 +105,7 @@ class CatalogoTests(BaseCatalogoTest):
                 "dias": [1, 3],
                 "hora_inicio": "07:00:00",
                 "hora_fin": "09:00:00",
+                "origen": "inscrita",
             },
         )
 
@@ -142,6 +145,7 @@ class CatalogoTests(BaseCatalogoTest):
         grupos = self.catalogo()
         self.assertIn("FI702", grupos)
         self.assertEqual(grupos["EC606"]["choques"], [])
+        self.assertEqual(grupos["EC504"]["errores"], [])
 
     def test_detalle_de_un_grupo(self):
         self.entrar()
@@ -173,6 +177,70 @@ class CatalogoTests(BaseCatalogoTest):
     def test_solo_lectura(self):
         self.entrar("valeria.ruiz")
         self.assertEqual(self.client.post("/api/grupos/", {}, format="json").status_code, 405)
+
+
+class CatalogoConCarritoTests(BaseCatalogoTest):
+    """El catálogo calcula choques y errores como si el carrito (?altas=&bajas=) ya se hubiera pedido."""
+
+    def nuevo_grupo(self, clave, num, dia, inicio, fin, materia=None):
+        base = self.grupo(clave)
+        g = Grupo.objects.create(
+            materia=materia or base.materia, docente=base.docente, periodo=self.periodo,
+            num_grupo=num, turno="matutino", cupo_maximo=20,
+        )
+        HorarioGrupo.objects.create(grupo=g, dia_semana=dia, hora_inicio=time(inicio), hora_fin=time(fin))
+        return g
+
+    def test_baja_en_el_carrito_libera_el_horario(self):
+        self.entrar()
+        self.assertEqual(self.catalogo(bajas=self.grupo("EC601").pk)["EC606"]["choques"], [])
+
+    def test_alta_en_el_carrito_choca(self):
+        # Otra materia el martes 11-12: choca con EC605 (mar y jue 11-13) si está en el carrito.
+        otra = self.nuevo_grupo("EC701", "05", HorarioGrupo.Dia.MARTES, 11, 12)
+        self.entrar()
+        ec605 = self.grupo("EC605").pk
+        grupos = self.client.get("/api/grupos/", {"altas": f"{ec605}"}).data
+        [nuevo] = [g for g in grupos if g["id"] == otra.pk]
+        [choque] = nuevo["choques"]
+        self.assertEqual((choque["grupo"], choque["origen"], choque["dias"]), (ec605, "carrito", [2]))
+        # El grupo del carrito no choca consigo mismo.
+        [propio] = [g for g in grupos if g["id"] == ec605]
+        self.assertEqual(propio["choques"], [])
+
+    def test_otro_grupo_de_una_materia_inscrita(self):
+        otro = self.nuevo_grupo("EC601", "02", HorarioGrupo.Dia.SABADO, 7, 9)
+        self.entrar()
+        [g] = [g for g in self.client.get("/api/grupos/").data if g["id"] == otro.pk]
+        self.assertEqual([e["codigo"] for e in g["errores"]], ["misma_materia"])
+        self.assertIn("Agrega su baja", g["errores"][0]["detalle"])
+        # Con la baja del grupo actual en el carrito ya se puede pedir.
+        r = self.client.get("/api/grupos/", {"bajas": self.grupo("EC601").pk})
+        [g] = [g for g in r.data if g["id"] == otro.pk]
+        self.assertEqual(g["errores"], [])
+
+    def test_grupo_lleno_trae_error_sin_cupo(self):
+        self.entrar()
+        self.assertEqual([e["codigo"] for e in self.catalogo()["EC504"]["errores"]], ["sin_cupo"])
+
+    def test_carrito_invalido_es_400(self):
+        self.entrar()
+        r = self.client.get("/api/grupos/", {"altas": "1,x"})
+        self.assertEqual(r.status_code, 400)
+        self.assertIn("altas", r.data)
+
+    def test_numero_de_consultas_con_carrito_no_crece(self):
+        self.entrar()
+        carrito = {"altas": self.grupo("EC605").pk, "bajas": self.grupo("EC601").pk}
+        with CaptureQueriesContext(connection) as antes:
+            self.client.get("/api/grupos/", carrito)
+        for i in range(5):
+            self.nuevo_grupo("EC605", f"9{i}", HorarioGrupo.Dia.LUNES, 7, 9)
+        carrito["altas"] = ",".join(str(g.pk) for g in Grupo.objects.filter(materia__clave="EC605"))
+        with CaptureQueriesContext(connection) as despues:
+            r = self.client.get("/api/grupos/", carrito)
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(len(despues), len(antes))
 
 
 class HorarioEstudianteTests(BaseCatalogoTest):

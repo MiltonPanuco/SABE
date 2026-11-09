@@ -1,15 +1,24 @@
 """
 Detección de choques de horario.
 
-F3 compara cada grupo del catálogo contra la carga inscrita del alumno.
-F4 agrega aquí las reglas del folio (bajas del mismo folio, choques entre altas).
+La "ocupación" del alumno son los grupos que ocupan su horario: la carga inscrita, menos las bajas
+que pide, más las altas pendientes de otros folios. Las reglas del folio están en `validacion.py`.
 """
 
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 from datetime import time
+from enum import StrEnum
 
-from core.models import CargaAcademica, Estudiante, Grupo, PeriodoEscolar
+from core.models import CargaAcademica, DetalleSolicitud, Estudiante, Grupo, PeriodoEscolar, Solicitud
+
+
+class Origen(StrEnum):
+    """Por qué un grupo ocupa el horario del alumno."""
+
+    INSCRITA = "inscrita"  # carga inscrita
+    CARRITO = "carrito"  # otra alta de la misma lista o folio
+    EN_TRAMITE = "en_tramite"  # alta pendiente de otro folio
 
 
 @dataclass
@@ -21,6 +30,13 @@ class Choque:
     hora_inicio: time
     hora_fin: time
     dias: list[int] = field(default_factory=list)
+    origen: Origen = Origen.INSCRITA
+
+
+@dataclass(frozen=True)
+class Ocupado:
+    grupo: Grupo
+    origen: Origen
 
 
 def grupos_inscritos(estudiante: Estudiante, periodo: PeriodoEscolar) -> list[Grupo]:
@@ -35,6 +51,52 @@ def grupos_inscritos(estudiante: Estudiante, periodo: PeriodoEscolar) -> list[Gr
         .prefetch_related("grupo__horarios")
     )
     return [carga.grupo for carga in cargas]
+
+
+def movimientos_pendientes(
+    estudiante: Estudiante, periodo: PeriodoEscolar, *, excluir_solicitud: Solicitud | None = None
+) -> list[DetalleSolicitud]:
+    """Movimientos pendientes del alumno en el periodo, con grupo, materia y horarios cargados."""
+    pendientes = DetalleSolicitud.objects.filter(
+        solicitud__estudiante=estudiante,
+        solicitud__periodo=periodo,
+        estado=DetalleSolicitud.Estado.PENDIENTE,
+    )
+    if excluir_solicitud is not None:
+        pendientes = pendientes.exclude(solicitud=excluir_solicitud)
+    return list(pendientes.select_related("grupo__materia").prefetch_related("grupo__horarios"))
+
+
+def ocupacion(
+    estudiante: Estudiante,
+    periodo: PeriodoEscolar,
+    *,
+    bajas: Iterable[Grupo] = (),
+    contar_pendientes: bool = True,
+    excluir_solicitud: Solicitud | None = None,
+    inscritos: list[Grupo] | None = None,
+) -> list[Ocupado]:
+    """
+    Grupos que ocupan el horario del alumno si se aplicaran `bajas`.
+
+    Con `contar_pendientes`, los movimientos pendientes de otros folios también cuentan: sus altas
+    ocupan horario y sus bajas lo liberan. Al aprobar (F6) solo cuenta la carga inscrita.
+    `inscritos` evita repetir la consulta si quien llama ya la tiene.
+    """
+    libres = {grupo.pk for grupo in bajas}
+    altas_pendientes: list[Grupo] = []
+    if contar_pendientes:
+        for detalle in movimientos_pendientes(estudiante, periodo, excluir_solicitud=excluir_solicitud):
+            if detalle.tipo_tramite == DetalleSolicitud.Tipo.BAJA:
+                libres.add(detalle.grupo_id)
+            else:
+                altas_pendientes.append(detalle.grupo)
+
+    if inscritos is None:
+        inscritos = grupos_inscritos(estudiante, periodo)
+    ocupados = [Ocupado(g, Origen.INSCRITA) for g in inscritos if g.pk not in libres]
+    ocupados += [Ocupado(g, Origen.EN_TRAMITE) for g in altas_pendientes]
+    return ocupados
 
 
 def choques_entre(grupo: Grupo, otros: Iterable[Grupo]) -> list[Choque]:
@@ -61,9 +123,19 @@ def choques_entre(grupo: Grupo, otros: Iterable[Grupo]) -> list[Choque]:
     return list(encontrados.values())
 
 
+def choques_contra(grupo: Grupo, ocupados: Iterable[Ocupado]) -> list[Choque]:
+    """Choques de `grupo` contra lo que ocupa el horario, cada uno con su origen."""
+    choques = []
+    for ocupado in ocupados:
+        for choque in choques_entre(grupo, [ocupado.grupo]):
+            choque.origen = ocupado.origen
+            choques.append(choque)
+    return choques
+
+
 def choques_con_carga(
     estudiante: Estudiante, periodo: PeriodoEscolar, grupos: Iterable[Grupo]
 ) -> dict[int, list[Choque]]:
-    """Para cada grupo, sus choques con la carga inscrita del alumno (lista vacía si no choca)."""
-    inscritos = grupos_inscritos(estudiante, periodo)
-    return {grupo.pk: choques_entre(grupo, inscritos) for grupo in grupos}
+    """Para cada grupo, sus choques con la ocupación del alumno (lista vacía si no choca)."""
+    ocupados = ocupacion(estudiante, periodo)
+    return {grupo.pk: choques_contra(grupo, ocupados) for grupo in grupos}

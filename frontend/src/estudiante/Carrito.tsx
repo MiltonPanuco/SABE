@@ -1,7 +1,7 @@
 // Carrito de solicitud: altas desde el catálogo y bajas desde el horario.
 // Vive solo en el navegador (sessionStorage); F5 lo envía como folio y el backend vuelve a validar todo.
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import type { Grupo, TipoTramite } from "../api/tipos";
+import type { Grupo, MovimientoEntrada, TipoTramite } from "../api/tipos";
 import { useAuth } from "../auth/AuthProvider";
 import { useToast } from "./Toast";
 
@@ -12,6 +12,8 @@ export interface ItemCarrito {
 
 interface Carrito {
   items: ItemCarrito[];
+  /** Los mismos movimientos como los recibe la API: {grupo: id, tipo}. */
+  movimientos: MovimientoEntrada[];
   /** Movimiento del carrito para ese grupo, si lo hay. */
   buscar: (grupoId: number) => ItemCarrito | undefined;
   agregar: (grupo: Grupo, tipo: TipoTramite) => void;
@@ -77,9 +79,11 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
 
   const vaciar = useCallback(() => setItems([]), []);
 
+  const movimientos = useMemo(() => items.map((i) => ({ grupo: i.grupo.id, tipo: i.tipo })), [items]);
+
   const valor = useMemo(
-    () => ({ items, buscar, agregar, quitar, vaciar, abierto, setAbierto }),
-    [items, buscar, agregar, quitar, vaciar, abierto],
+    () => ({ items, movimientos, buscar, agregar, quitar, vaciar, abierto, setAbierto }),
+    [items, movimientos, buscar, agregar, quitar, vaciar, abierto],
   );
   return <CarritoContext.Provider value={valor}>{children}</CarritoContext.Provider>;
 }

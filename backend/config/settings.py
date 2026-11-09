@@ -107,6 +107,8 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "Sistema de Altas y Bajas de Economía (UAE - UAN)",
     "VERSION": "0.1.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    # ALTA/BAJA aparece como `tipo_tramite` y como `tipo`: un solo enum en el esquema.
+    "ENUM_NAME_OVERRIDES": {"TipoTramiteEnum": "core.models.DetalleSolicitud.Tipo"},
 }
 
 CORS_ALLOWED_ORIGINS = [

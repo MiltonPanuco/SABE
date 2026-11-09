@@ -50,7 +50,10 @@ export interface HorarioClase {
   aula: string;
 }
 
-/** El grupo choca con una materia inscrita (`grupo`) esos días y a esa hora. */
+/** Por qué el grupo con el que choca ocupa el horario: inscrito, otra alta del carrito o un alta en trámite. */
+export type OrigenChoque = "inscrita" | "carrito" | "en_tramite";
+
+/** El grupo choca con `grupo` esos días y a esa hora (horario de `grupo`). */
 export interface Choque {
   grupo: number;
   materia: string;
@@ -58,6 +61,14 @@ export interface Choque {
   dias: DiaSemana[];
   hora_inicio: string;
   hora_fin: string;
+  origen: OrigenChoque;
+}
+
+export type CodigoError = "repetido" | "ya_inscrito" | "no_disponible" | "sin_cupo" | "misma_materia" | "no_inscrito";
+
+export interface ErrorMovimiento {
+  codigo: CodigoError;
+  detalle: string;
 }
 
 /** Elemento de GET /api/grupos/ */
@@ -70,7 +81,10 @@ export interface Grupo {
   cupo_maximo: number;
   cupo_disponible: number;
   horarios: HorarioClase[];
+  /** Para un alumno: con qué choca si pidiera el alta (tomando en cuenta el carrito). */
   choques: Choque[];
+  /** Para un alumno: por qué no podría pedir el alta, además de los choques. */
+  errores: ErrorMovimiento[];
 }
 
 export type TipoTramite = "ALTA" | "BAJA";
@@ -87,4 +101,21 @@ export interface HorarioEstudiante {
   ciclo: string | null;
   inscritas: Grupo[];
   en_tramite: EnTramite[];
+}
+
+/** Un movimiento del carrito tal como lo recibe la API. */
+export interface MovimientoEntrada {
+  grupo: number;
+  tipo: TipoTramite;
+}
+
+export interface ResultadoMovimiento extends MovimientoEntrada {
+  choques: Choque[];
+  errores: ErrorMovimiento[];
+}
+
+/** POST /api/solicitudes/validar/ */
+export interface Validacion {
+  valido: boolean;
+  movimientos: ResultadoMovimiento[];
 }
