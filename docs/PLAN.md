@@ -4,6 +4,8 @@ Fecha límite: **lunes 30 de noviembre de 2026**. Creado el 6 de noviembre de 20
 
 Este archivo dice **qué** se construye, **en qué orden** y **cuándo está terminado**. Los responsables se asignan fuera de este documento. Las reglas de negocio completas están en `docs/diseno/SABE_Contexto_Completo.md` y el diseño de cada pantalla en `stitch/`.
 
+> **Regla de diseño para todas las etapas:** en cada hito y cada función, las pantallas deben verse igual que su diseño en `stitch/` (estructura, imágenes, iconos, textos y colores). Ninguna función con frontend se marca como `Hecho` si sus pantallas no coinciden con `stitch/`. Si el diseño choca con una regla de negocio, el backend o un dato que no existe, se avisa al equipo antes de desviarse.
+
 Cómo usarlo: cuando una función se fusiona a `main`, se cambia su **Estado** a `Hecho` en el mismo PR. Si cambia un endpoint, se actualiza aquí su **Contrato de API** antes de programarlo.
 
 ---
@@ -58,7 +60,7 @@ F12 se puede preparar desde H2 (Dockerfiles y settings de producción) para no d
 
 ## 5. Funciones
 
-Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Frontend** (con la pantalla de `stitch/`), **Contrato de API**, **Reglas de negocio**, **Terminado cuando**, **Fecha objetivo**, **Estado**.
+Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Frontend** (con la pantalla de `stitch/`), **Contrato de API**, **Reglas de negocio**, **Terminado cuando**, **Fecha objetivo**, **Estado**. En toda función con frontend, **Terminado cuando** incluye que sus pantallas coinciden con `stitch/`.
 
 ### F1. Datos de prueba
 
@@ -84,7 +86,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
   - `GET /api/me/` → `{id, username, nombre, apellidos, rol, debe_cambiar_password, estudiante: {matricula, programa, semestre, turno} | null}`
   - `POST /api/auth/cambiar-password/` `{actual, nueva}` → `204`
 - **Reglas de negocio:** mientras `debe_cambiar_password` sea `True`, el frontend solo permite la pantalla de cambio. La nueva contraseña pasa los validadores de Django.
-- **Terminado cuando:** pruebas de permisos por rol en backend; los 3 usuarios demo entran a su panel; el usuario con `temporal` es forzado a cambiarla; un estudiante no puede abrir rutas de control escolar.
+- **Terminado cuando:** pruebas de permisos por rol en backend; los 3 usuarios demo entran a su panel; el usuario con `temporal` es forzado a cambiarla; un estudiante no puede abrir rutas de control escolar; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 11 nov.
 - **Estado:** Hecho.
 
@@ -92,14 +94,14 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 
 - **Objetivo:** el alumno ve la oferta del periodo activo (materia, grupo, docente, horario, cupo) y su horario actual.
 - **Depende de:** F2.
-- **Backend:** serializers de lectura para grupos con horarios y cupo disponible; horario del alumno a partir de su carga académica más los movimientos en trámite. Optimizar consultas (`select_related`, `prefetch_related`, cupo con `annotate`, no con la propiedad por fila).
-- **Frontend:** dashboard del estudiante, horario semanal y catálogo con filtros. Pantalla: `sabe_estudiantes`.
+- **Backend:** serializers de lectura para grupos con horarios y cupo disponible; horario del alumno a partir de su carga académica más los movimientos en trámite. Optimizar consultas (`select_related`, `prefetch_related`, cupo con `annotate`, no con la propiedad por fila). Crea `core/services/choques.py` con la comparación base "grupo contra mi carga inscrita", que F4 amplía.
+- **Frontend:** dashboard del estudiante, horario semanal (retícula y lista) y catálogo con búsqueda por materia, clave o docente (como en `stitch/`). Carrito de solicitud solo en el navegador (agregar altas desde el catálogo y bajas desde el horario); el envío es F5. Pantalla: `sabe_estudiantes`.
 - **Contrato de API:**
-  - `GET /api/periodos/activo/` → `{ciclo, convocatoria_inicio, convocatoria_fin, convocatoria_abierta}`
-  - `GET /api/grupos/?materia=&turno=&programa=` → `[{id, materia: {clave, nombre, creditos}, num_grupo, docente, turno, cupo_maximo, cupo_disponible, horarios: [{dia_semana, hora_inicio, hora_fin, aula}], choca_con_mi_horario}]`
-  - `GET /api/estudiante/horario/` → `{inscritas: [...grupos], en_tramite: [{grupo, tipo_tramite, folio}]}`
-- **Reglas de negocio:** solo grupos `visible = True` del periodo activo. `choca_con_mi_horario` lo calcula F4.
-- **Terminado cuando:** el alumno demo ve su horario y el catálogo filtrable; el grupo lleno aparece sin cupo.
+  - `GET /api/periodos/activo/` → `{ciclo, convocatoria_inicio, convocatoria_fin, convocatoria_abierta}` (`404` si no hay periodo activo)
+  - `GET /api/grupos/?q=&materia=&turno=&programa=` → `[{id, materia: {clave, nombre, creditos}, num_grupo, docente, turno, cupo_maximo, cupo_disponible, horarios: [{dia_semana, hora_inicio, hora_fin, aula}], choques: [{grupo, materia, num_grupo, dias, hora_inicio, hora_fin}]}]`. `choques` vacío = no choca.
+  - `GET /api/estudiante/horario/` → `{ciclo, inscritas: [...grupos], en_tramite: [{id, grupo, tipo_tramite, folio}]}`
+- **Reglas de negocio:** solo grupos `visible = True` del periodo activo. Al alumno se le muestra por defecto la oferta de su programa. `choques` compara contra la carga inscrita del periodo activo; las reglas del folio las agrega F4.
+- **Terminado cuando:** el alumno demo ve su horario y el catálogo filtrable; el grupo lleno aparece sin cupo; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 14 nov.
 - **Estado:** Pendiente.
 
@@ -107,12 +109,12 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 
 - **Objetivo:** un único servicio en el backend decide si un conjunto de movimientos genera choques.
 - **Depende de:** F1 (datos para probar).
-- **Backend:** `core/services/choques.py` con una función que recibe al estudiante y una lista de movimientos `{grupo, tipo}` y devuelve los choques encontrados. Usa `HorarioGrupo.traslapa_con`. Se usa en F3, F5 (al crear) y F6 (al aprobar).
+- **Backend:** amplía `core/services/choques.py` (creado en F3) con una función que recibe al estudiante y una lista de movimientos `{grupo, tipo}` y devuelve los choques encontrados. Usa `HorarioGrupo.traslapa_con`. Se usa en F3, F5 (al crear) y F6 (al aprobar).
 - **Frontend:** marcar en el catálogo y el carrito las materias que chocan, con el motivo.
 - **Contrato de API:**
   - `POST /api/solicitudes/validar/` `{movimientos: [{grupo, tipo}]}` → `{valido, choques: [{grupo, choca_con, dia, horario}], errores: [...]}`
 - **Reglas de negocio:** se compara contra la carga inscrita, quitando las bajas del mismo folio (D2), y contra las otras altas del mismo folio. Tocar extremos (10:00 a 10:00) no es choque. Una materia con choque no se puede solicitar (no existe "forzar").
-- **Terminado cuando:** pruebas unitarias que cubran: sin choque, choque con carga, choque entre dos altas, alta que reemplaza una baja del mismo folio, extremos que se tocan, días distintos.
+- **Terminado cuando:** pruebas unitarias que cubran: sin choque, choque con carga, choque entre dos altas, alta que reemplaza una baja del mismo folio, extremos que se tocan, días distintos; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 13 nov.
 - **Estado:** Pendiente.
 
@@ -121,7 +123,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 - **Objetivo:** el alumno envía un folio con altas y bajas, recibe acuse, ve su historial y detalle, y puede cancelar lo pendiente.
 - **Depende de:** F3, F4.
 - **Backend:** servicio de creación de folio en `transaction.atomic`, con generación de `folio_digital` sin repetidos; listado, detalle y cancelación.
-- **Frontend:** carrito, confirmación (justificación y declaración), acuse con folio, historial, detalle del folio con motivo de rechazo, cancelar, convocatoria cerrada con solicitud extemporánea y comprobante imprimible (D5). Pantallas: `sabe_estudiantes`, `sabe_detalle_de_folio_sabe_2026_014_estudiante`, `sabe_cancelar_solicitud_pendiente_estudiante`, `sabe_convocatoria_cerrada_solicitud_extempor_nea_estudiante`.
+- **Frontend:** el carrito ya existe desde F3; aquí se conecta al envío. Confirmación (justificación y declaración), acuse con folio, historial, detalle del folio con motivo de rechazo, cancelar, convocatoria cerrada con solicitud extemporánea y comprobante imprimible (D5). Pantallas: `sabe_estudiantes`, `sabe_detalle_de_folio_sabe_2026_014_estudiante`, `sabe_cancelar_solicitud_pendiente_estudiante`, `sabe_convocatoria_cerrada_solicitud_extempor_nea_estudiante`.
 - **Contrato de API:**
   - `POST /api/solicitudes/` `{justificacion, movimientos: [{grupo, tipo}]}` → `201 {id, folio_digital, estado, extemporanea, detalles: [...]}`
   - `GET /api/solicitudes/` → folios del alumno (control escolar ve todos, ver F6)
@@ -134,7 +136,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
   - No se repite un grupo con un movimiento pendiente en otro folio del mismo alumno.
   - Fuera de la convocatoria el folio se marca como extemporáneo (fecha de envío posterior a `convocatoria_fin`) y solo se aprueba con `visto_bueno`.
   - Solo se cancelan movimientos en estado `pendiente`.
-- **Terminado cuando:** pruebas del servicio de creación (cada regla de arriba); flujo completo en el navegador con el alumno demo; el folio aparece en historial y horario como "en trámite".
+- **Terminado cuando:** pruebas del servicio de creación (cada regla de arriba); flujo completo en el navegador con el alumno demo; el folio aparece en historial y horario como "en trámite"; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 17 nov.
 - **Estado:** Pendiente.
 
@@ -149,7 +151,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
   - `POST /api/movimientos/{id}/aprobar/` `{visto_bueno?}` → movimiento actualizado
   - `POST /api/movimientos/{id}/rechazar/` `{motivo}` → movimiento actualizado
 - **Reglas de negocio:** al aprobar se vuelve a validar cupo y choques (pudo cambiar desde que se envió). Rechazo sin motivo devuelve `400`. Extemporáneo sin `visto_bueno` no se aprueba. Se guardan `revisado_por` y `fecha_resolucion`.
-- **Terminado cuando:** pruebas de aprobar con último cupo (dos aprobaciones simultáneas no sobrepasan el cupo), rechazo sin motivo, extemporáneo sin visto bueno; flujo completo en el navegador.
+- **Terminado cuando:** pruebas de aprobar con último cupo (dos aprobaciones simultáneas no sobrepasan el cupo), rechazo sin motivo, extemporáneo sin visto bueno; flujo completo en el navegador; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 20 nov.
 - **Estado:** Pendiente.
 
@@ -161,7 +163,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 - **Frontend:** pantallas `sabe_periodo_y_convocatoria_control_escolar` y `sabe_oferta_academica_control_escolar` (horario por día y hora, cupo, publicar o mostrar u ocultar).
 - **Contrato de API:** `/api/periodos/`, `/api/periodos/{id}/activar/`, `/api/materias/`, `/api/docentes/`, `/api/grupos/` (escritura), `/api/grupos/{id}/horarios/`.
 - **Reglas de negocio:** un solo periodo activo (ya está en la base). No se puede bajar el `cupo_maximo` por debajo de los inscritos. No se borra un grupo con cargas o solicitudes; se oculta.
-- **Terminado cuando:** control escolar crea un grupo con horario y el alumno lo ve en el catálogo.
+- **Terminado cuando:** control escolar crea un grupo con horario y el alumno lo ve en el catálogo; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 21 nov.
 - **Estado:** Pendiente.
 
@@ -175,7 +177,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
   - `GET /api/importaciones/plantilla/{alumnos|cargas}/` → CSV
   - `POST /api/importaciones/{alumnos|cargas}/?modo=preview|confirmar` (multipart `archivo`) → `{validas, errores: [{fila, campo, mensaje}], creados, actualizados}`
 - **Reglas de negocio:** alumnos se identifican por matrícula (actualiza si existe). Alumno nuevo nace con contraseña temporal y `debe_cambiar_password = True`. Cargas se identifican por (matrícula, clave de materia, grupo, periodo). Columnas de alumnos: matrícula, nombre, apellidos, correo, programa, semestre, turno.
-- **Terminado cuando:** pruebas con un CSV válido, uno con errores y uno reimportado; la vista previa muestra los errores por fila.
+- **Terminado cuando:** pruebas con un CSV válido, uno con errores y uno reimportado; la vista previa muestra los errores por fila; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 22 nov.
 - **Estado:** Pendiente.
 
@@ -192,7 +194,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
   - `GET /api/exportaciones/{id}/descargar/` → archivo del lote
   - `POST /api/exportaciones/{id}/marcar-cargado/` → `204`
 - **Reglas de negocio:** un movimiento solo entra a un lote. Columnas según D1. Marcar como cargado notifica a los alumnos (F10).
-- **Terminado cuando:** pruebas del servicio (no repite movimientos, cuenta bien `total_registros`); el Excel abre bien en Excel y LibreOffice.
+- **Terminado cuando:** pruebas del servicio (no repite movimientos, cuenta bien `total_registros`); el Excel abre bien en Excel y LibreOffice; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 23 nov.
 - **Estado:** Pendiente.
 
@@ -207,7 +209,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
   - `POST /api/notificaciones/{id}/leer/`, `POST /api/notificaciones/leer-todas/`
   - `GET /api/bitacora/?accion=&usuario=&desde=&hasta=`, `GET /api/bitacora/exportar/` → CSV
 - **Reglas de negocio:** se notifica al enviar folio (al alumno y a control escolar), al aprobar, al rechazar y al cargar en SADCE. Se registra: login, crear y cancelar folio, aprobar, rechazar, importar CSV, exportar, marcar cargado y cambios de catálogo y usuarios.
-- **Terminado cuando:** cada acción de la lista deja su fila en la bitácora; el alumno ve la notificación de su dictamen.
+- **Terminado cuando:** cada acción de la lista deja su fila en la bitácora; el alumno ve la notificación de su dictamen; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 24 nov.
 - **Estado:** Pendiente.
 
@@ -219,7 +221,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 - **Frontend:** pantalla `sabe_usuarios_y_roles_administrador`.
 - **Contrato de API:** `/api/usuarios/`, `POST /api/usuarios/{id}/reiniciar-password/` → `{password_temporal}`.
 - **Reglas de negocio:** no se borran usuarios, se desactivan. El administrador no puede quitarse su propio rol. El reinicio activa `debe_cambiar_password`.
-- **Terminado cuando:** el admin crea un usuario de control escolar que puede iniciar sesión.
+- **Terminado cuando:** el admin crea un usuario de control escolar que puede iniciar sesión; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 24 nov. **Opcional** si H3 se atrasa (se puede usar el admin de Django).
 - **Estado:** Pendiente.
 
@@ -232,7 +234,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 - **Infraestructura:** `Dockerfile` del backend y del frontend; `docker-compose.prod.yml` con db, backend y frontend; respaldo de la base; correo SMTP si D4 lo pide. CI en GitHub Actions: pruebas del backend y `npm run build` en cada PR.
 - **Contrato de API:** no aplica.
 - **Reglas de negocio:** el `.env` de producción nunca se sube al repositorio. `seed_demo` solo en el ambiente de demostración.
-- **Terminado cuando:** desde un celular y una computadora se completa el flujo de H2 y H3 en la URL pública.
+- **Terminado cuando:** desde un celular y una computadora se completa el flujo de H2 y H3 en la URL pública; las pantallas en la URL pública se ven igual que en `stitch/`.
 - **Fecha objetivo:** 27 nov.
 - **Estado:** Pendiente.
 
@@ -241,6 +243,6 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 - **Objetivo:** la entrega funciona de punta a punta y está documentada.
 - **Depende de:** F12.
 - **Tareas:** recorrido completo con los 3 roles en producción; prueba rápida de usabilidad con 2 o 3 compañeros; corregir errores encontrados; actualizar README (cómo arrancar, cómo desplegar, usuarios demo), `SABE_Contexto_Completo.md` y este plan; preparar guion de la presentación.
-- **Terminado cuando:** no quedan errores que bloqueen el flujo principal y el README permite a alguien nuevo levantar el proyecto.
+- **Terminado cuando:** no quedan errores que bloqueen el flujo principal y el README permite a alguien nuevo levantar el proyecto; cada pantalla se revisó una última vez contra su diseño en `stitch/`.
 - **Fecha objetivo:** 28 nov.
 - **Estado:** Pendiente.

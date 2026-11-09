@@ -4,6 +4,8 @@ Deadline: **Monday, November 30, 2026**. Created on November 6, 2026.
 
 This file states **what** gets built, **in what order** and **when it counts as done**. Owners are assigned outside this document. The full business rules are in `docs/diseno/SABE_Contexto_Completo.md` and each screen's design is in `stitch/`.
 
+> **Design rule for every stage:** in every milestone and every feature, screens must look the same as their `stitch/` design (layout, images, icons, copy and colors). No feature with a frontend is marked `Done` unless its screens match `stitch/`. If the design conflicts with a business rule, the backend or data that doesn't exist, raise it with the team before deviating.
+
 > English version of `docs/PLAN.md`. If the two differ, `PLAN.md` (Spanish) is the source of truth. Endpoint paths, field names and screen folders stay in Spanish because that is how they exist in the code.
 
 How to use it: when a feature is merged into `main`, change its **Status** to `Done` in the same PR. If an endpoint changes, update its **API contract** here before coding it.
@@ -60,7 +62,7 @@ F12 can be prepared starting in H2 (Dockerfiles and production settings) so it i
 
 ## 5. Features
 
-Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (with the `stitch/` screen), **API contract**, **Business rules**, **Done when**, **Target date**, **Status**.
+Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (with the `stitch/` screen), **API contract**, **Business rules**, **Done when**, **Target date**, **Status**. For every feature with a frontend, **Done when** includes its screens matching `stitch/`.
 
 ### F1. Seed data
 
@@ -86,7 +88,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
   - `GET /api/me/` → `{id, username, nombre, apellidos, rol, debe_cambiar_password, estudiante: {matricula, programa, semestre, turno} | null}`
   - `POST /api/auth/cambiar-password/` `{actual, nueva}` → `204`
 - **Business rules:** while `debe_cambiar_password` is `True`, the frontend only allows the change-password screen. The new password must pass Django's validators.
-- **Done when:** backend tests for permissions by role; the 3 demo users reach their dashboard; the `temporal` user is forced to change it; a student cannot open Control Escolar routes.
+- **Done when:** backend tests for permissions by role; the 3 demo users reach their dashboard; the `temporal` user is forced to change it; a student cannot open Control Escolar routes; the screens match their `stitch/` design.
 - **Target date:** Nov 11.
 - **Status:** Done.
 
@@ -94,14 +96,14 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 
 - **Goal:** the student sees the active period's offering (course, group, teacher, schedule, seats) and their current schedule.
 - **Depends on:** F2.
-- **Backend:** read serializers for groups with schedules and available seats; the student's schedule from their enrollment plus moves in progress. Optimize queries (`select_related`, `prefetch_related`, seats via `annotate`, not the per-row property).
-- **Frontend:** student dashboard, weekly schedule and filterable catalog. Screen: `sabe_estudiantes`.
+- **Backend:** read serializers for groups with schedules and available seats; the student's schedule from their enrollment plus moves in progress. Optimize queries (`select_related`, `prefetch_related`, seats via `annotate`, not the per-row property). Creates `core/services/choques.py` with the base "group vs. my enrolled load" check, which F4 extends.
+- **Frontend:** student dashboard, weekly schedule (grid and list) and catalog with search by course, code or teacher (as in `stitch/`). Request cart kept only in the browser (adds from the catalog, drops from the schedule); submitting is F5. Screen: `sabe_estudiantes`.
 - **API contract:**
-  - `GET /api/periodos/activo/` → `{ciclo, convocatoria_inicio, convocatoria_fin, convocatoria_abierta}`
-  - `GET /api/grupos/?materia=&turno=&programa=` → `[{id, materia: {clave, nombre, creditos}, num_grupo, docente, turno, cupo_maximo, cupo_disponible, horarios: [{dia_semana, hora_inicio, hora_fin, aula}], choca_con_mi_horario}]`
-  - `GET /api/estudiante/horario/` → `{inscritas: [...groups], en_tramite: [{grupo, tipo_tramite, folio}]}`
-- **Business rules:** only groups with `visible = True` in the active period. `choca_con_mi_horario` is computed by F4.
-- **Done when:** the demo student sees their schedule and the filterable catalog; the full group shows no seats.
+  - `GET /api/periodos/activo/` → `{ciclo, convocatoria_inicio, convocatoria_fin, convocatoria_abierta}` (`404` if there is no active period)
+  - `GET /api/grupos/?q=&materia=&turno=&programa=` → `[{id, materia: {clave, nombre, creditos}, num_grupo, docente, turno, cupo_maximo, cupo_disponible, horarios: [{dia_semana, hora_inicio, hora_fin, aula}], choques: [{grupo, materia, num_grupo, dias, hora_inicio, hora_fin}]}]`. Empty `choques` = no clash.
+  - `GET /api/estudiante/horario/` → `{ciclo, inscritas: [...groups], en_tramite: [{id, grupo, tipo_tramite, folio}]}`
+- **Business rules:** only groups with `visible = True` in the active period. Students see their own program's offering by default. `choques` compares against the enrolled load of the active period; F4 adds the folio rules.
+- **Done when:** the demo student sees their schedule and the filterable catalog; the full group shows no seats; the screens match their `stitch/` design.
 - **Target date:** Nov 14.
 - **Status:** Pending.
 
@@ -109,12 +111,12 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 
 - **Goal:** a single backend service decides whether a set of moves creates clashes.
 - **Depends on:** F1 (data to test with).
-- **Backend:** `core/services/choques.py` with a function that takes the student and a list of moves `{grupo, tipo}` and returns the clashes found. Uses `HorarioGrupo.traslapa_con`. Used in F3, F5 (on create) and F6 (on approve).
+- **Backend:** extends `core/services/choques.py` (created in F3) with a function that takes the student and a list of moves `{grupo, tipo}` and returns the clashes found. Uses `HorarioGrupo.traslapa_con`. Used in F3, F5 (on create) and F6 (on approve).
 - **Frontend:** mark the courses that clash in the catalog and cart, with the reason.
 - **API contract:**
   - `POST /api/solicitudes/validar/` `{movimientos: [{grupo, tipo}]}` → `{valido, choques: [{grupo, choca_con, dia, horario}], errores: [...]}`
 - **Business rules:** compare against the enrolled schedule, excluding drops in the same folio (D2), and against the other adds in the same folio. Touching edges (10:00 to 10:00) is not a clash. A course with a clash cannot be requested (there is no "force").
-- **Done when:** unit tests covering: no clash, clash with enrollment, clash between two adds, an add replacing a drop in the same folio, touching edges, different days.
+- **Done when:** unit tests covering: no clash, clash with enrollment, clash between two adds, an add replacing a drop in the same folio, touching edges, different days; the screens match their `stitch/` design.
 - **Target date:** Nov 13.
 - **Status:** Pending.
 
@@ -123,7 +125,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 - **Goal:** the student submits a folio with adds and drops, gets a receipt, sees their history and details, and can cancel what's pending.
 - **Depends on:** F3, F4.
 - **Backend:** folio creation service inside `transaction.atomic`, generating a unique `folio_digital`; list, detail and cancel.
-- **Frontend:** cart, confirmation (justification and declaration), receipt with folio, history, folio detail with rejection reason, cancel, closed enrollment window with late request, and printable receipt (D5). Screens: `sabe_estudiantes`, `sabe_detalle_de_folio_sabe_2026_014_estudiante`, `sabe_cancelar_solicitud_pendiente_estudiante`, `sabe_convocatoria_cerrada_solicitud_extempor_nea_estudiante`.
+- **Frontend:** the cart already exists from F3; here it is wired to submission. Confirmation (justification and declaration), receipt with folio, history, folio detail with rejection reason, cancel, closed enrollment window with late request, and printable receipt (D5). Screens: `sabe_estudiantes`, `sabe_detalle_de_folio_sabe_2026_014_estudiante`, `sabe_cancelar_solicitud_pendiente_estudiante`, `sabe_convocatoria_cerrada_solicitud_extempor_nea_estudiante`.
 - **API contract:**
   - `POST /api/solicitudes/` `{justificacion, movimientos: [{grupo, tipo}]}` → `201 {id, folio_digital, estado, extemporanea, detalles: [...]}`
   - `GET /api/solicitudes/` → the student's folios (Control Escolar sees all, see F6)
@@ -136,7 +138,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
   - A group can't have a pending move in another folio of the same student.
   - Outside the enrollment window the folio is marked as late (submitted after `convocatoria_fin`) and can only be approved with `visto_bueno`.
   - Only moves in `pendiente` status can be canceled.
-- **Done when:** tests for the creation service (each rule above); the full flow works in the browser with the demo student; the folio appears in the history and schedule as "in progress".
+- **Done when:** tests for the creation service (each rule above); the full flow works in the browser with the demo student; the folio appears in the history and schedule as "in progress"; the screens match their `stitch/` design.
 - **Target date:** Nov 17.
 - **Status:** Pending.
 
@@ -151,7 +153,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
   - `POST /api/movimientos/{id}/aprobar/` `{visto_bueno?}` → updated move
   - `POST /api/movimientos/{id}/rechazar/` `{motivo}` → updated move
 - **Business rules:** on approval, seats and clashes are validated again (they may have changed since submission). Rejecting without a reason returns `400`. A late request without `visto_bueno` cannot be approved. `revisado_por` and `fecha_resolucion` are saved.
-- **Done when:** tests for approving the last seat (two simultaneous approvals don't exceed capacity), rejection without reason, late request without sign-off; full flow in the browser.
+- **Done when:** tests for approving the last seat (two simultaneous approvals don't exceed capacity), rejection without reason, late request without sign-off; full flow in the browser; the screens match their `stitch/` design.
 - **Target date:** Nov 20.
 - **Status:** Pending.
 
@@ -163,7 +165,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 - **Frontend:** screens `sabe_periodo_y_convocatoria_control_escolar` and `sabe_oferta_academica_control_escolar` (per-day and per-hour schedule, seats, publish or show/hide).
 - **API contract:** `/api/periodos/`, `/api/periodos/{id}/activar/`, `/api/materias/`, `/api/docentes/`, `/api/grupos/` (write), `/api/grupos/{id}/horarios/`.
 - **Business rules:** only one active period (already enforced in the database). `cupo_maximo` can't be lowered below the number enrolled. A group with enrollments or requests isn't deleted; it is hidden.
-- **Done when:** Control Escolar creates a group with a schedule and the student sees it in the catalog.
+- **Done when:** Control Escolar creates a group with a schedule and the student sees it in the catalog; the screens match their `stitch/` design.
 - **Target date:** Nov 21.
 - **Status:** Pending.
 
@@ -177,7 +179,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
   - `GET /api/importaciones/plantilla/{alumnos|cargas}/` → CSV
   - `POST /api/importaciones/{alumnos|cargas}/?modo=preview|confirmar` (multipart `archivo`) → `{validas, errores: [{fila, campo, mensaje}], creados, actualizados}`
 - **Business rules:** students are identified by matrícula (updated if they exist). A new student gets a temporary password and `debe_cambiar_password = True`. Enrollments are identified by (matrícula, course code, group, period). Student columns: matrícula, first name, last names, email, program, semester, shift.
-- **Done when:** tests with a valid CSV, one with errors, and one re-imported; the preview shows errors per row.
+- **Done when:** tests with a valid CSV, one with errors, and one re-imported; the preview shows errors per row; the screens match their `stitch/` design.
 - **Target date:** Nov 22.
 - **Status:** Pending.
 
@@ -194,7 +196,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
   - `GET /api/exportaciones/{id}/descargar/` → the batch's file
   - `POST /api/exportaciones/{id}/marcar-cargado/` → `204`
 - **Business rules:** a move belongs to only one batch. Columns per D1. Marking as uploaded notifies the students (F10).
-- **Done when:** service tests (no repeated moves, `total_registros` counted correctly); the Excel file opens correctly in Excel and LibreOffice.
+- **Done when:** service tests (no repeated moves, `total_registros` counted correctly); the Excel file opens correctly in Excel and LibreOffice; the screens match their `stitch/` design.
 - **Target date:** Nov 23.
 - **Status:** Pending.
 
@@ -209,7 +211,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
   - `POST /api/notificaciones/{id}/leer/`, `POST /api/notificaciones/leer-todas/`
   - `GET /api/bitacora/?accion=&usuario=&desde=&hasta=`, `GET /api/bitacora/exportar/` → CSV
 - **Business rules:** notify on folio submission (to the student and Control Escolar), approval, rejection and SADCE upload. Log: login, create and cancel folio, approve, reject, CSV import, export, mark as uploaded, and catalog and user changes.
-- **Done when:** every action on the list leaves its row in the audit log; the student sees the notification of their decision.
+- **Done when:** every action on the list leaves its row in the audit log; the student sees the notification of their decision; the screens match their `stitch/` design.
 - **Target date:** Nov 24.
 - **Status:** Pending.
 
@@ -221,7 +223,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 - **Frontend:** screen `sabe_usuarios_y_roles_administrador`.
 - **API contract:** `/api/usuarios/`, `POST /api/usuarios/{id}/reiniciar-password/` → `{password_temporal}`.
 - **Business rules:** users aren't deleted, they're deactivated. The administrator can't remove their own role. A reset turns on `debe_cambiar_password`.
-- **Done when:** the admin creates a Control Escolar user who can log in.
+- **Done when:** the admin creates a Control Escolar user who can log in; the screens match their `stitch/` design.
 - **Target date:** Nov 24. **Optional** if H3 slips (the Django admin can be used instead).
 - **Status:** Pending.
 
@@ -234,7 +236,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 - **Infrastructure:** `Dockerfile` for the backend and frontend; `docker-compose.prod.yml` with db, backend and frontend; database backup; SMTP email if D4 requires it. CI on GitHub Actions: backend tests and `npm run build` on every PR.
 - **API contract:** not applicable.
 - **Business rules:** the production `.env` is never committed to the repository. `seed_demo` only in the demo environment.
-- **Done when:** the H2 and H3 flows can be completed on the public URL from both a phone and a computer.
+- **Done when:** the H2 and H3 flows can be completed on the public URL from both a phone and a computer; the screens on the public URL look the same as in `stitch/`.
 - **Target date:** Nov 27.
 - **Status:** Pending.
 
@@ -243,6 +245,6 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 - **Goal:** the delivery works end to end and is documented.
 - **Depends on:** F12.
 - **Tasks:** full walkthrough with all 3 roles in production; quick usability test with 2 or 3 classmates; fix the bugs found; update the README (how to start, how to deploy, demo users), `SABE_Contexto_Completo.md` and this plan; prepare the presentation script.
-- **Done when:** no bugs block the main flow, and the README lets a newcomer set up the project.
+- **Done when:** no bugs block the main flow, and the README lets a newcomer set up the project; every screen got a final check against its `stitch/` design.
 - **Target date:** Nov 28.
 - **Status:** Pending.

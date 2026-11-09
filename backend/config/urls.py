@@ -1,10 +1,14 @@
 from django.contrib import admin
 from django.http import JsonResponse
-from django.urls import path
+from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from rest_framework.routers import SimpleRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from core.views import CambiarPasswordView, MeView
+from core.views import CambiarPasswordView, GrupoViewSet, HorarioEstudianteView, MeView, PeriodoActivoView
+
+router = SimpleRouter()
+router.register("grupos", GrupoViewSet, basename="grupo")
 
 
 def health(request):
@@ -20,6 +24,10 @@ urlpatterns = [
     path("api/auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("api/auth/cambiar-password/", CambiarPasswordView.as_view(), name="cambiar_password"),
     path("api/me/", MeView.as_view(), name="me"),
+    # Catálogo y horario del estudiante (F3).
+    path("api/periodos/activo/", PeriodoActivoView.as_view(), name="periodo_activo"),
+    path("api/estudiante/horario/", HorarioEstudianteView.as_view(), name="horario_estudiante"),
+    path("api/", include(router.urls)),
     # Documentación de la API (contrato para el frontend).
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="docs"),

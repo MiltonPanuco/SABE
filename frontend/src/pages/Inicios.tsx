@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 
-// Inicio de cada rol. Por ahora solo saludan y dicen qué viene; se llenan en F3 (estudiante),
-// F6 a F10 (control escolar) y F11 (administrador). Diseño de referencia en stitch/.
+// Inicio de control escolar y administrador. Por ahora solo saludan y dicen qué viene; se llenan en
+// F6 a F10 (control escolar) y F11 (administrador). El estudiante ya tiene su portal en src/estudiante/.
 
 function Inicio({ titulo, children, proximamente }: { titulo: string; children?: ReactNode; proximamente: string[] }) {
   const { usuario } = useAuth();
@@ -23,23 +23,6 @@ function Inicio({ titulo, children, proximamente }: { titulo: string; children?:
         </ul>
       </div>
     </div>
-  );
-}
-
-export function InicioEstudiante() {
-  const { usuario } = useAuth();
-  const perfil = usuario?.estudiante;
-  return (
-    <Inicio
-      titulo="Portal del estudiante"
-      proximamente={["Tu horario inscrito", "Catálogo de grupos con cupo y choques", "Solicitudes de alta y baja"]}
-    >
-      {perfil && (
-        <p className="mt-1 text-sm text-slate-600">
-          Matrícula {perfil.matricula} • Lic. en {perfil.programa} • {perfil.semestre}° semestre
-        </p>
-      )}
-    </Inicio>
   );
 }
 
