@@ -7,11 +7,14 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from core.views import (
     CambiarPasswordView,
+    DocenteViewSet,
     GrupoViewSet,
     HorarioEstudianteView,
     MeView,
     MovimientoViewSet,
     PeriodoActivoView,
+    PeriodoViewSet,
+    ProgramaViewSet,
     SolicitudViewSet,
     ValidarMovimientosView,
 )
@@ -20,6 +23,9 @@ router = SimpleRouter()
 router.register("grupos", GrupoViewSet, basename="grupo")
 router.register("solicitudes", SolicitudViewSet, basename="solicitud")
 router.register("movimientos", MovimientoViewSet, basename="movimiento")
+router.register("periodos", PeriodoViewSet, basename="periodo")
+router.register("docentes", DocenteViewSet, basename="docente")
+router.register("programas", ProgramaViewSet, basename="programa")
 
 
 def health(request):

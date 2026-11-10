@@ -1,12 +1,11 @@
 import threading
-from datetime import date, time, timedelta
+from datetime import time
 from io import StringIO
 
 from django.core.management import call_command
 from django.db import connection
 from django.test import TestCase, TransactionTestCase, override_settings
 from django.test.utils import CaptureQueriesContext
-from django.utils import timezone
 
 from core.models import (
     CargaAcademica,
@@ -265,14 +264,7 @@ class BandejaTests(BaseDictamenTest):
         self.crear("104", DIEGO, ("EC605", "rechazada"), ("EC704", "cancelada"), extemporanea=True)
         self.crear("105", ANDREA, ("EC605", "cancelada"))
         self.crear("106", ANDREA, ("EC704", "pendiente"), extemporanea=True)
-        viejo = PeriodoEscolar.objects.create(
-            ciclo="2025-B",
-            fecha_inicio=date(2025, 2, 1),
-            fecha_fin=date(2025, 6, 30),
-            convocatoria_inicio=timezone.now() - timedelta(days=300),
-            convocatoria_fin=timezone.now() - timedelta(days=290),
-            activo=False,
-        )
+        viejo = PeriodoEscolar.objects.get(ciclo="2025-B")  # ciclo anterior de seed_demo
         self.crear("107", ALUMNO, ("EC605", "pendiente"), periodo=viejo)
         self.entrar(CONTROL)
 

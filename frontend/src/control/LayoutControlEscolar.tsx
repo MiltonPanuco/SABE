@@ -20,6 +20,9 @@ export const SECCIONES_CONTROL = {
   ],
 };
 
+// Pantallas de stitch con el pie institucional.
+const CON_PIE = ["/control-escolar/periodo", "/control-escolar/importacion"];
+
 export function LayoutControlEscolar() {
   const { usuario, cerrarSesion } = useAuth();
   const { data: periodo } = usePeriodoActivo();
@@ -62,7 +65,7 @@ export function LayoutControlEscolar() {
           }`}
         />
         <aside
-          className={`fixed top-0 left-0 z-50 flex h-full w-72 max-w-[85vw] flex-col justify-between overflow-y-auto bg-surface-container-low shadow-[0_1px_8px_rgba(0,43,73,0.06)] transition-transform duration-300 lg:translate-x-0 ${
+          className={`fixed top-0 left-0 z-50 flex print:hidden h-full w-72 max-w-[85vw] flex-col justify-between overflow-y-auto bg-surface-container-low shadow-[0_1px_8px_rgba(0,43,73,0.06)] transition-transform duration-300 lg:translate-x-0 ${
             menuAbierto ? "translate-x-0" : "-translate-x-full"
           }`}
         >
@@ -90,8 +93,8 @@ export function LayoutControlEscolar() {
           </div>
         </aside>
 
-        <div className="flex min-h-screen flex-col lg:pl-72">
-          <header className="fixed top-0 right-0 left-0 z-40 flex h-16 items-center justify-between gap-2 bg-surface/85 px-3 shadow-[0_1px_8px_rgba(0,43,73,0.04)] backdrop-blur-xl sm:px-space-lg lg:left-72">
+        <div className="flex min-h-screen flex-col lg:pl-72 print:pl-0">
+          <header className="fixed top-0 right-0 left-0 z-40 flex print:hidden h-16 items-center justify-between gap-2 bg-surface/85 px-3 shadow-[0_1px_8px_rgba(0,43,73,0.04)] backdrop-blur-xl sm:px-space-lg lg:left-72">
             <div className="flex min-w-0 items-center gap-2 sm:gap-space-md">
               <button
                 type="button"
@@ -135,12 +138,30 @@ export function LayoutControlEscolar() {
               </div>
             </div>
           </header>
-          <main className="flex-1 bg-surface px-margin-sm pt-16 pb-space-md sm:px-space-lg">
+          <main className="flex-1 bg-surface px-margin-sm pt-16 pb-space-md sm:px-space-lg print:pt-0">
             <Outlet />
           </main>
+          {CON_PIE.includes(pathname) && <Pie ciclo={periodo?.ciclo} />}
         </div>
       </div>
     </AvisoProvider>
+  );
+}
+
+function Pie({ ciclo }: { ciclo?: string }) {
+  return (
+    <footer className="mt-auto w-full bg-surface-container-low px-margin-sm py-space-md shadow-[0_-1px_6px_rgba(0,43,73,0.03)] sm:px-space-lg print:hidden">
+      <div className="flex w-full flex-col items-center justify-between gap-space-sm text-center font-label-md text-label-md text-on-surface-variant md:flex-row md:text-left">
+        <div>
+          © 2026 Universidad Autónoma de Nayarit • Unidad Académica de Economía (UAE).
+          {ciclo && <strong> Ciclo Escolar {ciclo}</strong>}.
+        </div>
+        <div className="flex items-center gap-space-xs">
+          <Simbolo nombre="info" className="text-[16px]! text-on-surface-variant" />
+          <span>Plataforma auxiliar independiente de SADCE Central</span>
+        </div>
+      </div>
+    </footer>
   );
 }
 

@@ -82,13 +82,15 @@ export interface ErrorMovimiento {
 /** Elemento de GET /api/grupos/ */
 export interface Grupo {
   id: number;
-  materia: { clave: string; nombre: string; creditos: number };
+  materia: { clave: string; nombre: string; creditos: number; programa: string };
   num_grupo: string;
   docente: string;
   turno: "matutino" | "vespertino" | "";
   cupo_maximo: number;
   cupo_disponible: number;
   horarios: HorarioClase[];
+  /** false si control escolar lo ocultó del catálogo (solo control escolar ve grupos ocultos). */
+  visible: boolean;
   /** Para un alumno: con qué choca si pidiera el alta (tomando en cuenta el carrito). */
   choques: Choque[];
   /** Para un alumno: por qué no podría pedir el alta, además de los choques. */
@@ -185,4 +187,71 @@ export interface RevisionMovimiento {
 
 export interface Revision {
   movimientos: RevisionMovimiento[];
+}
+
+// ---------------------------------------------------------------------------
+// Periodo, convocatoria y oferta académica (F7)
+// ---------------------------------------------------------------------------
+
+export type EstadoConvocatoria = "programada" | "abierta" | "cerrada";
+
+export interface Periodo {
+  id: number;
+  ciclo: string;
+  /** "2026-08-03" */
+  fecha_inicio: string;
+  fecha_fin: string;
+  convocatoria_inicio: string;
+  convocatoria_fin: string;
+  activo: boolean;
+  estado_convocatoria: EstadoConvocatoria;
+  movimientos_pendientes: number;
+}
+
+export interface PeriodoEscritura {
+  ciclo: string;
+  fecha_inicio: string;
+  fecha_fin: string;
+  convocatoria_inicio: string;
+  convocatoria_fin: string;
+  activar: boolean;
+}
+
+export interface UltimaModificacion {
+  usuario: string | null;
+  fecha: string;
+}
+
+export interface Programa {
+  id: number;
+  nombre: string;
+}
+
+export interface Docente {
+  id: number;
+  nombre: string;
+  grado_academico: string;
+}
+
+export interface HorarioEntrada {
+  dia_semana: DiaSemana;
+  /** "08:00" */
+  hora_inicio: string;
+  hora_fin: string;
+}
+
+export interface GrupoEscritura {
+  clave: string;
+  nombre_materia: string;
+  programa: number;
+  num_grupo: string;
+  cupo_maximo: number;
+  docente: number;
+  horarios: HorarioEntrada[];
+}
+
+export interface FiltrosOferta {
+  q: string;
+  programa: string;
+  cupo: "" | "con" | "sin";
 }

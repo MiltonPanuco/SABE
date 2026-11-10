@@ -1,12 +1,25 @@
+import re
+
 from django.contrib.auth import password_validation
 from django.core.exceptions import ValidationError as DjangoValidationError
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from .models import DetalleSolicitud, Estudiante, Grupo, HorarioGrupo, PeriodoEscolar, Solicitud, Usuario
+from .models import (
+    DetalleSolicitud,
+    Docente,
+    Estudiante,
+    Grupo,
+    HorarioGrupo,
+    PeriodoEscolar,
+    Programa,
+    Solicitud,
+    Usuario,
+)
 from .services.bandeja import EstadoBandeja, estado_bandeja
 from .services.catalogo import con_cupo
 from .services.choques import Origen
+from .services.periodos import EstadoConvocatoria, estado_convocatoria
 from .services.validacion import Codigo, Movimiento
 
 
@@ -83,6 +96,7 @@ class MateriaResumenSerializer(serializers.Serializer):
     clave = serializers.CharField()
     nombre = serializers.CharField(source="nombre_materia")
     creditos = serializers.IntegerField()
+    programa = serializers.CharField(source="programa.nombre")
 
 
 class ChoqueSerializer(serializers.Serializer):
@@ -120,7 +134,7 @@ class GrupoSerializer(serializers.ModelSerializer):
         model = Grupo
         fields = [
             "id", "materia", "num_grupo", "docente", "turno",
-            "cupo_maximo", "cupo_disponible", "horarios", "choques", "errores",
+            "cupo_maximo", "cupo_disponible", "horarios", "visible", "choques", "errores",
         ]
 
     @extend_schema_field(ChoqueSerializer(many=True))
@@ -292,3 +306,150 @@ class AprobarSerializer(serializers.Serializer):
 class RechazarSerializer(serializers.Serializer):
     # Las reglas (obligatorio, máximo 500) están en services.dictamen.
     motivo = serializers.CharField(allow_blank=True, trim_whitespace=False)
+
+
+# ---------------------------------------------------------------------------
+# Periodo, convocatoria y oferta académica (F7)
+# ---------------------------------------------------------------------------
+
+FORMATO_CICLO = re.compile(r"^\d{4}-[AB]$")
+
+
+class PeriodoSerializer(serializers.ModelSerializer):
+    """Periodo de la pantalla de control escolar. Espera `services.periodos.periodos_listado`."""
+
+    estado_convocatoria = serializers.SerializerMethodField()
+    movimientos_pendientes = serializers.IntegerField(read_only=True, default=0)
+
+    class Meta:
+        model = PeriodoEscolar
+        fields = [
+            "id", "ciclo", "fecha_inicio", "fecha_fin", "convocatoria_inicio", "convocatoria_fin",
+            "activo", "estado_convocatoria", "movimientos_pendientes",
+        ]
+
+    @extend_schema_field(serializers.ChoiceField(choices=[e.value for e in EstadoConvocatoria]))
+    def get_estado_convocatoria(self, periodo):
+        return estado_convocatoria(periodo).value
+
+
+class PeriodoEscrituraSerializer(serializers.ModelSerializer):
+    """Alta y edición de un periodo. `activar` lo deja como periodo activo al guardarlo."""
+
+    # Sin el validador automático de único, para dar el mensaje en español.
+    ciclo = serializers.CharField(max_length=10)
+    activar = serializers.BooleanField(default=False, write_only=True)
+
+    class Meta:
+        model = PeriodoEscolar
+        fields = ["ciclo", "fecha_inicio", "fecha_fin", "convocatoria_inicio", "convocatoria_fin", "activar"]
+
+    def validate_ciclo(self, ciclo):
+        ciclo = ciclo.strip().upper()
+        if not FORMATO_CICLO.match(ciclo):
+            raise serializers.ValidationError("Formato obligatorio: AAAA-A / AAAA-B")
+        repetido = PeriodoEscolar.objects.filter(ciclo=ciclo)
+        if self.instance is not None:
+            repetido = repetido.exclude(pk=self.instance.pk)
+        if repetido.exists():
+            raise serializers.ValidationError(f"Ya existe el ciclo {ciclo}.")
+        return ciclo
+
+    def validate(self, datos):
+        def valor(campo):
+            return datos.get(campo, getattr(self.instance, campo, None))
+
+        errores = {}
+        if valor("fecha_inicio") and valor("fecha_fin") and valor("fecha_fin") <= valor("fecha_inicio"):
+            errores["fecha_fin"] = ["El fin del semestre debe ser posterior a su inicio."]
+        inicio, fin = valor("convocatoria_inicio"), valor("convocatoria_fin")
+        if inicio and fin and fin <= inicio:
+            errores["convocatoria_fin"] = ["El cierre de la convocatoria debe ser posterior a su apertura."]
+        if errores:
+            raise serializers.ValidationError(errores)
+        return datos
+
+
+class UltimaModificacionSerializer(serializers.Serializer):
+    usuario = serializers.SerializerMethodField()
+    fecha = serializers.DateTimeField()
+
+    @extend_schema_field(serializers.CharField(allow_null=True))
+    def get_usuario(self, registro):
+        usuario = registro.usuario
+        return (usuario.get_full_name() or usuario.username) if usuario else None
+
+
+class ProgramaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Programa
+        fields = ["id", "nombre"]
+
+
+class DocenteSerializer(serializers.ModelSerializer):
+    nombre = serializers.CharField(max_length=150)
+
+    class Meta:
+        model = Docente
+        fields = ["id", "nombre", "grado_academico"]
+
+    def validate_nombre(self, nombre):
+        nombre = " ".join(nombre.split())
+        if not nombre:
+            raise serializers.ValidationError("Escribe el nombre del docente.")
+        if Docente.objects.filter(nombre__iexact=nombre).exists():
+            raise serializers.ValidationError("Ya existe ese docente.")
+        return nombre
+
+
+class HorarioEntradaSerializer(serializers.Serializer):
+    dia_semana = serializers.ChoiceField(choices=HorarioGrupo.Dia.choices)
+    hora_inicio = serializers.TimeField()
+    hora_fin = serializers.TimeField()
+
+    def validate(self, datos):
+        if datos["hora_fin"] <= datos["hora_inicio"]:
+            raise serializers.ValidationError("La hora de fin debe ser posterior a la de inicio.")
+        return datos
+
+
+class GrupoEscrituraSerializer(serializers.Serializer):
+    """Publicar o editar un grupo del periodo activo con su horario completo (formulario de stitch)."""
+
+    clave = serializers.CharField(max_length=20)
+    nombre_materia = serializers.CharField(max_length=150)
+    programa = serializers.PrimaryKeyRelatedField(queryset=Programa.objects.all())
+    num_grupo = serializers.CharField(max_length=10)
+    cupo_maximo = serializers.IntegerField(
+        min_value=1, max_value=32767, error_messages={"min_value": "El cupo máximo debe ser mayor a 0."}
+    )
+    docente = serializers.PrimaryKeyRelatedField(queryset=Docente.objects.all())
+    horarios = HorarioEntradaSerializer(many=True)
+
+    def validate_clave(self, clave):
+        return clave.strip().upper()
+
+    def validate_nombre_materia(self, nombre):
+        return " ".join(nombre.split())
+
+    def validate_num_grupo(self, num_grupo):
+        return num_grupo.strip()
+
+    def validate_horarios(self, horarios):
+        if not horarios:
+            raise serializers.ValidationError("Agrega al menos un día de clase.")
+        for i, uno in enumerate(horarios):
+            for otro in horarios[i + 1 :]:
+                if (
+                    uno["dia_semana"] == otro["dia_semana"]
+                    and uno["hora_inicio"] < otro["hora_fin"]
+                    and otro["hora_inicio"] < uno["hora_fin"]
+                ):
+                    raise serializers.ValidationError("Dos horarios del mismo día se traslapan.")
+        return sorted(horarios, key=lambda h: (h["dia_semana"], h["hora_inicio"]))
+
+
+class VisibilidadGrupoSerializer(serializers.Serializer):
+    """PATCH /api/grupos/{id}/ con solo `visible`: Activar o Desactivar en la oferta."""
+
+    visible = serializers.BooleanField()

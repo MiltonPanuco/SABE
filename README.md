@@ -73,7 +73,7 @@ Usuarios de demostración que crea `seed_demo` (iguales al prototipo):
 
 `python manage.py seed_demo --convocatoria-cerrada` deja la convocatoria cerrada para probar solicitudes extemporáneas.
 
-`seed_demo` también deja 3 folios de otros alumnos en la bandeja de control escolar (uno con choque, uno extemporáneo y uno aprobado). Con `--sin-folios` la bandeja queda vacía. Volver a correrlo borra los folios de los alumnos demo y restaura sus cargas.
+`seed_demo` también crea los ciclos anteriores 2025-B, 2025-A y 2024-B (inactivos) y deja 3 folios de otros alumnos en la bandeja de control escolar (uno con choque, uno extemporáneo y uno aprobado). Con `--sin-folios` la bandeja queda vacía. Volver a correrlo borra los folios de los alumnos demo y restaura sus cargas.
 
 ### 4. Frontend
 ```

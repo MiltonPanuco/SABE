@@ -67,7 +67,7 @@ class CatalogoTests(BaseCatalogoTest):
     def test_forma_del_grupo(self):
         self.entrar()
         g = self.catalogo()["EC605"]
-        self.assertEqual(g["materia"], {"clave": "EC605", "nombre": "Econometría II", "creditos": 8})
+        self.assertEqual(g["materia"], {"clave": "EC605", "nombre": "Econometría II", "creditos": 8, "programa": "Economía"})
         self.assertEqual(g["num_grupo"], "02")
         self.assertEqual(g["docente"], "Dr. Hugo Valdez Miranda")
         self.assertEqual(g["turno"], "matutino")
@@ -174,9 +174,13 @@ class CatalogoTests(BaseCatalogoTest):
     def test_requiere_sesion(self):
         self.assertEqual(self.client.get("/api/grupos/").status_code, 401)
 
-    def test_solo_lectura(self):
+    def test_el_alumno_no_edita_y_nadie_borra(self):
+        # Control escolar publica y edita la oferta desde F7 (test_oferta); los grupos no se borran.
+        self.entrar()
+        self.assertEqual(self.client.post("/api/grupos/", {}, format="json").status_code, 403)
         self.entrar("valeria.ruiz")
-        self.assertEqual(self.client.post("/api/grupos/", {}, format="json").status_code, 405)
+        grupo = Grupo.objects.first()
+        self.assertEqual(self.client.delete(f"/api/grupos/{grupo.pk}/").status_code, 405)
 
 
 class CatalogoConCarritoTests(BaseCatalogoTest):

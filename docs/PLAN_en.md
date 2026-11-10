@@ -177,7 +177,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
   - A late folio without `visto_bueno` cannot be approved. The sign-off is saved on each approved move.
   - Rejecting without a reason returns `400`; the reason is at most 500 characters. `revisado_por` and `fecha_resolucion` are saved.
   - Folio state once nothing is pending: approved if any move was approved; otherwise loaded in SADCE, rejected or cancelled, in that order.
-- **Differences from stitch (to confirm):** the F7–F10 menu items open a "Próximamente" page inside the frame; on phones the side menu is a panel opened with a button (stitch has no phone layout); the bell and logout that `prototipo.js` adds sit inside the header; the "Aprueba primero la baja…" text is new; the header name comes from the user, without "Lic."; fully cancelled folios don't appear in the inbox; a cancelled move says "Cancelado por el alumno".
+- **Differences from stitch (agreed):** the F7–F10 menu items open a "Próximamente" page inside the frame; on phones the side menu is a panel opened with a button (stitch has no phone layout); the bell and logout that `prototipo.js` adds sit inside the header; the "Aprueba primero la baja…" text is new; the header name comes from the user, without "Lic."; fully cancelled folios don't appear in the inbox; a cancelled move says "Cancelado por el alumno".
 - **Done when:** tests for approving the last seat (two simultaneous approvals don't exceed capacity), rejection without a reason, a late folio without sign-off, and the group change; full flow in the browser; the screens match their `stitch/` design.
 - **Target date:** Nov 20.
 - **Status:** Pending.
@@ -186,11 +186,27 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 
 - **Goal:** Control Escolar configures the period, the enrollment window dates and the offering (courses, teachers, groups and per-day schedules).
 - **Depends on:** F2.
-- **Backend:** CRUD with `ModelViewSet` for periods, courses, teachers, groups and schedules. Activating a period deactivates the previous one.
-- **Frontend:** screens `sabe_periodo_y_convocatoria_control_escolar` and `sabe_oferta_academica_control_escolar` (per-day and per-hour schedule, seats, publish or show/hide).
-- **API contract:** `/api/periodos/`, `/api/periodos/{id}/activar/`, `/api/materias/`, `/api/docentes/`, `/api/grupos/` (write), `/api/grupos/{id}/horarios/`.
-- **Business rules:** only one active period (already enforced in the database). `cupo_maximo` can't be lowered below the number enrolled. A group with enrollments or requests isn't deleted; it is hidden.
-- **Done when:** Control Escolar creates a group with a schedule and the student sees it in the catalog; the screens match their `stitch/` design.
+- **Backend:** `core/services/periodos.py` (save and activate in `transaction.atomic`, with `select_for_update` on the periods) and `core/services/oferta.py` (publish and edit a group with its full schedule, hide and show). `registrar()` in `core/services/avisos.py` logs every change to periods, groups and teachers in the audit log (pulled forward from F10). `seed_demo` adds the 2025-B, 2025-A and 2024-B cycles (inactive, no groups) and the activation of 2026-A by Control Escolar.
+- **Frontend:** screens `sabe_periodo_y_convocatoria_control_escolar` (active period, window progress, cycle catalog, new and edit period, activate) and `sabe_oferta_academica_control_escolar` (filters, publish, edit, deactivate and activate, new teacher from the form).
+- **API contract:**
+  - `GET /api/periodos/` → `[Periodo]` with `estado_convocatoria` (`programada|abierta|cerrada`) and `movimientos_pendientes`. Control Escolar and admin.
+  - `POST /api/periodos/` and `PATCH /api/periodos/{id}/` `{ciclo, fecha_inicio, fecha_fin, convocatoria_inicio, convocatoria_fin, activar?}` → `Periodo`.
+  - `POST /api/periodos/{id}/activar/` → `Periodo`. `400 {detail}` if the active period has pending moves.
+  - `GET /api/periodos/ultima-modificacion/` → `{usuario, fecha}` or `null`.
+  - `GET /api/grupos/?oferta=1&q=&programa=&cupo=con|sin` (Control Escolar) → `[Grupo]`, hidden ones included.
+  - `POST /api/grupos/` and `PATCH /api/grupos/{id}/` `{clave, nombre_materia, programa, num_grupo, cupo_maximo, docente, horarios: [{dia_semana, hora_inicio, hora_fin}]}` → `Grupo`. `PATCH` with only `{visible}` shows or hides it. Control Escolar only.
+  - `GET /api/docentes/`, `POST /api/docentes/` `{nombre, grado_academico?}` (Control Escolar). `GET /api/programas/` (any user).
+  - `Grupo` adds `visible` and `materia.programa`. No `DELETE` for periods or groups, and no separate endpoints for courses or schedules: the schedule goes inside the group.
+- **Business rules:**
+  - Only one active period. Another one can't be activated while the active one has pending moves: "Dictamina los N movimientos pendientes de 2026-A antes de activar otro periodo." If activation was asked for on create and fails, nothing is saved.
+  - Cycle in `AAAA-A` or `AAAA-B` format, no duplicates. The semester end and the window close come after their start.
+  - The offering is always the active period's. The course is identified by its key: if it exists it is reused and its name and program are updated (in all its groups); if not, it is created with 8 credits.
+  - Key and group number can't repeat in the period. Max seats is above 0 and can't go below the number enrolled. A group with students or requests can't change its key.
+  - Schedule with at least one day; end time after start time; two rows on the same day can't overlap. The shift comes from the earliest start time (13:00 or later is afternoon). When editing, the room is kept per day.
+  - A group is never deleted, it is hidden. A pending ALTA on a hidden group is blocked at approval (`no_disponible`).
+  - Changing the schedule of a group with enrolled students is allowed: approval re-checks clashes.
+- **Differences from stitch (to confirm):** "+ Nuevo docente" in the teacher dropdown (team decision); new texts for the scheduled and closed window ("Convocatoria programada", "Abre en…", "Cerró el…", "Programada", "Próximo"); the program list comes from the data (no "Posgrados UAE"); "Activar" uses an in-page dialog with the text of stitch's `confirm()`; the edit form is titled "Editar periodo escolar"; new texts "Dos horarios del mismo día se traslapan." and "Dictamina los N movimientos pendientes…"; the footer name comes from the user, without "Lic."; the stitch screenshot has an older menu (Dictamen en Lote, Cruces…) and the frame keeps the `code.html` one, as in F6.
+- **Done when:** tests for creating and activating periods (with and without pending moves), publishing and editing groups (duplicate, low seats, invalid schedules), hiding, and the audit row of each change; Control Escolar creates a group with a schedule and the student sees it in the catalog; the screens match their `stitch/` design.
 - **Target date:** Nov 21.
 - **Status:** Pending.
 
@@ -229,7 +245,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 
 - **Goal:** users see notices about their requests and there's a record of who did what.
 - **Depends on:** F5, F6.
-- **Backend:** helpers `notificar(usuario, mensaje)` (exists since F6 in `core/services/avisos.py` and notifies on approve and reject) and `registrar(usuario, accion, entidad, request)` called from the services. Audit log is read-only (no editing or deleting through the API).
+- **Backend:** helpers `notificar(usuario, mensaje)` (exists since F6 in `core/services/avisos.py` and notifies on approve and reject) and `registrar(usuario, accion, objeto, request=)` (exists since F7 and logs changes to periods, the offering and teachers), called from the services. Audit log is read-only (no editing or deleting through the API).
 - **Frontend:** bell and panel for students and Control Escolar; audit log with filters and CSV download. Screens: `sabe_panel_de_notificaciones_estudiante_y_control_escolar`, `sabe_notificaciones_de_control_escolar_uae_uan`, `sabe_bitacora_auditoria`.
 - **API contract:**
   - `GET /api/notificaciones/` → `{no_leidas, resultados: [...]}`

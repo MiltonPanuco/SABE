@@ -6,18 +6,25 @@ from rest_framework.exceptions import NotFound, PermissionDenied, ValidationErro
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import CargaAcademica, DetalleSolicitud, Estudiante, Grupo, Rol, Solicitud, Usuario
-from .permissions import EsControlEscolar, EsEstudiante
+from .models import CargaAcademica, DetalleSolicitud, Docente, Estudiante, Grupo, Programa, Rol, Solicitud, Usuario
+from .permissions import EsControlEscolar, EsEstudiante, EsPersonalEscolar
 from .serializers import (
     AprobarSerializer,
     CambiarPasswordSerializer,
     ChoqueSerializer,
+    DocenteSerializer,
     EnTramiteSerializer,
     ErrorMovimientoSerializer,
+    GrupoEscrituraSerializer,
     GrupoSerializer,
     HorarioEstudianteSerializer,
     MeSerializer,
     PeriodoActivoSerializer,
+    PeriodoEscrituraSerializer,
+    PeriodoSerializer,
+    ProgramaSerializer,
+    UltimaModificacionSerializer,
+    VisibilidadGrupoSerializer,
     CrearSolicitudSerializer,
     RechazarSerializer,
     ResumenBandejaSerializer,
@@ -29,6 +36,15 @@ from .serializers import (
 from .services.bandeja import EstadoBandeja, folios_bandeja, resumen_bandeja
 from .services.catalogo import con_cupo, grupos_catalogo, periodo_activo
 from .services.dictamen import DictamenInvalido, aprobar_movimiento, rechazar_movimiento, revision_folio
+from .services.avisos import registrar
+from .services.oferta import OfertaInvalida, cambiar_visibilidad, grupos_oferta, guardar_grupo
+from .services.periodos import (
+    PeriodoInvalido,
+    activar_periodo,
+    guardar_periodo,
+    periodos_listado,
+    ultimo_cambio_de_periodo,
+)
 from .services.solicitudes import SolicitudInvalida, cancelar_solicitud, crear_solicitud
 from .services.validacion import Contexto, revisar_alta, validar_movimientos
 
@@ -76,45 +92,92 @@ class PeriodoActivoView(APIView):
         return Response(PeriodoActivoSerializer(periodo).data)
 
 
-@extend_schema(
-    parameters=[
-        OpenApiParameter("q", str, description="Busca en nombre de la materia, clave o docente."),
-        OpenApiParameter("materia", str, description="Clave exacta de la materia."),
-        OpenApiParameter("turno", str, enum=["matutino", "vespertino"]),
-        OpenApiParameter(
-            "programa", str, description="Nombre del programa. Para un alumno, por defecto el suyo."
-        ),
-        OpenApiParameter(
-            "altas", str, description="Ids de grupos con alta en el carrito, separados por comas (alumnos)."
-        ),
-        OpenApiParameter(
-            "bajas", str, description="Ids de grupos con baja en el carrito, separados por comas (alumnos)."
-        ),
-    ]
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter("q", str, description="Busca en nombre de la materia, clave o docente."),
+            OpenApiParameter("materia", str, description="Clave exacta de la materia."),
+            OpenApiParameter("turno", str, enum=["matutino", "vespertino"]),
+            OpenApiParameter(
+                "programa", str, description="Nombre del programa. Para un alumno, por defecto el suyo."
+            ),
+            OpenApiParameter(
+                "altas", str, description="Ids de grupos con alta en el carrito, separados por comas (alumnos)."
+            ),
+            OpenApiParameter(
+                "bajas", str, description="Ids de grupos con baja en el carrito, separados por comas (alumnos)."
+            ),
+            OpenApiParameter(
+                "oferta",
+                bool,
+                description="Control escolar: toda la oferta del periodo activo, también los grupos ocultos.",
+            ),
+            OpenApiParameter(
+                "cupo", str, enum=["con", "sin"], description="Con `oferta`: grupos con cupo o sin cupo."
+            ),
+        ]
+    ),
+    create=extend_schema(request=GrupoEscrituraSerializer, responses={201: GrupoSerializer}),
+    partial_update=extend_schema(
+        request=GrupoEscrituraSerializer,
+        responses=GrupoSerializer,
+        description="Edita el grupo con su horario completo. Con solo `{visible}` lo muestra u oculta.",
+    ),
 )
-class GrupoViewSet(viewsets.ReadOnlyModelViewSet):
+class GrupoViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet,
+):
     """
     Oferta del periodo activo (solo grupos visibles), con cupo disponible.
     Para un alumno, `choques` y `errores` dicen qué pasaría si pidiera el alta de cada grupo,
     tomando en cuenta su carga, sus trámites pendientes y el carrito (`altas` y `bajas`).
-    F7 lo convierte en ModelViewSet para que control escolar edite la oferta.
+    Control escolar publica y edita grupos (F7); con `?oferta=1` ve también los ocultos.
     """
 
     serializer_class = GrupoSerializer
     pagination_class = None
+    # Sin PUT: la edición es PATCH. Los grupos no se borran, se ocultan.
+    http_method_names = ["get", "post", "patch", "head", "options"]
     # Se llenan en initial(); Swagger llama a get_queryset sin petición.
     periodo = None
     estudiante = None
+
+    def get_permissions(self):
+        if self.action in ("create", "partial_update", "update"):
+            return [EsControlEscolar()]
+        return super().get_permissions()
 
     def initial(self, request, *args, **kwargs):
         super().initial(request, *args, **kwargs)
         self.periodo = periodo_activo()
         self.estudiante = estudiante_de(request.user)
 
+    def _es_control(self) -> bool:
+        return getattr(self.request.user, "rol", None) == Rol.CONTROL_ESCOLAR
+
+    def _oferta(self) -> bool:
+        return self.request.query_params.get("oferta", "").strip().lower() in ("1", "true")
+
     def get_queryset(self):
         if self.periodo is None:
             return Grupo.objects.none()
         params = self.request.query_params
+        if self.action == "list" and self._oferta():
+            if not self._es_control():
+                raise PermissionDenied("Solo control escolar administra la oferta.")
+            cupo = params.get("cupo", "").strip()
+            if cupo not in ("", "con", "sin"):
+                raise ValidationError({"cupo": ["Debe ser con o sin."]})
+            return grupos_oferta(
+                self.periodo, q=params.get("q", "").strip(), programa=params.get("programa", "").strip(), cupo=cupo
+            )
+        if self.action != "list" and self._es_control():
+            # Control escolar ve y edita también los grupos ocultos del periodo.
+            return con_cupo(Grupo.objects.filter(periodo=self.periodo))
         programa = params.get("programa", "")
         if not programa and self.estudiante and self.action == "list":
             programa = self.estudiante.programa.nombre
@@ -161,6 +224,32 @@ class GrupoViewSet(viewsets.ReadOnlyModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         grupo = self.get_object()
         return Response(GrupoSerializer(grupo, context=self._contexto([grupo])).data)
+
+    def create(self, request, *args, **kwargs):
+        if self.periodo is None:
+            raise NotFound("No hay un periodo activo.")
+        entrada = GrupoEscrituraSerializer(data=request.data)
+        entrada.is_valid(raise_exception=True)
+        try:
+            grupo = guardar_grupo(entrada.validated_data, request.user, self.periodo, request=request)
+        except OfertaInvalida as error:
+            return Response(error.datos, status=status.HTTP_400_BAD_REQUEST)
+        return Response(GrupoSerializer(grupo).data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        grupo = self.get_object()
+        if isinstance(request.data, dict) and set(request.data) == {"visible"}:
+            entrada = VisibilidadGrupoSerializer(data=request.data)
+            entrada.is_valid(raise_exception=True)
+            grupo = cambiar_visibilidad(grupo, entrada.validated_data["visible"], request.user, request=request)
+            return Response(GrupoSerializer(grupo).data)
+        entrada = GrupoEscrituraSerializer(data=request.data)
+        entrada.is_valid(raise_exception=True)
+        try:
+            grupo = guardar_grupo(entrada.validated_data, request.user, self.periodo, grupo=grupo, request=request)
+        except OfertaInvalida as error:
+            return Response(error.datos, status=status.HTTP_400_BAD_REQUEST)
+        return Response(GrupoSerializer(grupo).data)
 
 
 class HorarioEstudianteView(APIView):
@@ -405,3 +494,85 @@ class MovimientoViewSet(viewsets.GenericViewSet):
         entrada.is_valid(raise_exception=True)
         motivo = entrada.validated_data["motivo"]
         return self._responder(lambda d: rechazar_movimiento(d, request.user, motivo))
+
+
+# ---------------------------------------------------------------------------
+# Periodo, convocatoria y oferta académica (F7)
+# ---------------------------------------------------------------------------
+
+
+@extend_schema_view(
+    create=extend_schema(request=PeriodoEscrituraSerializer, responses={201: PeriodoSerializer}),
+    partial_update=extend_schema(request=PeriodoEscrituraSerializer, responses=PeriodoSerializer),
+)
+class PeriodoViewSet(
+    mixins.ListModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet
+):
+    """Periodos escolares y su convocatoria. Solo uno está activo; los periodos no se borran."""
+
+    serializer_class = PeriodoSerializer
+    permission_classes = [EsPersonalEscolar]
+    pagination_class = None
+    http_method_names = ["get", "post", "patch", "head", "options"]
+
+    def get_queryset(self):
+        return periodos_listado()
+
+    def _respuesta(self, periodo, codigo=status.HTTP_200_OK) -> Response:
+        return Response(PeriodoSerializer(periodos_listado().get(pk=periodo.pk)).data, status=codigo)
+
+    def _guardar(self, request, periodo=None) -> Response:
+        entrada = PeriodoEscrituraSerializer(periodo, data=request.data, partial=periodo is not None)
+        entrada.is_valid(raise_exception=True)
+        datos = dict(entrada.validated_data)
+        activar = datos.pop("activar", False)
+        try:
+            periodo = guardar_periodo(datos, request.user, periodo=periodo, activar=activar, request=request)
+        except PeriodoInvalido as error:
+            # Si no se puede activar, tampoco se guarda: todo va en la misma transacción.
+            return Response(error.datos, status=status.HTTP_400_BAD_REQUEST)
+        return self._respuesta(periodo, status.HTTP_201_CREATED if entrada.instance is None else status.HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        return self._guardar(request)
+
+    def update(self, request, *args, **kwargs):
+        return self._guardar(request, self.get_object())
+
+    @extend_schema(request=None, responses=PeriodoSerializer)
+    @action(detail=True, methods=["post"])
+    def activar(self, request, pk=None):
+        """Deja este periodo como el activo. Falla si el activo actual tiene movimientos pendientes."""
+        try:
+            periodo = activar_periodo(self.get_object(), request.user, request=request)
+        except PeriodoInvalido as error:
+            return Response(error.datos, status=status.HTTP_400_BAD_REQUEST)
+        return self._respuesta(periodo)
+
+    @extend_schema(responses=UltimaModificacionSerializer(allow_null=True))
+    @action(detail=False, url_path="ultima-modificacion")
+    def ultima_modificacion(self, request):
+        """Quién cambió por última vez un periodo y cuándo (pie de la pantalla de periodos)."""
+        registro = ultimo_cambio_de_periodo()
+        return Response(UltimaModificacionSerializer(registro).data if registro else None)
+
+
+class DocenteViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
+    """Catálogo de docentes para el formulario de la oferta. Control escolar puede agregar uno."""
+
+    queryset = Docente.objects.order_by("nombre")
+    serializer_class = DocenteSerializer
+    permission_classes = [EsControlEscolar]
+    pagination_class = None
+
+    def perform_create(self, serializer):
+        docente = serializer.save()
+        registrar(self.request.user, "crear_docente", docente, request=self.request)
+
+
+class ProgramaViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """Programas académicos (filtros y formulario de la oferta)."""
+
+    queryset = Programa.objects.order_by("nombre")
+    serializer_class = ProgramaSerializer
+    pagination_class = None

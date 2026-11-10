@@ -9,7 +9,7 @@ Se puede correr las veces que quieras: actualiza lo que existe y deja los datos
 de demostración como al inicio (contraseñas, cargas y folios de la bandeja incluidos).
 """
 
-from datetime import date, time, timedelta
+from datetime import date, datetime, time, timedelta
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
@@ -17,6 +17,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from core.models import (
+    Bitacora,
     CargaAcademica,
     DetalleSolicitud,
     Docente,
@@ -32,6 +33,7 @@ from core.models import (
     UnidadAprendizaje,
     Usuario,
 )
+from core.services.avisos import entidad_de, registrar
 from core.services.solicitudes import siguiente_folio
 
 PASSWORD_DEMO = "demo1234"
@@ -44,6 +46,14 @@ PROGRAMAS = [ECONOMIA, FINANZAS]
 CICLO = "2026-A"
 SEMESTRE_INICIO = date(2026, 8, 3)
 SEMESTRE_FIN = date(2026, 12, 18)
+
+# Ciclos anteriores, inactivos y sin grupos (catálogo histórico de stitch).
+# ciclo -> (inicio y fin del semestre, días de apertura y cierre de la convocatoria)
+HISTORIAL = {
+    "2025-B": (date(2025, 8, 18), date(2025, 12, 19), date(2025, 8, 25), date(2025, 8, 29)),
+    "2025-A": (date(2025, 1, 27), date(2025, 6, 27), date(2025, 2, 10), date(2025, 2, 14)),
+    "2024-B": (date(2024, 8, 19), date(2024, 12, 20), date(2024, 8, 26), date(2024, 8, 30)),
+}
 
 # nombre (tal como se muestra en el prototipo) -> grado académico
 DOCENTES = {
@@ -172,12 +182,14 @@ class Command(BaseCommand):
         with transaction.atomic():
             programas = self._programas()
             periodo = self._periodo(options["convocatoria_cerrada"])
+            self._historial()
             docentes = self._docentes()
             grupos = self._materias_y_grupos(programas, docentes, periodo)
             estudiantes = self._usuarios(programas)
             self._limpiar_tramites(estudiantes)
             self._cargas(estudiantes, grupos)
             folios = 0 if options["sin_folios"] else self._folios(periodo, estudiantes, grupos)
+            self._bitacora(periodo)
 
         self._resumen(periodo, folios)
 
@@ -204,6 +216,29 @@ class Command(BaseCommand):
             },
         )
         return periodo
+
+    def _historial(self):
+        for ciclo, (inicio, fin, abre, cierra) in HISTORIAL.items():
+            PeriodoEscolar.objects.update_or_create(
+                ciclo=ciclo,
+                defaults={
+                    "fecha_inicio": inicio,
+                    "fecha_fin": fin,
+                    "convocatoria_inicio": timezone.make_aware(datetime.combine(abre, time(8))),
+                    "convocatoria_fin": timezone.make_aware(datetime.combine(cierra, time(23, 59))),
+                    "activo": False,
+                },
+            )
+
+    def _bitacora(self, periodo):
+        """La activación del ciclo por control escolar (pie "Última modificación" de la pantalla de periodos)."""
+        valeria = Usuario.objects.get(username="valeria.ruiz")
+        Bitacora.objects.filter(usuario=valeria, accion="activar_periodo", entidad=entidad_de(periodo)).delete()
+        registro = registrar(valeria, "activar_periodo", periodo)
+        fecha = timezone.localtime(periodo.convocatoria_inicio - timedelta(days=1)).replace(
+            hour=9, minute=14, second=0, microsecond=0
+        )
+        Bitacora.objects.filter(pk=registro.pk).update(fecha=fecha)
 
     def _docentes(self):
         return {
@@ -363,7 +398,7 @@ class Command(BaseCommand):
             f"hasta {timezone.localtime(periodo.convocatoria_fin):%d/%m/%Y %H:%M}."
         )
         self.stdout.write(
-            f"  {Grupo.objects.filter(periodo=periodo).count()} grupos, "
+            f"  {PeriodoEscolar.objects.count()} periodos, {Grupo.objects.filter(periodo=periodo).count()} grupos, "
             f"{Estudiante.objects.count()} estudiantes, "
             f"{CargaAcademica.objects.filter(estado=CargaAcademica.Estado.INSCRITO).count()} cargas inscritas, "
             f"{folios} folios en la bandeja de control escolar."

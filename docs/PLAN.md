@@ -175,7 +175,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
   - Extemporáneo sin `visto_bueno` no se aprueba. El visto bueno se guarda en cada movimiento aprobado.
   - Rechazo sin motivo devuelve `400`; el motivo tiene 500 caracteres como máximo. Se guardan `revisado_por` y `fecha_resolucion`.
   - Estado del folio sin pendientes: aprobada si algún movimiento se aprobó; si no, cargada en SADCE, rechazada o cancelada, en ese orden.
-- **Diferencias con stitch (a confirmar):** el menú de F7 a F10 abre una página "Próximamente" dentro del marco; en teléfono el menú lateral es un panel que se abre con un botón (stitch no tiene versión para teléfono); la campana y la salida que agrega `prototipo.js` van dentro del encabezado; el texto de "Aprueba primero la baja…" es nuevo; el nombre del encabezado sale del usuario, sin "Lic."; los folios cancelados por completo no aparecen en la bandeja; un movimiento cancelado dice "Cancelado por el alumno".
+- **Diferencias con stitch (acordadas):** el menú de F7 a F10 abre una página "Próximamente" dentro del marco; en teléfono el menú lateral es un panel que se abre con un botón (stitch no tiene versión para teléfono); la campana y la salida que agrega `prototipo.js` van dentro del encabezado; el texto de "Aprueba primero la baja…" es nuevo; el nombre del encabezado sale del usuario, sin "Lic."; los folios cancelados por completo no aparecen en la bandeja; un movimiento cancelado dice "Cancelado por el alumno".
 - **Terminado cuando:** pruebas de aprobar con último cupo (dos aprobaciones simultáneas no sobrepasan el cupo), rechazo sin motivo, extemporáneo sin visto bueno y cambio de grupo; flujo completo en el navegador; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 20 nov.
 - **Estado:** Pendiente.
@@ -184,11 +184,27 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 
 - **Objetivo:** control escolar configura el periodo, las fechas de convocatoria y la oferta (materias, docentes, grupos y horarios por día).
 - **Depende de:** F2.
-- **Backend:** CRUD con `ModelViewSet` para periodos, materias, docentes, grupos y horarios. Activar un periodo desactiva el anterior.
-- **Frontend:** pantallas `sabe_periodo_y_convocatoria_control_escolar` y `sabe_oferta_academica_control_escolar` (horario por día y hora, cupo, publicar o mostrar u ocultar).
-- **Contrato de API:** `/api/periodos/`, `/api/periodos/{id}/activar/`, `/api/materias/`, `/api/docentes/`, `/api/grupos/` (escritura), `/api/grupos/{id}/horarios/`.
-- **Reglas de negocio:** un solo periodo activo (ya está en la base). No se puede bajar el `cupo_maximo` por debajo de los inscritos. No se borra un grupo con cargas o solicitudes; se oculta.
-- **Terminado cuando:** control escolar crea un grupo con horario y el alumno lo ve en el catálogo; las pantallas coinciden con su diseño en `stitch/`.
+- **Backend:** `core/services/periodos.py` (guardar y activar en `transaction.atomic`, con `select_for_update` sobre los periodos) y `core/services/oferta.py` (publicar y editar un grupo con su horario completo, ocultar y mostrar). `registrar()` en `core/services/avisos.py` deja en la bitácora cada cambio de periodos, grupos y docentes (adelanto de F10). `seed_demo` agrega los ciclos 2025-B, 2025-A y 2024-B (inactivos, sin grupos) y la activación de 2026-A por control escolar.
+- **Frontend:** pantallas `sabe_periodo_y_convocatoria_control_escolar` (periodo activo, avance de la ventana, catálogo de ciclos, nuevo y editar periodo, activar) y `sabe_oferta_academica_control_escolar` (filtros, publicar, editar, desactivar y activar, docente nuevo desde el formulario).
+- **Contrato de API:**
+  - `GET /api/periodos/` → `[Periodo]` con `estado_convocatoria` (`programada|abierta|cerrada`) y `movimientos_pendientes`. Control escolar y administrador.
+  - `POST /api/periodos/` y `PATCH /api/periodos/{id}/` `{ciclo, fecha_inicio, fecha_fin, convocatoria_inicio, convocatoria_fin, activar?}` → `Periodo`.
+  - `POST /api/periodos/{id}/activar/` → `Periodo`. `400 {detail}` si el periodo activo tiene movimientos pendientes.
+  - `GET /api/periodos/ultima-modificacion/` → `{usuario, fecha}` o `null`.
+  - `GET /api/grupos/?oferta=1&q=&programa=&cupo=con|sin` (control escolar) → `[Grupo]`, también los ocultos.
+  - `POST /api/grupos/` y `PATCH /api/grupos/{id}/` `{clave, nombre_materia, programa, num_grupo, cupo_maximo, docente, horarios: [{dia_semana, hora_inicio, hora_fin}]}` → `Grupo`. `PATCH` con solo `{visible}` lo muestra u oculta. Solo control escolar.
+  - `GET /api/docentes/`, `POST /api/docentes/` `{nombre, grado_academico?}` (control escolar). `GET /api/programas/` (cualquier usuario).
+  - `Grupo` agrega `visible` y `materia.programa`. Sin `DELETE` de periodos ni grupos, y sin endpoints aparte de materias u horarios: el horario va dentro del grupo.
+- **Reglas de negocio:**
+  - Un solo periodo activo. No se activa otro mientras el activo tenga movimientos pendientes: "Dictamina los N movimientos pendientes de 2026-A antes de activar otro periodo." Si se pide activar al crear y no se puede, tampoco se guarda.
+  - Ciclo con formato `AAAA-A` o `AAAA-B`, sin repetir. El fin del semestre y el cierre de la convocatoria van después de su inicio.
+  - La oferta es siempre la del periodo activo. La materia se identifica por la clave: si existe, se reutiliza y se actualizan su nombre y programa (en todos sus grupos); si no, se crea con 8 créditos.
+  - No se repite clave y grupo en el periodo. El cupo máximo es mayor a 0 y no baja de los inscritos. No se cambia la clave de un grupo con alumnos o trámites.
+  - Horario con al menos un día; la hora de fin va después de la de inicio; dos horarios del mismo día no se traslapan. El turno sale de la hora de inicio más temprana (13:00 o después es vespertino). Al editar, el aula se conserva por día.
+  - Un grupo no se borra, se oculta. Un alta pendiente de un grupo oculto queda bloqueada al dictaminar (`no_disponible`).
+  - Cambiar el horario de un grupo con inscritos está permitido: el dictamen vuelve a revisar choques.
+- **Diferencias con stitch (a confirmar):** "+ Nuevo docente" en la lista de docentes (decisión del equipo); textos nuevos para la convocatoria programada y cerrada ("Convocatoria programada", "Abre en…", "Cerró el…", "Programada", "Próximo"); la lista de programas sale de los datos (sin "Posgrados UAE"); "Activar" usa una ventana dentro de la página con el texto del `confirm()` de stitch; el formulario de edición se titula "Editar periodo escolar"; textos nuevos "Dos horarios del mismo día se traslapan." y "Dictamina los N movimientos pendientes…"; el nombre del pie sale del usuario, sin "Lic."; la captura de stitch tiene un menú anterior (Dictamen en Lote, Cruces…) y el marco conserva el del `code.html`, como en F6.
+- **Terminado cuando:** pruebas de crear y activar periodos (con y sin pendientes), publicar y editar grupos (repetido, cupo bajo, horarios inválidos), ocultar y la bitácora de cada cambio; control escolar crea un grupo con horario y el alumno lo ve en el catálogo; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 21 nov.
 - **Estado:** Pendiente.
 
@@ -227,7 +243,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 
 - **Objetivo:** los usuarios ven avisos de sus trámites y queda registro de quién hizo qué.
 - **Depende de:** F5, F6.
-- **Backend:** helpers `notificar(usuario, mensaje)` (ya existe desde F6 en `core/services/avisos.py` y avisa al aprobar y rechazar) y `registrar(usuario, accion, entidad, request)` llamados desde los servicios. Bitácora solo de lectura (sin editar ni borrar desde la API).
+- **Backend:** helpers `notificar(usuario, mensaje)` (ya existe desde F6 en `core/services/avisos.py` y avisa al aprobar y rechazar) y `registrar(usuario, accion, objeto, request=)` (ya existe desde F7 y registra los cambios de periodos, oferta y docentes), llamados desde los servicios. Bitácora solo de lectura (sin editar ni borrar desde la API).
 - **Frontend:** campana y panel en estudiante y control escolar; bitácora con filtros y descarga CSV. Pantallas: `sabe_panel_de_notificaciones_estudiante_y_control_escolar`, `sabe_notificaciones_de_control_escolar_uae_uan`, `sabe_bitacora_auditoria`.
 - **Contrato de API:**
   - `GET /api/notificaciones/` → `{no_leidas, resultados: [...]}`

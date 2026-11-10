@@ -26,3 +26,9 @@ class EsControlEscolar(TieneRol):
 
 class EsAdministrador(TieneRol):
     roles = (Rol.ADMINISTRADOR,)
+
+
+class EsPersonalEscolar(TieneRol):
+    """Control escolar o administrador (en stitch, los dos menús tienen "Periodo y Convocatoria")."""
+
+    roles = (Rol.CONTROL_ESCOLAR, Rol.ADMINISTRADOR)

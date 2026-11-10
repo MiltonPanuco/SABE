@@ -6,6 +6,7 @@ import type { EstadoBandeja, FiltrosBandeja, Solicitud } from "../api/tipos";
 import { Simbolo, Spinner } from "../components/acceso";
 import { fechaHora } from "../estudiante/formato";
 import { ESTADO_BANDEJA, porRevisar } from "./estado";
+import { useCambiarFiltro } from "./filtrosUrl";
 
 const ESTADOS: EstadoBandeja[] = ["pendiente", "parcial", "dictaminada", "rechazada"];
 
@@ -20,7 +21,8 @@ function leerFiltros(params: URLSearchParams): FiltrosBandeja {
 }
 
 export function SolicitudesPage() {
-  const [params, setParams] = useSearchParams();
+  const [params] = useSearchParams();
+  const cambiar = useCambiarFiltro();
   const filtros = leerFiltros(params);
   const [texto, setTexto] = useState(filtros.q);
   const { data: folios, isPending, error, isFetching } = useBandeja(filtros);
@@ -30,19 +32,8 @@ export function SolicitudesPage() {
   useEffect(() => {
     const espera = window.setTimeout(() => cambiar("q", texto.trim()), 300);
     return () => window.clearTimeout(espera);
-  }, [texto]); // `cambiar` solo cambia la URL; no hace falta como dependencia.
+  }, [texto]); // Solo al teclear: `cambiar` lee la URL actual, no necesita ser dependencia.
 
-  function cambiar(nombre: keyof FiltrosBandeja, valor: string) {
-    setParams(
-      (actuales) => {
-        const nuevos = new URLSearchParams(actuales);
-        if (valor) nuevos.set(nombre, valor);
-        else nuevos.delete(nombre);
-        return nuevos;
-      },
-      { replace: true },
-    );
-  }
 
   return (
     <div className="flex w-full flex-col gap-space-lg">

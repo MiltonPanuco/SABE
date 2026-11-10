@@ -17,7 +17,7 @@ def con_cupo(grupos: QuerySet[Grupo]) -> QuerySet[Grupo]:
     con ese nombre y una anotación no puede pisarla.
     """
     return (
-        grupos.select_related("materia", "docente")
+        grupos.select_related("materia__programa", "docente")
         .prefetch_related("horarios")
         .annotate(
             inscritos_n=Count("cargas", filter=Q(cargas__estado=CargaAcademica.Estado.INSCRITO)),

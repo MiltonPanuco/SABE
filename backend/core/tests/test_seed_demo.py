@@ -5,6 +5,7 @@ from django.core.management.base import CommandError
 from django.test import TestCase, override_settings
 
 from core.models import (
+    Bitacora,
     CargaAcademica,
     DetalleSolicitud,
     Estudiante,
@@ -36,7 +37,9 @@ class SeedDemoTests(TestCase):
             "usuarios": Usuario.objects.count(),
             "estudiantes": Estudiante.objects.count(),
             "cargas": CargaAcademica.objects.count(),
+            "periodos": PeriodoEscolar.objects.count(),
             "periodos_activos": PeriodoEscolar.objects.filter(activo=True).count(),
+            "bitacora": Bitacora.objects.count(),
             "folios": Solicitud.objects.count(),
             "movimientos": DetalleSolicitud.objects.count(),
         }
@@ -53,7 +56,11 @@ class SeedDemoTests(TestCase):
                 "estudiantes": 5,
                 # 7 importadas y el alta aprobada de Diego.
                 "cargas": 8,
+                # 2026-A y los tres ciclos anteriores del catálogo histórico.
+                "periodos": 4,
                 "periodos_activos": 1,
+                # La activación de 2026-A por control escolar.
+                "bitacora": 1,
                 "folios": 3,
                 "movimientos": 3,
             },
@@ -168,7 +175,7 @@ class SeedDemoTests(TestCase):
 
     def test_desactiva_otro_periodo_activo(self):
         otro = PeriodoEscolar.objects.create(
-            ciclo="2025-B",
+            ciclo="2023-B",
             fecha_inicio="2026-01-12",
             fecha_fin="2026-06-26",
             convocatoria_inicio="2026-01-19T08:00:00Z",
@@ -179,6 +186,16 @@ class SeedDemoTests(TestCase):
         otro.refresh_from_db()
         self.assertFalse(otro.activo)
         self.assertEqual(PeriodoEscolar.objects.get(activo=True).ciclo, "2026-A")
+
+    def test_ciclos_anteriores_y_ultima_modificacion(self):
+        seed()
+        self.assertEqual(
+            list(PeriodoEscolar.objects.order_by("-fecha_inicio").values_list("ciclo", "activo")),
+            [("2026-A", True), ("2025-B", False), ("2025-A", False), ("2024-B", False)],
+        )
+        registro = Bitacora.objects.get()
+        self.assertEqual((registro.usuario.username, registro.accion), ("valeria.ruiz", "activar_periodo"))
+        self.assertTrue(registro.entidad.endswith("(2026-A)"))
 
 
 @override_settings(DEBUG=False)
