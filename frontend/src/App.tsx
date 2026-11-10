@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { RedirigirPorRol, RutaProtegida } from "./auth/RutaProtegida";
 import { Layout } from "./components/Layout";
+import { ImportacionPage } from "./control/ImportacionPage";
 import { LayoutControlEscolar } from "./control/LayoutControlEscolar";
 import { OfertaPage } from "./control/OfertaPage";
 import { PeriodoPage } from "./control/PeriodoPage";
@@ -21,7 +22,6 @@ import { RecuperarPasswordPage } from "./pages/RecuperarPasswordPage";
 
 // Secciones del menú de control escolar que llegan con funciones posteriores del plan.
 const PROXIMAMENTE = [
-  { ruta: "importacion", titulo: "Importación de Datos (CSV)", icono: "badge", funcion: "F8 (importación de CSV)" },
   { ruta: "exportacion", titulo: "Exportar Excel para SADCE", icono: "sync_alt", funcion: "F9 (exportación a SADCE y lotes)" },
   { ruta: "bitacora", titulo: "Bitácora de Auditoría", icono: "security_update_good", funcion: "F10 (notificaciones y bitácora)" },
   { ruta: "notificaciones", titulo: "Notificaciones", icono: "notifications", funcion: "F10 (notificaciones y bitácora)" },
@@ -58,6 +58,7 @@ export default function App() {
             <Route path="solicitudes/:id" element={<RevisarFolioPage />} />
             <Route path="oferta" element={<OfertaPage />} />
             <Route path="periodo" element={<PeriodoPage />} />
+            <Route path="importacion" element={<ImportacionPage />} />
             {PROXIMAMENTE.map((p) => (
               <Route key={p.ruta} path={p.ruta} element={<Proximamente {...p} />} />
             ))}

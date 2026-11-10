@@ -224,6 +224,8 @@ export interface UltimaModificacion {
 
 export interface Programa {
   id: number;
+  /** "L-ECO": la que trae el CSV del padrón. */
+  clave: string;
   nombre: string;
 }
 
@@ -254,4 +256,88 @@ export interface FiltrosOferta {
   q: string;
   programa: string;
   cupo: "" | "con" | "sin";
+}
+
+// ---------------------------------------------------------------------------
+// Importación de CSV (F8)
+// ---------------------------------------------------------------------------
+
+export type TipoImportacion = "alumnos" | "cargas";
+export type AccionImportacion = "nuevo" | "actualizacion" | "sin_cambios" | "nueva" | "baja_respetada";
+
+/** Columnas de una fila del padrón ya normalizadas. */
+export interface DatosAlumno {
+  matricula: string;
+  nombre: string;
+  apellidos: string;
+  email: string;
+  programa: string;
+  semestre: number;
+  turno: "" | "matutino" | "vespertino";
+}
+
+/** Columnas de una fila de cargas ya resueltas. */
+export interface DatosCarga {
+  matricula: string;
+  alumno: string;
+  clave: string;
+  materia: string;
+  grupo: string;
+  ciclo: string;
+}
+
+export interface FilaValida {
+  linea: number;
+  datos: DatosAlumno | DatosCarga;
+  accion: AccionImportacion;
+  /** Cupo excedido o choques (solo cargas): se importa igual. */
+  avisos: string[];
+}
+
+export interface FilaError {
+  linea: number;
+  matricula: string;
+  /** Nombre del alumno, "Clave: ECO-999" o "Grupo: 09". */
+  datos: string;
+  mensaje: string;
+}
+
+export interface VistaPrevia {
+  tipo: TipoImportacion;
+  archivo: string;
+  total: number;
+  validas: number;
+  avisos: number;
+  errores: FilaError[];
+  muestra: FilaValida[];
+}
+
+export interface Credencial {
+  matricula: string;
+  nombre: string;
+  email: string;
+  password: string;
+}
+
+export interface ResultadoImportacion {
+  folio: string;
+  tipo: TipoImportacion;
+  creados: number;
+  actualizados: number;
+  excluidos: number;
+  /** Contraseñas temporales de los alumnos nuevos: solo llegan esta vez. */
+  credenciales: Credencial[];
+}
+
+export interface Importacion {
+  id: number;
+  folio: string;
+  tipo: TipoImportacion;
+  archivo: string;
+  usuario: string | null;
+  fecha: string;
+  total: number;
+  creados: number;
+  actualizados: number;
+  excluidos: number;
 }

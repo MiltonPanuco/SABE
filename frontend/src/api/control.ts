@@ -1,4 +1,4 @@
-// Bandeja y dictamen (F6); periodo, convocatoria y oferta académica (F7) de control escolar.
+// Bandeja y dictamen (F6); periodo, convocatoria y oferta académica (F7); importación de CSV (F8).
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "./client";
 import type {
@@ -7,13 +7,17 @@ import type {
   FiltrosOferta,
   Grupo,
   GrupoEscritura,
+  Importacion,
   Periodo,
   PeriodoEscritura,
   Programa,
   ResumenBandeja,
+  ResultadoImportacion,
   Revision,
   Solicitud,
+  TipoImportacion,
   UltimaModificacion,
+  VistaPrevia,
 } from "./tipos";
 
 /** Folios del periodo activo con los filtros de la bandeja. */
@@ -170,4 +174,45 @@ export function useCrearDocente() {
 
 export function useProgramas() {
   return useQuery({ queryKey: ["programas"], queryFn: () => api<Programa[]>("/programas/"), staleTime: Infinity });
+}
+
+// ---------------------------------------------------------------------------
+// Importación de CSV (F8)
+// ---------------------------------------------------------------------------
+
+function formulario(archivo: File) {
+  const datos = new FormData();
+  datos.append("archivo", archivo);
+  return datos;
+}
+
+/** Valida el archivo sin escribir nada. */
+export function useVistaPrevia() {
+  return useMutation({
+    mutationFn: ({ tipo, archivo }: { tipo: TipoImportacion; archivo: File }) =>
+      api<VistaPrevia>(`/importaciones/${tipo}/?modo=vista_previa`, { method: "POST", body: formulario(archivo) }),
+  });
+}
+
+/** Importa las filas válidas. Cambia alumnos, cargas y cupos: se vuelve a pedir lo que depende de ellos. */
+export function useConfirmarImportacion() {
+  const cliente = useQueryClient();
+  return useMutation({
+    mutationFn: ({ tipo, archivo }: { tipo: TipoImportacion; archivo: File }) =>
+      api<ResultadoImportacion>(`/importaciones/${tipo}/?modo=confirmar`, { method: "POST", body: formulario(archivo) }),
+    onSuccess: () =>
+      Promise.all(
+        ["importaciones", "grupos", "solicitudes", "mi-horario"].map((clave) =>
+          cliente.invalidateQueries({ queryKey: [clave] }),
+        ),
+      ),
+  });
+}
+
+export function useImportaciones(activo: boolean) {
+  return useQuery({
+    queryKey: ["importaciones"],
+    queryFn: () => api<Importacion[]>("/importaciones/"),
+    enabled: activo,
+  });
 }

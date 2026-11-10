@@ -10,6 +10,7 @@ from core.views import (
     DocenteViewSet,
     GrupoViewSet,
     HorarioEstudianteView,
+    ImportacionViewSet,
     MeView,
     MovimientoViewSet,
     PeriodoActivoView,
@@ -26,6 +27,7 @@ router.register("movimientos", MovimientoViewSet, basename="movimiento")
 router.register("periodos", PeriodoViewSet, basename="periodo")
 router.register("docentes", DocenteViewSet, basename="docente")
 router.register("programas", ProgramaViewSet, basename="programa")
+router.register("importaciones", ImportacionViewSet, basename="importacion")
 
 
 def health(request):

@@ -41,7 +41,7 @@ PASSWORD_TEMPORAL = "temporal"
 
 ECONOMIA = "Economía"
 FINANZAS = "Finanzas"
-PROGRAMAS = [ECONOMIA, FINANZAS]
+PROGRAMAS = {ECONOMIA: "L-ECO", FINANZAS: "L-FIN"}  # nombre -> clave del padrón CSV
 
 CICLO = "2026-A"
 SEMESTRE_INICIO = date(2026, 8, 3)
@@ -194,7 +194,10 @@ class Command(BaseCommand):
         self._resumen(periodo, folios)
 
     def _programas(self):
-        return {nombre: Programa.objects.get_or_create(nombre=nombre)[0] for nombre in PROGRAMAS}
+        return {
+            nombre: Programa.objects.update_or_create(nombre=nombre, defaults={"clave": clave})[0]
+            for nombre, clave in PROGRAMAS.items()
+        }
 
     def _periodo(self, cerrada):
         ahora = timezone.now()

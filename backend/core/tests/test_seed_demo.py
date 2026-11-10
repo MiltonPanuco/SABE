@@ -66,6 +66,12 @@ class SeedDemoTests(TestCase):
             },
         )
 
+    def test_programas_con_clave_del_padron(self):
+        seed()
+        self.assertEqual(
+            dict(Programa.objects.values_list("nombre", "clave")), {"Economía": "L-ECO", "Finanzas": "L-FIN"}
+        )
+
     def test_folios_de_la_bandeja(self):
         seed()
         folios = {

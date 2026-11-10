@@ -205,7 +205,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
   - Schedule with at least one day; end time after start time; two rows on the same day can't overlap. The shift comes from the earliest start time (13:00 or later is afternoon). When editing, the room is kept per day.
   - A group is never deleted, it is hidden. A pending ALTA on a hidden group is blocked at approval (`no_disponible`).
   - Changing the schedule of a group with enrolled students is allowed: approval re-checks clashes.
-- **Differences from stitch (to confirm):** "+ Nuevo docente" in the teacher dropdown (team decision); new texts for the scheduled and closed window ("Convocatoria programada", "Abre en…", "Cerró el…", "Programada", "Próximo"); the program list comes from the data (no "Posgrados UAE"); "Activar" uses an in-page dialog with the text of stitch's `confirm()`; the edit form is titled "Editar periodo escolar"; new texts "Dos horarios del mismo día se traslapan." and "Dictamina los N movimientos pendientes…"; the footer name comes from the user, without "Lic."; the stitch screenshot has an older menu (Dictamen en Lote, Cruces…) and the frame keeps the `code.html` one, as in F6.
+- **Differences from stitch (agreed):** "+ Nuevo docente" in the teacher dropdown (team decision); new texts for the scheduled and closed window ("Convocatoria programada", "Abre en…", "Cerró el…", "Programada", "Próximo"); the program list comes from the data (no "Posgrados UAE"); "Activar" uses an in-page dialog with the text of stitch's `confirm()`; the edit form is titled "Editar periodo escolar"; new texts "Dos horarios del mismo día se traslapan." and "Dictamina los N movimientos pendientes…"; the footer name comes from the user, without "Lic."; the stitch screenshot has an older menu (Dictamen en Lote, Cruces…) and the frame keeps the `code.html` one, as in F6.
 - **Done when:** tests for creating and activating periods (with and without pending moves), publishing and editing groups (duplicate, low seats, invalid schedules), hiding, and the audit row of each change; Control Escolar creates a group with a schedule and the student sees it in the catalog; the screens match their `stitch/` design.
 - **Target date:** Nov 21.
 - **Status:** Pending.
@@ -214,13 +214,22 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 
 - **Goal:** Control Escolar uploads students and their enrollment by CSV, sees errors before confirming, and can re-import without duplicates.
 - **Depends on:** F2, F7 (groups must exist).
-- **Backend:** two-step service: preview (validates and returns good rows and rows with errors) and confirm (inside `transaction.atomic`). Downloadable templates.
-- **Frontend:** screen `sabe_importaci_n_de_csv_control_escolar`: upload file, preview table with errors per row, confirm.
-- **API contract:**
-  - `GET /api/importaciones/plantilla/{alumnos|cargas}/` → CSV
-  - `POST /api/importaciones/{alumnos|cargas}/?modo=preview|confirmar` (multipart `archivo`) → `{validas, errores: [{fila, campo, mensaje}], creados, actualizados}`
-- **Business rules:** students are identified by matrícula (updated if they exist). A new student gets a temporary password and `debe_cambiar_password = True`. Enrollments are identified by (matrícula, course code, group, period). Student columns: matrícula, first name, last names, email, program, semester, shift.
-- **Done when:** tests with a valid CSV, one with errors, and one re-imported; the preview shows errors per row; the screens match their `stitch/` design.
+- **Backend:** `core/services/importacion.py` in two steps: preview (reads and validates, writes nothing) and confirm (analyzes the file again and imports the valid rows inside `transaction.atomic`, skipping the rows with errors). History in the `ImportacionCSV` model (folio `IMP-2026A-001`) and an `importar_csv` audit row. `Programa` gets a `clave` (L-ECO, L-FIN). Temporary passwords use a light PBKDF2 hasher (`core/hashers.py`) so 120 students take under a second.
+- **Frontend:** screen `sabe_importaci_n_de_csv_control_escolar` with its 3 steps (file, preview, result), templates, import history, error report and download of the generated accounts.
+- **API contract:** (Control Escolar only)
+  - `GET /api/importaciones/plantilla/{alumnos|cargas}/` → CSV with the headers.
+  - `POST /api/importaciones/{alumnos|cargas}/?modo=vista_previa` (multipart `archivo`) → `{tipo, archivo, total, validas, avisos, errores: [{linea, matricula, datos, mensaje}], muestra: [{linea, datos, accion, avisos}]}`. Writes nothing.
+  - `POST /api/importaciones/{alumnos|cargas}/?modo=confirmar` → `201 {folio, tipo, creados, actualizados, excluidos, credenciales: [{matricula, nombre, email, password}]}`. Temporary passwords only come in this response.
+  - `GET /api/importaciones/` → history `[{id, folio, tipo, archivo, usuario, fecha, total, creados, actualizados, excluidos}]`.
+  - Columns: students `matricula,nombre,apellidos,email,programa,semestre,turno`; enrollments `matricula,clave_materia,num_grupo,ciclo`.
+- **Business rules:**
+  - UTF-8 CSV (BOM and `;` accepted), at most 25 MB, with exactly the columns of its type. It always imports into the active period.
+  - Students: 9-digit matrícula, not repeated in the file; `@uan.edu.mx` or `@alumnos.uan.edu.mx` email not used by another account; program by code or name; semester 1 to 10; shift morning, afternoon or empty. An existing matrícula gets its data updated, never its password. A new student gets a random temporary password and `debe_cambiar_password = True`.
+  - Enrollments: the student, course and group must exist in the active period, and the cycle must be the active one. Enrollments are only added: an enrolled one stays "Sin cambios" and a dropped one is respected. A student can't be in two groups of the same course.
+  - An enrollment over the seat limit or clashing with the student's schedule is imported anyway (it is SADCE's official load) and the preview flags it with a warning.
+  - Rows with errors are skipped; with no valid rows nothing is imported.
+- **Differences from stitch (to confirm):** seat and clash warnings under the row's action; "Ver cuentas de estudiantes generadas" downloads the temporary passwords; "Descargar reporte de errores (.csv)" without PDF; error texts adapted to the data ("Materia inexistente: X." instead of "…en el plan curricular 2020", groups "01" and codes "EC504" instead of "G-01" and "ECO-204") and new texts for the other rules; the sample shows up to 10 rows; enrollments use the same wizard with their own columns ("Cargas procesadas", "cargas nuevas"); its own text when there were no new records; the selected card looks like stitch's screenshot (light icon box, no check mark); the screenshot has an older menu and a single type card, and `code.html` is followed.
+- **Done when:** tests with a valid CSV, one with errors and one re-imported (students and enrollments); the preview shows errors per row; a new student logs in with the temporary password and changes it; the screens match their `stitch/` design.
 - **Target date:** Nov 22.
 - **Status:** Pending.
 
@@ -245,7 +254,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 
 - **Goal:** users see notices about their requests and there's a record of who did what.
 - **Depends on:** F5, F6.
-- **Backend:** helpers `notificar(usuario, mensaje)` (exists since F6 in `core/services/avisos.py` and notifies on approve and reject) and `registrar(usuario, accion, objeto, request=)` (exists since F7 and logs changes to periods, the offering and teachers), called from the services. Audit log is read-only (no editing or deleting through the API).
+- **Backend:** helpers `notificar(usuario, mensaje)` (exists since F6 in `core/services/avisos.py` and notifies on approve and reject) and `registrar(usuario, accion, objeto, request=)` (exists since F7 and logs changes to periods, the offering and teachers, and since F8 the CSV imports), called from the services. Audit log is read-only (no editing or deleting through the API).
 - **Frontend:** bell and panel for students and Control Escolar; audit log with filters and CSV download. Screens: `sabe_panel_de_notificaciones_estudiante_y_control_escolar`, `sabe_notificaciones_de_control_escolar_uae_uan`, `sabe_bitacora_auditoria`.
 - **API contract:**
   - `GET /api/notificaciones/` → `{no_leidas, resultados: [...]}`

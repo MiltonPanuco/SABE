@@ -1,15 +1,29 @@
 from django.db.models import Prefetch
+from django.http import HttpResponse
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
+from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import CargaAcademica, DetalleSolicitud, Docente, Estudiante, Grupo, Programa, Rol, Solicitud, Usuario
+from .models import (
+    CargaAcademica,
+    DetalleSolicitud,
+    Docente,
+    Estudiante,
+    Grupo,
+    ImportacionCSV,
+    Programa,
+    Rol,
+    Solicitud,
+    Usuario,
+)
 from .permissions import EsControlEscolar, EsEstudiante, EsPersonalEscolar
 from .serializers import (
     AprobarSerializer,
+    ArchivoCsvSerializer,
     CambiarPasswordSerializer,
     ChoqueSerializer,
     DocenteSerializer,
@@ -18,11 +32,13 @@ from .serializers import (
     GrupoEscrituraSerializer,
     GrupoSerializer,
     HorarioEstudianteSerializer,
+    ImportacionSerializer,
     MeSerializer,
     PeriodoActivoSerializer,
     PeriodoEscrituraSerializer,
     PeriodoSerializer,
     ProgramaSerializer,
+    ResultadoImportacionSerializer,
     UltimaModificacionSerializer,
     VisibilidadGrupoSerializer,
     CrearSolicitudSerializer,
@@ -32,9 +48,11 @@ from .serializers import (
     SolicitudSerializer,
     ValidacionSerializer,
     ValidarMovimientosSerializer,
+    VistaPreviaSerializer,
 )
 from .services.bandeja import EstadoBandeja, folios_bandeja, resumen_bandeja
 from .services.catalogo import con_cupo, grupos_catalogo, periodo_activo
+from .services import importacion
 from .services.dictamen import DictamenInvalido, aprobar_movimiento, rechazar_movimiento, revision_folio
 from .services.avisos import registrar
 from .services.oferta import OfertaInvalida, cambiar_visibilidad, grupos_oferta, guardar_grupo
@@ -576,3 +594,58 @@ class ProgramaViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = Programa.objects.order_by("nombre")
     serializer_class = ProgramaSerializer
     pagination_class = None
+
+
+TIPO_IMPORTACION = OpenApiParameter(
+    "tipo", str, OpenApiParameter.PATH, enum=[t.value for t in ImportacionCSV.Tipo], description="alumnos o cargas"
+)
+
+
+class ImportacionViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """Importación de CSV del padrón y de cargas académicas, y su historial. Solo control escolar."""
+
+    queryset = ImportacionCSV.objects.select_related("periodo", "usuario")
+    serializer_class = ImportacionSerializer
+    permission_classes = [EsControlEscolar]
+    pagination_class = None
+
+    @extend_schema(
+        parameters=[
+            TIPO_IMPORTACION,
+            OpenApiParameter(
+                "modo",
+                str,
+                enum=["vista_previa", "confirmar"],
+                required=True,
+                description="vista_previa valida sin escribir; confirmar importa las filas válidas.",
+            ),
+        ],
+        request={"multipart/form-data": ArchivoCsvSerializer},
+        responses={200: VistaPreviaSerializer, 201: ResultadoImportacionSerializer},
+    )
+    @action(detail=False, methods=["post"], url_path=r"(?P<tipo>alumnos|cargas)", parser_classes=[MultiPartParser])
+    def importar(self, request, tipo=None):
+        modo = request.query_params.get("modo")
+        if modo not in ("vista_previa", "confirmar"):
+            raise ValidationError({"modo": ["Usa modo=vista_previa o modo=confirmar."]})
+        entrada = ArchivoCsvSerializer(data=request.data)
+        entrada.is_valid(raise_exception=True)
+        periodo = periodo_activo()
+        if periodo is None:
+            raise ValidationError({"detail": "No hay un periodo activo."})
+        archivo = entrada.validated_data["archivo"]
+        try:
+            if modo == "vista_previa":
+                return Response(importacion.vista_previa(tipo, archivo, periodo))
+            resultado = importacion.confirmar(tipo, archivo, request.user, periodo, request=request)
+        except importacion.ImportacionInvalida as error:
+            return Response(error.datos, status=status.HTTP_400_BAD_REQUEST)
+        return Response(resultado, status=status.HTTP_201_CREATED)
+
+    @extend_schema(parameters=[TIPO_IMPORTACION], responses={(200, "text/csv"): bytes})
+    @action(detail=False, url_path=r"plantilla/(?P<tipo>alumnos|cargas)")
+    def plantilla(self, request, tipo=None):
+        """Plantilla oficial: solo los encabezados de las columnas."""
+        respuesta = HttpResponse(importacion.plantilla(tipo), content_type="text/csv; charset=utf-8")
+        respuesta["Content-Disposition"] = f'attachment; filename="plantilla_{tipo}.csv"'
+        return respuesta

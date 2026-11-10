@@ -81,6 +81,16 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
+# Los de Django y, al final, el de las contraseñas temporales de la importación de CSV.
+PASSWORD_HASHERS = [
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
+    "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
+    "django.contrib.auth.hashers.ScryptPasswordHasher",
+    "core.hashers.PBKDF2TemporalHasher",
+]
+
 LANGUAGE_CODE = "es-mx"
 TIME_ZONE = "America/Mazatlan"
 USE_I18N = True
@@ -108,7 +118,10 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "0.1.0",
     "SERVE_INCLUDE_SCHEMA": False,
     # ALTA/BAJA aparece como `tipo_tramite` y como `tipo`: un solo enum en el esquema.
-    "ENUM_NAME_OVERRIDES": {"TipoTramiteEnum": "core.models.DetalleSolicitud.Tipo"},
+    "ENUM_NAME_OVERRIDES": {
+        "TipoTramiteEnum": "core.models.DetalleSolicitud.Tipo",
+        "TipoImportacionEnum": "core.models.ImportacionCSV.Tipo",
+    },
 }
 
 CORS_ALLOWED_ORIGINS = [

@@ -21,7 +21,12 @@ export const SECCIONES_CONTROL = {
 };
 
 // Pantallas de stitch con el pie institucional.
-const CON_PIE = ["/control-escolar/periodo", "/control-escolar/importacion"];
+// Pie institucional de stitch y su leyenda derecha, por pantalla.
+const PIES: Record<string, string> = {
+  "/control-escolar/periodo": "Plataforma auxiliar independiente de SADCE Central",
+  "/control-escolar/importacion":
+    "Plataforma interna auxiliar. No se conecta ni sincroniza automáticamente con SADCE; la captura final corresponde a Control Escolar.",
+};
 
 export function LayoutControlEscolar() {
   const { usuario, cerrarSesion } = useAuth();
@@ -141,14 +146,14 @@ export function LayoutControlEscolar() {
           <main className="flex-1 bg-surface px-margin-sm pt-16 pb-space-md sm:px-space-lg print:pt-0">
             <Outlet />
           </main>
-          {CON_PIE.includes(pathname) && <Pie ciclo={periodo?.ciclo} />}
+          {PIES[pathname] && <Pie ciclo={periodo?.ciclo} leyenda={PIES[pathname]} />}
         </div>
       </div>
     </AvisoProvider>
   );
 }
 
-function Pie({ ciclo }: { ciclo?: string }) {
+function Pie({ ciclo, leyenda }: { ciclo?: string; leyenda: string }) {
   return (
     <footer className="mt-auto w-full bg-surface-container-low px-margin-sm py-space-md shadow-[0_-1px_6px_rgba(0,43,73,0.03)] sm:px-space-lg print:hidden">
       <div className="flex w-full flex-col items-center justify-between gap-space-sm text-center font-label-md text-label-md text-on-surface-variant md:flex-row md:text-left">
@@ -158,7 +163,7 @@ function Pie({ ciclo }: { ciclo?: string }) {
         </div>
         <div className="flex items-center gap-space-xs">
           <Simbolo nombre="info" className="text-[16px]! text-on-surface-variant" />
-          <span>Plataforma auxiliar independiente de SADCE Central</span>
+          <span>{leyenda}</span>
         </div>
       </div>
     </footer>

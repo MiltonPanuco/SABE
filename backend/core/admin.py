@@ -45,5 +45,6 @@ for modelo in (
     models.LoteExportacion,
     models.Notificacion,
     models.Bitacora,
+    models.ImportacionCSV,
 ):
     admin.site.register(modelo)

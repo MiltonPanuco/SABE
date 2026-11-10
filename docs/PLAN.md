@@ -203,7 +203,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
   - Horario con al menos un día; la hora de fin va después de la de inicio; dos horarios del mismo día no se traslapan. El turno sale de la hora de inicio más temprana (13:00 o después es vespertino). Al editar, el aula se conserva por día.
   - Un grupo no se borra, se oculta. Un alta pendiente de un grupo oculto queda bloqueada al dictaminar (`no_disponible`).
   - Cambiar el horario de un grupo con inscritos está permitido: el dictamen vuelve a revisar choques.
-- **Diferencias con stitch (a confirmar):** "+ Nuevo docente" en la lista de docentes (decisión del equipo); textos nuevos para la convocatoria programada y cerrada ("Convocatoria programada", "Abre en…", "Cerró el…", "Programada", "Próximo"); la lista de programas sale de los datos (sin "Posgrados UAE"); "Activar" usa una ventana dentro de la página con el texto del `confirm()` de stitch; el formulario de edición se titula "Editar periodo escolar"; textos nuevos "Dos horarios del mismo día se traslapan." y "Dictamina los N movimientos pendientes…"; el nombre del pie sale del usuario, sin "Lic."; la captura de stitch tiene un menú anterior (Dictamen en Lote, Cruces…) y el marco conserva el del `code.html`, como en F6.
+- **Diferencias con stitch (acordadas):** "+ Nuevo docente" en la lista de docentes (decisión del equipo); textos nuevos para la convocatoria programada y cerrada ("Convocatoria programada", "Abre en…", "Cerró el…", "Programada", "Próximo"); la lista de programas sale de los datos (sin "Posgrados UAE"); "Activar" usa una ventana dentro de la página con el texto del `confirm()` de stitch; el formulario de edición se titula "Editar periodo escolar"; textos nuevos "Dos horarios del mismo día se traslapan." y "Dictamina los N movimientos pendientes…"; el nombre del pie sale del usuario, sin "Lic."; la captura de stitch tiene un menú anterior (Dictamen en Lote, Cruces…) y el marco conserva el del `code.html`, como en F6.
 - **Terminado cuando:** pruebas de crear y activar periodos (con y sin pendientes), publicar y editar grupos (repetido, cupo bajo, horarios inválidos), ocultar y la bitácora de cada cambio; control escolar crea un grupo con horario y el alumno lo ve en el catálogo; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 21 nov.
 - **Estado:** Pendiente.
@@ -212,13 +212,22 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 
 - **Objetivo:** control escolar sube alumnos y cargas académicas por CSV, ve los errores antes de confirmar y puede reimportar sin duplicar.
 - **Depende de:** F2, F7 (los grupos deben existir).
-- **Backend:** servicio en dos pasos: vista previa (valida y devuelve filas buenas y con error) y confirmación (en `transaction.atomic`). Plantillas descargables.
-- **Frontend:** pantalla `sabe_importaci_n_de_csv_control_escolar`: subir archivo, tabla de vista previa con errores por fila, confirmar.
-- **Contrato de API:**
-  - `GET /api/importaciones/plantilla/{alumnos|cargas}/` → CSV
-  - `POST /api/importaciones/{alumnos|cargas}/?modo=preview|confirmar` (multipart `archivo`) → `{validas, errores: [{fila, campo, mensaje}], creados, actualizados}`
-- **Reglas de negocio:** alumnos se identifican por matrícula (actualiza si existe). Alumno nuevo nace con contraseña temporal y `debe_cambiar_password = True`. Cargas se identifican por (matrícula, clave de materia, grupo, periodo). Columnas de alumnos: matrícula, nombre, apellidos, correo, programa, semestre, turno.
-- **Terminado cuando:** pruebas con un CSV válido, uno con errores y uno reimportado; la vista previa muestra los errores por fila; las pantallas coinciden con su diseño en `stitch/`.
+- **Backend:** `core/services/importacion.py` en dos pasos: vista previa (lee y valida, no escribe) y confirmación (vuelve a analizar el archivo e importa las filas válidas en `transaction.atomic`, omite las de error). Historial en el modelo `ImportacionCSV` (folio `IMP-2026A-001`) y fila `importar_csv` en la bitácora. `Programa` agrega `clave` (L-ECO, L-FIN). Las contraseñas temporales usan un hasher PBKDF2 ligero (`core/hashers.py`) para que 120 alumnos tarden menos de un segundo.
+- **Frontend:** pantalla `sabe_importaci_n_de_csv_control_escolar` con sus 3 pasos (archivo, vista previa, resultado), plantillas, historial de cargas, reporte de errores y descarga de las cuentas generadas.
+- **Contrato de API:** (solo control escolar)
+  - `GET /api/importaciones/plantilla/{alumnos|cargas}/` → CSV con los encabezados.
+  - `POST /api/importaciones/{alumnos|cargas}/?modo=vista_previa` (multipart `archivo`) → `{tipo, archivo, total, validas, avisos, errores: [{linea, matricula, datos, mensaje}], muestra: [{linea, datos, accion, avisos}]}`. No escribe nada.
+  - `POST /api/importaciones/{alumnos|cargas}/?modo=confirmar` → `201 {folio, tipo, creados, actualizados, excluidos, credenciales: [{matricula, nombre, email, password}]}`. Las contraseñas temporales solo llegan en esta respuesta.
+  - `GET /api/importaciones/` → historial `[{id, folio, tipo, archivo, usuario, fecha, total, creados, actualizados, excluidos}]`.
+  - Columnas: alumnos `matricula,nombre,apellidos,email,programa,semestre,turno`; cargas `matricula,clave_materia,num_grupo,ciclo`.
+- **Reglas de negocio:**
+  - Archivo CSV en UTF-8 (acepta BOM y `;`), máximo 25 MB, con exactamente las columnas de su tipo. Siempre se importa al periodo activo.
+  - Alumnos: matrícula de 9 dígitos sin repetirse en el archivo; correo `@uan.edu.mx` o `@alumnos.uan.edu.mx` que no sea de otra cuenta; programa por clave o nombre; semestre 1 a 10; turno matutino, vespertino o vacío. Si la matrícula existe se actualizan sus datos y nunca su contraseña. Un alumno nuevo nace con contraseña temporal aleatoria y `debe_cambiar_password = True`.
+  - Cargas: el alumno, la materia y el grupo deben existir en el periodo activo, y el ciclo debe ser el activo. Solo se agregan cargas: una inscrita queda "Sin cambios" y una dada de baja se respeta. Un alumno no tiene dos grupos de la misma materia.
+  - Una carga que excede el cupo o choca con el horario del alumno se importa igual (es la carga oficial de SADCE) y la vista previa la marca con un aviso.
+  - Las filas con error se omiten; si no hay filas válidas no se importa nada.
+- **Diferencias con stitch (a confirmar):** avisos de cupo excedido y choque bajo la acción de la fila; "Ver cuentas de estudiantes generadas" descarga las contraseñas temporales; "Descargar reporte de errores (.csv)" sin PDF; textos de error adaptados a los datos ("Materia inexistente: X." en lugar de "…en el plan curricular 2020", grupos "01" y claves "EC504" en lugar de "G-01" y "ECO-204") y textos nuevos para las demás reglas; la muestra enseña hasta 10 filas; cargas usa el mismo asistente con sus propias columnas ("Cargas procesadas", "cargas nuevas"); texto propio cuando no hubo registros nuevos; la tarjeta elegida se ve como en la captura de stitch (recuadro claro y sin palomita); la captura tiene un menú anterior y una sola tarjeta de tipo, y se sigue el `code.html`.
+- **Terminado cuando:** pruebas con un CSV válido, uno con errores y uno reimportado (alumnos y cargas); la vista previa muestra los errores por fila; un alumno nuevo entra con su contraseña temporal y la cambia; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 22 nov.
 - **Estado:** Pendiente.
 
@@ -243,7 +252,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 
 - **Objetivo:** los usuarios ven avisos de sus trámites y queda registro de quién hizo qué.
 - **Depende de:** F5, F6.
-- **Backend:** helpers `notificar(usuario, mensaje)` (ya existe desde F6 en `core/services/avisos.py` y avisa al aprobar y rechazar) y `registrar(usuario, accion, objeto, request=)` (ya existe desde F7 y registra los cambios de periodos, oferta y docentes), llamados desde los servicios. Bitácora solo de lectura (sin editar ni borrar desde la API).
+- **Backend:** helpers `notificar(usuario, mensaje)` (ya existe desde F6 en `core/services/avisos.py` y avisa al aprobar y rechazar) y `registrar(usuario, accion, objeto, request=)` (ya existe desde F7 y registra los cambios de periodos, oferta y docentes, y desde F8 las importaciones de CSV), llamados desde los servicios. Bitácora solo de lectura (sin editar ni borrar desde la API).
 - **Frontend:** campana y panel en estudiante y control escolar; bitácora con filtros y descarga CSV. Pantallas: `sabe_panel_de_notificaciones_estudiante_y_control_escolar`, `sabe_notificaciones_de_control_escolar_uae_uan`, `sabe_bitacora_auditoria`.
 - **Contrato de API:**
   - `GET /api/notificaciones/` → `{no_leidas, resultados: [...]}`

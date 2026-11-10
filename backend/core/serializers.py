@@ -11,6 +11,7 @@ from .models import (
     Estudiante,
     Grupo,
     HorarioGrupo,
+    ImportacionCSV,
     PeriodoEscolar,
     Programa,
     Solicitud,
@@ -383,7 +384,7 @@ class UltimaModificacionSerializer(serializers.Serializer):
 class ProgramaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Programa
-        fields = ["id", "nombre"]
+        fields = ["id", "clave", "nombre"]
 
 
 class DocenteSerializer(serializers.ModelSerializer):
@@ -453,3 +454,73 @@ class VisibilidadGrupoSerializer(serializers.Serializer):
     """PATCH /api/grupos/{id}/ con solo `visible`: Activar o Desactivar en la oferta."""
 
     visible = serializers.BooleanField()
+
+
+# ---------------------------------------------------------------------------
+# Importación de CSV (F8)
+# ---------------------------------------------------------------------------
+
+class ArchivoCsvSerializer(serializers.Serializer):
+    archivo = serializers.FileField(
+        error_messages={
+            "required": "Selecciona un archivo .csv.",
+            "empty": "El archivo está vacío.",
+            "invalid": "Selecciona un archivo .csv.",
+        }
+    )
+
+
+class FilaValidaSerializer(serializers.Serializer):
+    linea = serializers.IntegerField()
+    datos = serializers.DictField(help_text="Columnas ya normalizadas de la fila.")
+    accion = serializers.ChoiceField(
+        choices=["nuevo", "actualizacion", "sin_cambios", "nueva", "baja_respetada"]
+    )
+    avisos = serializers.ListField(child=serializers.CharField(), help_text="Cupo excedido o choques (cargas).")
+
+
+class FilaErrorSerializer(serializers.Serializer):
+    linea = serializers.IntegerField()
+    matricula = serializers.CharField()
+    datos = serializers.CharField(help_text='Nombre del alumno, "Clave: ECO-999" o "Grupo: 09".')
+    mensaje = serializers.CharField()
+
+
+class VistaPreviaSerializer(serializers.Serializer):
+    tipo = serializers.ChoiceField(choices=ImportacionCSV.Tipo.choices)
+    archivo = serializers.CharField()
+    total = serializers.IntegerField()
+    validas = serializers.IntegerField()
+    avisos = serializers.IntegerField()
+    errores = FilaErrorSerializer(many=True)
+    muestra = FilaValidaSerializer(many=True)
+
+
+class CredencialSerializer(serializers.Serializer):
+    matricula = serializers.CharField()
+    nombre = serializers.CharField()
+    email = serializers.CharField()
+    password = serializers.CharField()
+
+
+class ResultadoImportacionSerializer(serializers.Serializer):
+    folio = serializers.CharField()
+    tipo = serializers.ChoiceField(choices=ImportacionCSV.Tipo.choices)
+    creados = serializers.IntegerField()
+    actualizados = serializers.IntegerField()
+    excluidos = serializers.IntegerField()
+    credenciales = CredencialSerializer(many=True, help_text="Contraseñas temporales; solo se entregan esta vez.")
+
+
+class ImportacionSerializer(serializers.ModelSerializer):
+    folio = serializers.CharField(read_only=True)
+    usuario = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ImportacionCSV
+        fields = ["id", "folio", "tipo", "archivo", "usuario", "fecha", "total", "creados", "actualizados", "excluidos"]
+
+    @extend_schema_field(serializers.CharField(allow_null=True))
+    def get_usuario(self, importacion):
+        usuario = importacion.usuario
+        return (usuario.get_full_name() or usuario.username) if usuario else None

@@ -85,7 +85,7 @@ Abre http://localhost:5173. La pantalla de arranque indica si ya hay conexión c
 
 ## Modelo de datos
 
-15 entidades en `backend/core/models.py`, según `diagramas/SABE_ERD_Backend.png`. Reglas importantes que ya quedan en la base de datos:
+16 entidades en `backend/core/models.py`, según `diagramas/SABE_ERD_Backend.png`. Reglas importantes que ya quedan en la base de datos:
 - Solo un periodo escolar activo a la vez.
 - Un rechazo siempre lleva motivo.
 - El cupo disponible se calcula, no se guarda.
@@ -97,7 +97,7 @@ Si cambias un modelo: `python manage.py makemigrations` y sube la migración en 
 
 **Backend**
 - [ ] Servicio de detección de choques de horario (con pruebas)
-- [ ] Importador de CSV: alumnos y cargas académicas (vista previa de errores, reimportar sin duplicar, contraseña temporal)
+- [x] Importador de CSV: alumnos y cargas académicas (vista previa de errores, reimportar sin duplicar, contraseña temporal)
 - [ ] Endpoints de solicitudes: crear folio, listar, cancelar
 - [ ] Aprobar y rechazar con bloqueo de cupo (`transaction.atomic` + `select_for_update`)
 - [x] Permisos por rol (estudiante, control escolar, administrador)
@@ -111,7 +111,7 @@ Si cambias un modelo: `python manage.py makemigrations` y sube la migración en 
 - [ ] Estudiante: dashboard, horario, catálogo y carrito (alta y baja), confirmación, historial con acuse y notificaciones
 - [ ] Estudiante: cancelar solicitud pendiente y ver motivo de rechazo
 - [ ] Control escolar: bandeja, validación, exportación, catálogos, oferta, bitácora
-- [ ] Control escolar: periodo y convocatoria, importación de CSV
+- [x] Control escolar: periodo y convocatoria, importación de CSV
 - [ ] Administrador: usuarios y roles
 
 **Diseño**

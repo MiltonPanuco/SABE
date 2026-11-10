@@ -48,6 +48,7 @@ class Usuario(AbstractUser):
 class Programa(models.Model):
     """Licenciatura: Economía, Finanzas."""
 
+    clave = models.CharField(max_length=10, unique=True)  # "L-ECO", la que trae el CSV del padrón
     nombre = models.CharField(max_length=100, unique=True)
 
     class Meta:
@@ -404,3 +405,35 @@ class Bitacora(models.Model):
 
     def __str__(self):
         return f"{self.fecha:%Y-%m-%d %H:%M} {self.accion}"
+
+
+class ImportacionCSV(models.Model):
+    """Historial de cargas por CSV (padrón de alumnos o cargas académicas) de un periodo."""
+
+    class Tipo(models.TextChoices):
+        ALUMNOS = "alumnos", "Alumnos"
+        CARGAS = "cargas", "Cargas académicas"
+
+    tipo = models.CharField(max_length=8, choices=Tipo.choices)
+    periodo = models.ForeignKey(PeriodoEscolar, on_delete=models.PROTECT, related_name="importaciones")
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="importaciones"
+    )
+    fecha = models.DateTimeField(auto_now_add=True)
+    archivo = models.CharField(max_length=255)
+    total = models.PositiveIntegerField(default=0)
+    creados = models.PositiveIntegerField(default=0)
+    actualizados = models.PositiveIntegerField(default=0)
+    excluidos = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        db_table = "importaciones_csv"
+        ordering = ["-fecha", "-id"]
+
+    @property
+    def folio(self) -> str:
+        """IMP-2026A-049"""
+        return f"IMP-{self.periodo.ciclo.replace('-', '')}-{self.pk:03d}"
+
+    def __str__(self):
+        return self.folio
