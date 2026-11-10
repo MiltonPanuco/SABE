@@ -2,7 +2,6 @@
 Validación de una lista de movimientos (el carrito o un folio): choques y errores por movimiento.
 
 La usan el catálogo, POST /api/solicitudes/validar/, la creación del folio (F5) y el dictamen (F6).
-F5 agrega aquí sus reglas (movimiento pendiente en otro folio, convocatoria, ...).
 """
 
 from collections import Counter
@@ -25,6 +24,7 @@ class Codigo(StrEnum):
     MISMA_MATERIA = "misma_materia"
     NO_INSCRITO = "no_inscrito"
     EN_OTRO_FOLIO = "en_otro_folio"
+    BAJA_PENDIENTE = "baja_pendiente"  # dictamen (F6): falta aprobar la baja del mismo folio
 
 
 @dataclass

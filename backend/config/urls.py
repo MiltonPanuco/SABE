@@ -10,6 +10,7 @@ from core.views import (
     GrupoViewSet,
     HorarioEstudianteView,
     MeView,
+    MovimientoViewSet,
     PeriodoActivoView,
     SolicitudViewSet,
     ValidarMovimientosView,
@@ -18,6 +19,7 @@ from core.views import (
 router = SimpleRouter()
 router.register("grupos", GrupoViewSet, basename="grupo")
 router.register("solicitudes", SolicitudViewSet, basename="solicitud")
+router.register("movimientos", MovimientoViewSet, basename="movimiento")
 
 
 def health(request):

@@ -21,7 +21,7 @@ class ValidarMovimientosTests(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        call_command("seed_demo", stdout=StringIO())
+        call_command("seed_demo", "--sin-folios", stdout=StringIO())
         cls.periodo = PeriodoEscolar.objects.get(activo=True)
         cls.alumno = Estudiante.objects.get(matricula=ALUMNO)
 

@@ -152,23 +152,33 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
   - A student can have several pending folios at once; the dashboard follows the most recent one.
   - New validation error code: `en_otro_folio` (the group already has a pending move in another folio of the student).
   - Only moves in `pendiente` status can be canceled; the whole folio is canceled, at any time.
-- **Differences from stitch (agreed):** the detail, cancel and closed-window screens use the F3 portal frame; the history is the `sabe_estudiantes` one (receipt plus table); no verification code, no "Turno asignado", "Ventanilla UAE", "Plan 2020", "Al corriente" or the email line; "Descargar acuse (PDF)" becomes "Imprimir acuse"; the "seats released" phrases on cancel are dropped (a pending request doesn't hold a seat); "La convocatoria aún no abre" reuses the closing-notice card.
+- **Differences from stitch (agreed):** the detail, cancel and closed-window screens use the F3 portal frame; the history is the `sabe_estudiantes` one (receipt plus table); no verification code, no "Turno asignado", "Ventanilla UAE", "Plan 2020", "Al corriente" or the email line; "Descargar acuse (PDF)" becomes "Imprimir acuse"; the "seats released" phrases on cancel are dropped (a pending request doesn't hold a seat); "La convocatoria aún no abre" reuses the closing-notice card. Accepted without a stitch design: the history's "Resolución" texts ("1 de 2 aprobados"), the tracker's "No aplica" step on cancelled or rejected folios, the static "Filtro rápido" chip, and "Docente: X" on each item of the late request.
 - **Done when:** tests for the creation service (each rule above); the full flow works in the browser with the demo student; the folio appears in the history and schedule as "in progress"; the screens match their `stitch/` design.
 - **Target date:** Nov 17.
 - **Status:** Pending.
 
 ### F6. Control Escolar inbox and review
 
-- **Goal:** Control Escolar reviews folios and approves or rejects each move.
+- **Goal:** Control Escolar reviews the period's folios and approves or rejects each move.
 - **Depends on:** F5.
-- **Backend:** the folio already stores `extemporanea` (F5) for filtering. Approve and reject service with `transaction.atomic` + `select_for_update` on the group. Approving an ALTA creates or reactivates the `CargaAcademica` (origin `solicitud`); approving a BAJA marks it `baja`.
-- **Frontend:** inbox with filters (status, late, date), per-move review view with visible clashes, rejection with reason, sign-off (`visto_bueno`). Screen: `sabe_solicitudes_control_escolar`.
+- **Backend:** `core/services/bandeja.py` (filters and KPIs in SQL) and `core/services/dictamen.py` (approve and reject in `transaction.atomic`, with `select_for_update` on the student, the group and the move, in that order). Approving an ALTA creates or reactivates the `CargaAcademica` (origin `solicitud`); approving a BAJA marks it `baja`. `core/services/avisos.py` with `notificar()`: the student gets a notification when each move is approved or rejected.
+- **Frontend:** the Control Escolar frame (side menu and header shared by its 6 screens), the inbox with KPIs and filters (text, status, type), and the per-move folio review: clashes and seats shown, rejection with a reason, and sign-off on late folios. Screen: `sabe_solicitudes_control_escolar`. `seed_demo` leaves 3 folios from other students for the demo (`--sin-folios` skips them).
 - **API contract:**
-  - `GET /api/solicitudes/?estado=&extemporanea=&q=` (Control Escolar sees all)
-  - `POST /api/movimientos/{id}/aprobar/` `{visto_bueno?}` → updated move
-  - `POST /api/movimientos/{id}/rechazar/` `{motivo}` → updated move
-- **Business rules:** on approval, seats and clashes are validated again (they may have changed since submission), against the enrolled load only (`contar_pendientes=False`). Rejecting without a reason returns `400`. A late request without `visto_bueno` cannot be approved. `revisado_por` and `fecha_resolucion` are saved.
-- **Done when:** tests for approving the last seat (two simultaneous approvals don't exceed capacity), rejection without reason, late request without sign-off; full flow in the browser; the screens match their `stitch/` design.
+  - `GET /api/solicitudes/?estado=pendiente|parcial|dictaminada|rechazada|cancelada&extemporanea=true|false&q=` → `[Solicitud]`. Control Escolar and admin see the active period; without `estado`, fully cancelled folios are hidden. Students still see all of theirs (F5).
+  - `GET /api/solicitudes/resumen/` → `{folios_pendientes, movimientos_aprobados, movimientos_rechazados, extemporaneos}`.
+  - `GET /api/solicitudes/{id}/revision/` → `{movimientos: [{id, choques, errores}]}`: what currently blocks approving each pending move.
+  - `POST /api/movimientos/{id}/aprobar/` `{visto_bueno?}` → full `Solicitud`. `400` with `detail` (plus `choques`/`errores` when blocked).
+  - `POST /api/movimientos/{id}/rechazar/` `{motivo}` → full `Solicitud`. `400` with `{"motivo": [...]}` or `{"detail"}`.
+  - `Solicitud` gains `estado_bandeja` and `estudiante.semestre`.
+- **Business rules:**
+  - Only Control Escolar decides; the admin only reads. Only `pendiente` moves can be decided, and a decision can't be undone.
+  - On approval, seats and clashes are validated again (they may have changed since sending), against the enrolled load only (`contar_pendientes=False`).
+  - Group change: the BAJA of the same folio is approved first. While it is pending, an ALTA that clashes with it (or is the same subject) is blocked with code `baja_pendiente`: "Aprueba primero la baja de {materia} en este folio."
+  - A late folio without `visto_bueno` cannot be approved. The sign-off is saved on each approved move.
+  - Rejecting without a reason returns `400`; the reason is at most 500 characters. `revisado_por` and `fecha_resolucion` are saved.
+  - Folio state once nothing is pending: approved if any move was approved; otherwise loaded in SADCE, rejected or cancelled, in that order.
+- **Differences from stitch (to confirm):** the F7–F10 menu items open a "Próximamente" page inside the frame; on phones the side menu is a panel opened with a button (stitch has no phone layout); the bell and logout that `prototipo.js` adds sit inside the header; the "Aprueba primero la baja…" text is new; the header name comes from the user, without "Lic."; fully cancelled folios don't appear in the inbox; a cancelled move says "Cancelado por el alumno".
+- **Done when:** tests for approving the last seat (two simultaneous approvals don't exceed capacity), rejection without a reason, a late folio without sign-off, and the group change; full flow in the browser; the screens match their `stitch/` design.
 - **Target date:** Nov 20.
 - **Status:** Pending.
 
@@ -219,7 +229,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 
 - **Goal:** users see notices about their requests and there's a record of who did what.
 - **Depends on:** F5, F6.
-- **Backend:** helpers `notificar(usuario, mensaje)` and `registrar(usuario, accion, entidad, request)` called from the services. Audit log is read-only (no editing or deleting through the API).
+- **Backend:** helpers `notificar(usuario, mensaje)` (exists since F6 in `core/services/avisos.py` and notifies on approve and reject) and `registrar(usuario, accion, entidad, request)` called from the services. Audit log is read-only (no editing or deleting through the API).
 - **Frontend:** bell and panel for students and Control Escolar; audit log with filters and CSV download. Screens: `sabe_panel_de_notificaciones_estudiante_y_control_escolar`, `sabe_notificaciones_de_control_escolar_uae_uan`, `sabe_bitacora_auditoria`.
 - **API contract:**
   - `GET /api/notificaciones/` → `{no_leidas, resultados: [...]}`

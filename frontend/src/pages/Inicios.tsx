@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 
-// Inicio de control escolar y administrador. Por ahora solo saludan y dicen qué viene; se llenan en
-// F6 a F10 (control escolar) y F11 (administrador). El estudiante ya tiene su portal en src/estudiante/.
+// Inicio del administrador. Por ahora solo saluda y dice qué viene; se llena en F11.
+// El estudiante tiene su portal en src/estudiante/ y control escolar el suyo en src/control/.
 
 function Inicio({ titulo, children, proximamente }: { titulo: string; children?: ReactNode; proximamente: string[] }) {
   const { usuario } = useAuth();
@@ -23,19 +23,6 @@ function Inicio({ titulo, children, proximamente }: { titulo: string; children?:
         </ul>
       </div>
     </div>
-  );
-}
-
-export function InicioControlEscolar() {
-  return (
-    <Inicio
-      titulo="Control Escolar"
-      proximamente={[
-        "Bandeja de solicitudes y dictamen por movimiento",
-        "Periodo, convocatoria y oferta académica",
-        "Importación de CSV y exportación a SADCE",
-      ]}
-    />
   );
 }
 

@@ -64,7 +64,15 @@ export interface Choque {
   origen: OrigenChoque;
 }
 
-export type CodigoError = "repetido" | "ya_inscrito" | "no_disponible" | "sin_cupo" | "misma_materia" | "no_inscrito";
+export type CodigoError =
+  | "repetido"
+  | "ya_inscrito"
+  | "no_disponible"
+  | "sin_cupo"
+  | "misma_materia"
+  | "no_inscrito"
+  | "en_otro_folio"
+  | "baja_pendiente";
 
 export interface ErrorMovimiento {
   codigo: CodigoError;
@@ -141,9 +149,40 @@ export interface Solicitud {
   ciclo: string;
   fecha_solicitud: string;
   estado: EstadoMovimiento;
+  /** Estado en la bandeja de control escolar; coincide con el filtro ?estado=. */
+  estado_bandeja: EstadoBandeja;
   extemporanea: boolean;
   justificacion: string;
-  estudiante: { matricula: string; nombre: string; programa: string };
+  estudiante: { matricula: string; nombre: string; programa: string; semestre: number };
   movimientos: MovimientoFolio[];
   resumen: { total: number; aprobadas: number; resueltas: number };
+}
+
+// Bandeja y dictamen de control escolar (F6)
+
+export type EstadoBandeja = "pendiente" | "parcial" | "dictaminada" | "rechazada" | "cancelada";
+
+export interface FiltrosBandeja {
+  q: string;
+  estado: EstadoBandeja | "";
+  /** "normal" = dentro de convocatoria, "extemp" = extemporáneo. */
+  tipo: "" | "normal" | "extemp";
+}
+
+export interface ResumenBandeja {
+  folios_pendientes: number;
+  movimientos_aprobados: number;
+  movimientos_rechazados: number;
+  extemporaneos: number;
+}
+
+/** Qué impide hoy aprobar un movimiento pendiente (listas vacías si se puede aprobar). */
+export interface RevisionMovimiento {
+  id: number;
+  choques: Choque[];
+  errores: ErrorMovimiento[];
+}
+
+export interface Revision {
+  movimientos: RevisionMovimiento[];
 }

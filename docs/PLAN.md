@@ -150,23 +150,33 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
   - Un alumno puede tener varios folios pendientes a la vez; el dashboard sigue el más reciente.
   - Código de error nuevo en la validación: `en_otro_folio` (el grupo ya tiene un movimiento pendiente en otro folio del alumno).
   - Solo se cancelan movimientos en estado `pendiente`; se cancela el folio completo, en cualquier momento.
-- **Diferencias con stitch (acordadas):** las pantallas de detalle, cancelar y convocatoria cerrada usan el marco del portal de F3; el historial es el de `sabe_estudiantes` (acuse más tabla); sin código de verificación, sin "Turno asignado", "Ventanilla UAE", "Plan 2020", "Al corriente" ni la línea del correo; "Descargar acuse (PDF)" pasa a "Imprimir acuse"; se quitan las frases de "cupos liberados" al cancelar (un trámite pendiente no aparta lugar); "La convocatoria aún no abre" usa la tarjeta del aviso de cierre.
+- **Diferencias con stitch (acordadas):** las pantallas de detalle, cancelar y convocatoria cerrada usan el marco del portal de F3; el historial es el de `sabe_estudiantes` (acuse más tabla); sin código de verificación, sin "Turno asignado", "Ventanilla UAE", "Plan 2020", "Al corriente" ni la línea del correo; "Descargar acuse (PDF)" pasa a "Imprimir acuse"; se quitan las frases de "cupos liberados" al cancelar (un trámite pendiente no aparta lugar); "La convocatoria aún no abre" usa la tarjeta del aviso de cierre. Sin diseño en stitch y aceptados: los textos de "Resolución" del historial ("1 de 2 aprobados"), el paso "No aplica" del seguimiento en folios cancelados o rechazados, el chip fijo "Filtro rápido" y "Docente: X" en cada movimiento de la solicitud extemporánea.
 - **Terminado cuando:** pruebas del servicio de creación (cada regla de arriba); flujo completo en el navegador con el alumno demo; el folio aparece en historial y horario como "en trámite"; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 17 nov.
 - **Estado:** Pendiente.
 
 ### F6. Bandeja y dictamen de control escolar
 
-- **Objetivo:** control escolar revisa folios y aprueba o rechaza cada movimiento.
+- **Objetivo:** control escolar revisa los folios del periodo y aprueba o rechaza cada movimiento.
 - **Depende de:** F5.
-- **Backend:** el folio ya guarda `extemporanea` (F5) para filtrar. Servicio de aprobar y rechazar con `transaction.atomic` + `select_for_update` sobre el grupo. Al aprobar una ALTA se crea o reactiva la `CargaAcademica` (origen `solicitud`); al aprobar una BAJA se marca `baja`.
-- **Frontend:** bandeja con filtros (estado, extemporáneo, fecha), vista de validación por movimiento con choques visibles, rechazo con motivo, visto bueno. Pantalla: `sabe_solicitudes_control_escolar`.
+- **Backend:** `core/services/bandeja.py` (filtros e indicadores en SQL) y `core/services/dictamen.py` (aprobar y rechazar en `transaction.atomic`, con `select_for_update` sobre alumno, grupo y movimiento, en ese orden). Al aprobar una ALTA se crea o reactiva la `CargaAcademica` (origen `solicitud`); al aprobar una BAJA se marca `baja`. `core/services/avisos.py` con `notificar()`: el alumno recibe un aviso al aprobarse o rechazarse cada movimiento.
+- **Frontend:** marco de control escolar (menú lateral y encabezado compartidos por sus 6 pantallas), bandeja con indicadores y filtros (texto, estado, tipo) y revisión del folio por movimiento: choques y cupo visibles, rechazo con motivo y visto bueno en extemporáneos. Pantalla: `sabe_solicitudes_control_escolar`. `seed_demo` deja 3 folios de otros alumnos para la demostración (`--sin-folios` los omite).
 - **Contrato de API:**
-  - `GET /api/solicitudes/?estado=&extemporanea=&q=` (control escolar ve todas)
-  - `POST /api/movimientos/{id}/aprobar/` `{visto_bueno?}` → movimiento actualizado
-  - `POST /api/movimientos/{id}/rechazar/` `{motivo}` → movimiento actualizado
-- **Reglas de negocio:** al aprobar se vuelve a validar cupo y choques (pudo cambiar desde que se envió), solo contra la carga inscrita (`contar_pendientes=False`). Rechazo sin motivo devuelve `400`. Extemporáneo sin `visto_bueno` no se aprueba. Se guardan `revisado_por` y `fecha_resolucion`.
-- **Terminado cuando:** pruebas de aprobar con último cupo (dos aprobaciones simultáneas no sobrepasan el cupo), rechazo sin motivo, extemporáneo sin visto bueno; flujo completo en el navegador; las pantallas coinciden con su diseño en `stitch/`.
+  - `GET /api/solicitudes/?estado=pendiente|parcial|dictaminada|rechazada|cancelada&extemporanea=true|false&q=` → `[Solicitud]`. Control escolar y administrador ven el periodo activo; sin `estado` se ocultan los folios cancelados por completo. El alumno sigue viendo todos los suyos (F5).
+  - `GET /api/solicitudes/resumen/` → `{folios_pendientes, movimientos_aprobados, movimientos_rechazados, extemporaneos}`.
+  - `GET /api/solicitudes/{id}/revision/` → `{movimientos: [{id, choques, errores}]}`: qué impide hoy aprobar cada movimiento pendiente.
+  - `POST /api/movimientos/{id}/aprobar/` `{visto_bueno?}` → `Solicitud` completa. `400` con `detail` (y `choques`/`errores` si está bloqueado).
+  - `POST /api/movimientos/{id}/rechazar/` `{motivo}` → `Solicitud` completa. `400` con `{"motivo": [...]}` o `{"detail"}`.
+  - `Solicitud` agrega `estado_bandeja` y `estudiante.semestre`.
+- **Reglas de negocio:**
+  - Solo control escolar dictamina; el administrador solo consulta. Solo se dictaminan movimientos `pendiente` y no se deshace un dictamen.
+  - Al aprobar se vuelve a validar cupo y choques (pudieron cambiar desde el envío), solo contra la carga inscrita (`contar_pendientes=False`).
+  - Cambio de grupo: la baja del mismo folio se aprueba primero. Mientras siga pendiente, el alta que choca con ella (o es de la misma materia) queda bloqueada con el código `baja_pendiente`: "Aprueba primero la baja de {materia} en este folio."
+  - Extemporáneo sin `visto_bueno` no se aprueba. El visto bueno se guarda en cada movimiento aprobado.
+  - Rechazo sin motivo devuelve `400`; el motivo tiene 500 caracteres como máximo. Se guardan `revisado_por` y `fecha_resolucion`.
+  - Estado del folio sin pendientes: aprobada si algún movimiento se aprobó; si no, cargada en SADCE, rechazada o cancelada, en ese orden.
+- **Diferencias con stitch (a confirmar):** el menú de F7 a F10 abre una página "Próximamente" dentro del marco; en teléfono el menú lateral es un panel que se abre con un botón (stitch no tiene versión para teléfono); la campana y la salida que agrega `prototipo.js` van dentro del encabezado; el texto de "Aprueba primero la baja…" es nuevo; el nombre del encabezado sale del usuario, sin "Lic."; los folios cancelados por completo no aparecen en la bandeja; un movimiento cancelado dice "Cancelado por el alumno".
+- **Terminado cuando:** pruebas de aprobar con último cupo (dos aprobaciones simultáneas no sobrepasan el cupo), rechazo sin motivo, extemporáneo sin visto bueno y cambio de grupo; flujo completo en el navegador; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 20 nov.
 - **Estado:** Pendiente.
 
@@ -217,7 +227,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 
 - **Objetivo:** los usuarios ven avisos de sus trámites y queda registro de quién hizo qué.
 - **Depende de:** F5, F6.
-- **Backend:** helpers `notificar(usuario, mensaje)` y `registrar(usuario, accion, entidad, request)` llamados desde los servicios. Bitácora solo de lectura (sin editar ni borrar desde la API).
+- **Backend:** helpers `notificar(usuario, mensaje)` (ya existe desde F6 en `core/services/avisos.py` y avisa al aprobar y rechazar) y `registrar(usuario, accion, entidad, request)` llamados desde los servicios. Bitácora solo de lectura (sin editar ni borrar desde la API).
 - **Frontend:** campana y panel en estudiante y control escolar; bitácora con filtros y descarga CSV. Pantallas: `sabe_panel_de_notificaciones_estudiante_y_control_escolar`, `sabe_notificaciones_de_control_escolar_uae_uan`, `sabe_bitacora_auditoria`.
 - **Contrato de API:**
   - `GET /api/notificaciones/` → `{no_leidas, resultados: [...]}`

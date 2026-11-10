@@ -14,7 +14,7 @@ DEMO = "demo1234"
 class BaseAuthTest(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        call_command("seed_demo", stdout=StringIO())
+        call_command("seed_demo", "--sin-folios", stdout=StringIO())
 
     def entrar(self, username, password=DEMO):
         r = self.client.post("/api/auth/token/", {"username": username, "password": password}, format="json")

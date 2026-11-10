@@ -1,5 +1,5 @@
 from django.db.models import Prefetch
-from drf_spectacular.utils import OpenApiParameter, extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
@@ -7,20 +7,28 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import CargaAcademica, DetalleSolicitud, Estudiante, Grupo, Rol, Solicitud, Usuario
-from .permissions import EsEstudiante
+from .permissions import EsControlEscolar, EsEstudiante
 from .serializers import (
+    AprobarSerializer,
     CambiarPasswordSerializer,
+    ChoqueSerializer,
     EnTramiteSerializer,
+    ErrorMovimientoSerializer,
     GrupoSerializer,
     HorarioEstudianteSerializer,
     MeSerializer,
     PeriodoActivoSerializer,
     CrearSolicitudSerializer,
+    RechazarSerializer,
+    ResumenBandejaSerializer,
+    RevisionSerializer,
     SolicitudSerializer,
     ValidacionSerializer,
     ValidarMovimientosSerializer,
 )
+from .services.bandeja import EstadoBandeja, folios_bandeja, resumen_bandeja
 from .services.catalogo import con_cupo, grupos_catalogo, periodo_activo
+from .services.dictamen import DictamenInvalido, aprobar_movimiento, rechazar_movimiento, revision_folio
 from .services.solicitudes import SolicitudInvalida, cancelar_solicitud, crear_solicitud
 from .services.validacion import Contexto, revisar_alta, validar_movimientos
 
@@ -225,12 +233,47 @@ class ValidarMovimientosView(APIView):
         )
 
 
+def folios_completos():
+    """Folios con alumno, periodo, movimientos, revisor y grupos (con cupo y horarios) precargados."""
+    return Solicitud.objects.select_related(
+        "periodo", "estudiante__usuario", "estudiante__programa"
+    ).prefetch_related(
+        Prefetch(
+            "detalles",
+            queryset=DetalleSolicitud.objects.select_related("revisado_por")
+            .prefetch_related(Prefetch("grupo", queryset=con_cupo(Grupo.objects.all())))
+            .order_by("id"),
+        )
+    )
+
+
+def folio_actualizado(solicitud_id: int) -> dict:
+    """Respuesta de las acciones que cambian un folio: el folio completo, igual que GET /{id}/."""
+    return SolicitudSerializer(folios_completos().get(pk=solicitud_id)).data
+
+
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "estado",
+                str,
+                enum=[e.value for e in EstadoBandeja],
+                description="Control escolar: estado en la bandeja. Sin él se ocultan los folios cancelados por completo.",
+            ),
+            OpenApiParameter(
+                "extemporanea", bool, description="Control escolar: extemporáneos (true) o en convocatoria (false)."
+            ),
+            OpenApiParameter("q", str, description="Control escolar: busca por folio, matrícula o nombre del alumno."),
+        ]
+    )
+)
 class SolicitudViewSet(
     mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
 ):
     """
-    Folios de altas y bajas. El alumno ve, crea y cancela los suyos;
-    control escolar y administrador los ven todos (F6 agrega filtros y el dictamen).
+    Folios de altas y bajas. El alumno ve, crea y cancela los suyos (F5).
+    Control escolar y administrador ven los del periodo activo, con los filtros de la bandeja (F6).
     """
 
     serializer_class = SolicitudSerializer
@@ -239,27 +282,33 @@ class SolicitudViewSet(
     def get_permissions(self):
         if self.action in ("create", "cancelar"):
             return [EsEstudiante()]
+        if self.action in ("resumen", "revision"):
+            return [EsControlEscolar()]
         return super().get_permissions()
 
+    def _es_alumno(self) -> bool:
+        return getattr(self.request.user, "rol", None) == Rol.ESTUDIANTE
+
     def get_queryset(self):
-        folios = Solicitud.objects.select_related(
-            "periodo", "estudiante__usuario", "estudiante__programa"
-        ).prefetch_related(
-            Prefetch(
-                "detalles",
-                queryset=DetalleSolicitud.objects.select_related("revisado_por")
-                .prefetch_related(Prefetch("grupo", queryset=con_cupo(Grupo.objects.all())))
-                .order_by("id"),
-            )
-        )
-        usuario = self.request.user
-        if getattr(usuario, "rol", None) == Rol.ESTUDIANTE:
-            folios = folios.filter(estudiante__usuario=usuario)
+        folios = folios_completos()
+        if self._es_alumno():
+            folios = folios.filter(estudiante__usuario=self.request.user)
         return folios.order_by("-fecha_solicitud", "-id")
 
-    def _detalle(self, solicitud: Solicitud) -> dict:
-        # Se vuelve a leer con todo precargado para responder igual que GET /{id}/.
-        return SolicitudSerializer(self.get_queryset().get(pk=solicitud.pk)).data
+    def filter_queryset(self, queryset):
+        if self.action != "list" or self._es_alumno():
+            return queryset
+        periodo = periodo_activo()
+        if periodo is None:
+            return queryset.none()
+        params = self.request.query_params
+        estado = params.get("estado", "").strip()
+        if estado and estado not in EstadoBandeja:
+            raise ValidationError({"estado": [f"Debe ser uno de: {', '.join(EstadoBandeja)}."]})
+        extemporanea = {"true": True, "false": False}.get(params.get("extemporanea", "").strip().lower())
+        return folios_bandeja(
+            queryset, periodo, estado=estado, extemporanea=extemporanea, q=params.get("q", "").strip()
+        )
 
     @extend_schema(request=CrearSolicitudSerializer, responses={201: SolicitudSerializer})
     def create(self, request, *args, **kwargs):
@@ -285,7 +334,7 @@ class SolicitudViewSet(
                     {"valido": False, "movimientos": error.resultados}
                 ).data
             return Response(datos, status=status.HTTP_400_BAD_REQUEST)
-        return Response(self._detalle(solicitud), status=status.HTTP_201_CREATED)
+        return Response(folio_actualizado(solicitud.pk), status=status.HTTP_201_CREATED)
 
     @extend_schema(request=None, responses=SolicitudSerializer)
     @action(detail=True, methods=["post"])
@@ -296,4 +345,63 @@ class SolicitudViewSet(
             cancelar_solicitud(solicitud)
         except SolicitudInvalida as error:
             return Response(error.datos, status=status.HTTP_400_BAD_REQUEST)
-        return Response(self._detalle(solicitud))
+        return Response(folio_actualizado(solicitud.pk))
+
+    @extend_schema(responses=ResumenBandejaSerializer)
+    @action(detail=False)
+    def resumen(self, request):
+        """Indicadores de la bandeja de control escolar para el periodo activo."""
+        periodo = periodo_activo()
+        if periodo is None:
+            raise NotFound("No hay un periodo activo.")
+        return Response(ResumenBandejaSerializer(resumen_bandeja(periodo)).data)
+
+    @extend_schema(responses=RevisionSerializer)
+    @action(detail=True)
+    def revision(self, request, pk=None):
+        """Qué impide hoy aprobar cada movimiento pendiente del folio (cupo, choques, baja pendiente)."""
+        solicitud = self.get_object()
+        revision = revision_folio(solicitud)
+        movimientos = [
+            {"id": detalle_id, "choques": choques, "errores": errores}
+            for detalle_id, (choques, errores) in revision.items()
+        ]
+        return Response(RevisionSerializer({"movimientos": movimientos}).data)
+
+
+class MovimientoViewSet(viewsets.GenericViewSet):
+    """Dictamen de control escolar: aprobar o rechazar cada movimiento de un folio (F6)."""
+
+    queryset = DetalleSolicitud.objects.all()
+    serializer_class = SolicitudSerializer
+    permission_classes = [EsControlEscolar]
+
+    def _responder(self, accion) -> Response:
+        detalle = self.get_object()
+        try:
+            detalle = accion(detalle)
+        except DictamenInvalido as error:
+            datos = dict(error.datos)
+            if error.choques or error.errores:
+                datos["choques"] = ChoqueSerializer(error.choques, many=True).data
+                datos["errores"] = ErrorMovimientoSerializer(error.errores, many=True).data
+            return Response(datos, status=status.HTTP_400_BAD_REQUEST)
+        return Response(folio_actualizado(detalle.solicitud_id))
+
+    @extend_schema(request=AprobarSerializer, responses=SolicitudSerializer)
+    @action(detail=True, methods=["post"])
+    def aprobar(self, request, pk=None):
+        """Aprueba el movimiento y actualiza la carga del alumno. Devuelve el folio completo."""
+        entrada = AprobarSerializer(data=request.data)
+        entrada.is_valid(raise_exception=True)
+        visto_bueno = entrada.validated_data["visto_bueno"]
+        return self._responder(lambda d: aprobar_movimiento(d, request.user, visto_bueno=visto_bueno))
+
+    @extend_schema(request=RechazarSerializer, responses=SolicitudSerializer)
+    @action(detail=True, methods=["post"])
+    def rechazar(self, request, pk=None):
+        """Rechaza el movimiento con su motivo. Devuelve el folio completo."""
+        entrada = RechazarSerializer(data=request.data)
+        entrada.is_valid(raise_exception=True)
+        motivo = entrada.validated_data["motivo"]
+        return self._responder(lambda d: rechazar_movimiento(d, request.user, motivo))

@@ -3,9 +3,10 @@ Datos de demostración iguales a los del prototipo (stitch/).
 
     python manage.py seed_demo
     python manage.py seed_demo --convocatoria-cerrada   # para probar solicitudes extemporáneas
+    python manage.py seed_demo --sin-folios             # bandeja de control escolar vacía
 
 Se puede correr las veces que quieras: actualiza lo que existe y deja los datos
-de demostración como al inicio (contraseñas y cargas incluidas).
+de demostración como al inicio (contraseñas, cargas y folios de la bandeja incluidos).
 """
 
 from datetime import date, time, timedelta
@@ -17,17 +18,21 @@ from django.utils import timezone
 
 from core.models import (
     CargaAcademica,
+    DetalleSolicitud,
     Docente,
     Estudiante,
     Grupo,
     HorarioGrupo,
+    Notificacion,
     PeriodoEscolar,
     Programa,
     Rol,
+    Solicitud,
     Turno,
     UnidadAprendizaje,
     Usuario,
 )
+from core.services.solicitudes import siguiente_folio
 
 PASSWORD_DEMO = "demo1234"
 PASSWORD_TEMPORAL = "temporal"
@@ -117,6 +122,26 @@ CARGAS = {
 }
 
 
+# Folios de la bandeja de control escolar (como en stitch). Carlos (210089334) no tiene ninguno,
+# para que la demostración del alumno empiece limpia. `horas`: cuánto después de abrir la
+# convocatoria se envió; los extemporáneos se fechan unas horas antes de correr el comando.
+FOLIOS = [
+    {"matricula": "220011456", "horas": 3, "extemporanea": False,
+     "justificacion": "Necesito Economía de la Innovación para completar los créditos optativos de este ciclo "
+                      "sin atrasar mi avance.",
+     "movimientos": [("EC704", "ALTA")], "aprobado_por": "roberto.pena"},
+    # EC605 choca con su FI702: el horario cambió después de que envió el folio.
+    {"matricula": "200045129", "horas": 26, "extemporanea": False,
+     "justificacion": "Me falta esta materia para completar la seriación y el grupo de la tarde es el único que "
+                      "no choca con mis prácticas profesionales.",
+     "movimientos": [("EC605", "ALTA")]},
+    {"matricula": "200078511", "horas": None, "extemporanea": True,
+     "justificacion": "Estuve hospitalizado durante la convocatoria y no pude hacer el trámite. Cuento con el "
+                      "justificante médico para presentarlo en ventanilla.",
+     "movimientos": [("EC603", "ALTA")]},
+]
+
+
 class Command(BaseCommand):
     help = "Carga los datos de demostración del prototipo (se puede correr varias veces)."
 
@@ -125,6 +150,11 @@ class Command(BaseCommand):
             "--convocatoria-cerrada",
             action="store_true",
             help="Deja la convocatoria cerrada desde ayer (para probar solicitudes extemporáneas).",
+        )
+        parser.add_argument(
+            "--sin-folios",
+            action="store_true",
+            help="No crea los folios de demostración de la bandeja de control escolar.",
         )
         parser.add_argument(
             "--permitir-produccion",
@@ -145,9 +175,11 @@ class Command(BaseCommand):
             docentes = self._docentes()
             grupos = self._materias_y_grupos(programas, docentes, periodo)
             estudiantes = self._usuarios(programas)
+            self._limpiar_tramites(estudiantes)
             self._cargas(estudiantes, grupos)
+            folios = 0 if options["sin_folios"] else self._folios(periodo, estudiantes, grupos)
 
-        self._resumen(periodo)
+        self._resumen(periodo, folios)
 
     def _programas(self):
         return {nombre: Programa.objects.get_or_create(nombre=nombre)[0] for nombre in PROGRAMAS}
@@ -272,7 +304,58 @@ class Command(BaseCommand):
                     },
                 )
 
-    def _resumen(self, periodo):
+    def _limpiar_tramites(self, estudiantes):
+        """Quita lo que dejaron las pruebas a mano: folios, avisos y altas aprobadas de los alumnos demo."""
+        Solicitud.objects.filter(estudiante__in=estudiantes.values()).delete()
+        usernames = [p["username"] for p in PERSONAL] + list(estudiantes)
+        Notificacion.objects.filter(usuario__username__in=usernames).delete()
+        CargaAcademica.objects.filter(
+            estudiante__in=estudiantes.values(), origen=CargaAcademica.Origen.SOLICITUD
+        ).delete()
+
+    def _folios(self, periodo, estudiantes, grupos):
+        ahora = timezone.now()
+        revisores = {u.username: u for u in Usuario.objects.filter(username__in=[p["username"] for p in PERSONAL])}
+        anio = timezone.localtime(ahora).year
+        for f in FOLIOS:
+            estudiante = estudiantes[f["matricula"]]
+            enviada = (
+                ahora - timedelta(hours=2)
+                if f["horas"] is None
+                else min(periodo.convocatoria_inicio + timedelta(hours=f["horas"]), ahora - timedelta(hours=4))
+            )
+            solicitud = Solicitud.objects.create(
+                folio_digital=siguiente_folio(anio),
+                estudiante=estudiante,
+                periodo=periodo,
+                justificacion=f["justificacion"],
+                extemporanea=f["extemporanea"],
+            )
+            # fecha_solicitud es auto_now_add: se ajusta después de crearla.
+            Solicitud.objects.filter(pk=solicitud.pk).update(fecha_solicitud=enviada)
+            revisor = revisores.get(f.get("aprobado_por", ""))
+            for clave, tipo in f["movimientos"]:
+                grupo = grupos[clave]
+                DetalleSolicitud.objects.create(
+                    solicitud=solicitud,
+                    grupo=grupo,
+                    tipo_tramite=tipo,
+                    estado=DetalleSolicitud.Estado.APROBADA if revisor else DetalleSolicitud.Estado.PENDIENTE,
+                    revisado_por=revisor,
+                    fecha_resolucion=enviada + timedelta(hours=2) if revisor else None,
+                )
+                if revisor and tipo == DetalleSolicitud.Tipo.ALTA:
+                    CargaAcademica.objects.update_or_create(
+                        estudiante=estudiante,
+                        grupo=grupo,
+                        defaults={
+                            "estado": CargaAcademica.Estado.INSCRITO,
+                            "origen": CargaAcademica.Origen.SOLICITUD,
+                        },
+                    )
+        return len(FOLIOS)
+
+    def _resumen(self, periodo, folios):
         estado = "abierta" if periodo.convocatoria_abierta else "cerrada"
         self.stdout.write(self.style.SUCCESS("Datos de demostración listos."))
         self.stdout.write(
@@ -282,7 +365,8 @@ class Command(BaseCommand):
         self.stdout.write(
             f"  {Grupo.objects.filter(periodo=periodo).count()} grupos, "
             f"{Estudiante.objects.count()} estudiantes, "
-            f"{CargaAcademica.objects.filter(estado=CargaAcademica.Estado.INSCRITO).count()} cargas inscritas."
+            f"{CargaAcademica.objects.filter(estado=CargaAcademica.Estado.INSCRITO).count()} cargas inscritas, "
+            f"{folios} folios en la bandeja de control escolar."
         )
         self.stdout.write("  Accesos:")
         self.stdout.write(f"    estudiante       210089334 / {PASSWORD_DEMO}")

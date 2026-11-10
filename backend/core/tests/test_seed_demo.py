@@ -6,12 +6,14 @@ from django.test import TestCase, override_settings
 
 from core.models import (
     CargaAcademica,
+    DetalleSolicitud,
     Estudiante,
     Grupo,
     HorarioGrupo,
     PeriodoEscolar,
     Programa,
     Rol,
+    Solicitud,
     Usuario,
 )
 
@@ -35,6 +37,8 @@ class SeedDemoTests(TestCase):
             "estudiantes": Estudiante.objects.count(),
             "cargas": CargaAcademica.objects.count(),
             "periodos_activos": PeriodoEscolar.objects.filter(activo=True).count(),
+            "folios": Solicitud.objects.count(),
+            "movimientos": DetalleSolicitud.objects.count(),
         }
 
     def test_crea_los_datos_esperados(self):
@@ -47,10 +51,51 @@ class SeedDemoTests(TestCase):
                 "horarios": 18,
                 "usuarios": 8,
                 "estudiantes": 5,
-                "cargas": 7,
+                # 7 importadas y el alta aprobada de Diego.
+                "cargas": 8,
                 "periodos_activos": 1,
+                "folios": 3,
+                "movimientos": 3,
             },
         )
+
+    def test_folios_de_la_bandeja(self):
+        seed()
+        folios = {
+            f.estudiante.matricula: f
+            for f in Solicitud.objects.select_related("estudiante").prefetch_related("detalles__grupo__materia")
+        }
+        self.assertNotIn("210089334", folios)
+        andrea, luis, diego = folios["200045129"], folios["200078511"], folios["220011456"]
+        self.assertEqual((andrea.estado, andrea.extemporanea), ("pendiente", False))
+        self.assertEqual((luis.estado, luis.extemporanea), ("pendiente", True))
+        self.assertGreaterEqual(len(luis.justificacion), 100)
+        self.assertEqual(diego.estado, "aprobada")
+        self.assertEqual(diego.detalles.get().revisado_por.username, "roberto.pena")
+        self.assertTrue(
+            CargaAcademica.objects.filter(
+                estudiante=diego.estudiante, grupo=grupo("EC704"), origen=CargaAcademica.Origen.SOLICITUD
+            ).exists()
+        )
+        # EC504 sigue lleno para la demostración de "sin cupo".
+        self.assertEqual(grupo("EC504").cupo_disponible, 0)
+
+    def test_reinicia_los_tramites(self):
+        seed()
+        carlos = Estudiante.objects.get(matricula="210089334")
+        folio = Solicitud.objects.create(folio_digital="SABE-2026-099", estudiante=carlos, periodo=grupo("EC606").periodo)
+        DetalleSolicitud.objects.create(solicitud=folio, grupo=grupo("EC606"), tipo_tramite="ALTA", estado="aprobada")
+        CargaAcademica.objects.create(
+            estudiante=carlos, grupo=grupo("EC606"), origen=CargaAcademica.Origen.SOLICITUD
+        )
+        seed()
+        self.assertFalse(Solicitud.objects.filter(estudiante=carlos).exists())
+        self.assertFalse(CargaAcademica.objects.filter(estudiante=carlos, grupo=grupo("EC606")).exists())
+        self.assertEqual(Solicitud.objects.count(), 3)
+
+    def test_sin_folios(self):
+        seed(sin_folios=True)
+        self.assertFalse(Solicitud.objects.exists())
 
     def test_correrlo_dos_veces_no_duplica(self):
         seed()

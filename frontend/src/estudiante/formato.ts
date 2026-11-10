@@ -121,6 +121,19 @@ export function fechaCorta(iso: string): string {
   return `${dia} ${MESES[mes].slice(0, 3)} ${anio}`;
 }
 
+/** "12 Feb 2026, 10:14" (bandeja de control escolar). */
+export function fechaHora(iso: string): string {
+  return `${fechaCorta(iso)}, ${partesFecha(iso).hora}`;
+}
+
+/** "Lun y Mié 08:00 a 10:00" (tarjetas del dictamen en control escolar). */
+export function horarioDictamen(horarios: HorarioClase[]): string {
+  if (horarios.length === 0) return "Sin horario asignado";
+  return bloques(horarios)
+    .map(({ dias, inicio, fin }) => `${unir(dias.map((d) => DIAS_CORTOS[d]))} ${hora(inicio)} a ${hora(fin)}`)
+    .join(" • ");
+}
+
 /** "14:15 hrs" */
 export function horaDe(iso: string): string {
   return `${partesFecha(iso).hora} hrs`;

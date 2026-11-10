@@ -1,6 +1,10 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { RedirigirPorRol, RutaProtegida } from "./auth/RutaProtegida";
 import { Layout } from "./components/Layout";
+import { LayoutControlEscolar } from "./control/LayoutControlEscolar";
+import { Proximamente } from "./control/Proximamente";
+import { RevisarFolioPage } from "./control/RevisarFolioPage";
+import { SolicitudesPage } from "./control/SolicitudesPage";
 import { CatalogoPage } from "./estudiante/CatalogoPage";
 import { DashboardPage } from "./estudiante/DashboardPage";
 import { HorarioPage } from "./estudiante/HorarioPage";
@@ -9,9 +13,19 @@ import { ConfirmacionPage } from "./estudiante/ConfirmacionPage";
 import { DetalleFolioPage } from "./estudiante/DetalleFolioPage";
 import { HistorialPage } from "./estudiante/HistorialPage";
 import { CambiarPasswordPage } from "./pages/CambiarPasswordPage";
-import { InicioAdministrador, InicioControlEscolar, NoEncontrada } from "./pages/Inicios";
+import { InicioAdministrador, NoEncontrada } from "./pages/Inicios";
 import { LoginPage } from "./pages/LoginPage";
 import { RecuperarPasswordPage } from "./pages/RecuperarPasswordPage";
+
+// Secciones del menú de control escolar que llegan con funciones posteriores del plan.
+const PROXIMAMENTE = [
+  { ruta: "oferta", titulo: "Oferta Académica", icono: "menu_book", funcion: "F7 (periodo, convocatoria y oferta académica)" },
+  { ruta: "periodo", titulo: "Periodo y Convocatoria", icono: "event_available", funcion: "F7 (periodo, convocatoria y oferta académica)" },
+  { ruta: "importacion", titulo: "Importación de Datos (CSV)", icono: "badge", funcion: "F8 (importación de CSV)" },
+  { ruta: "exportacion", titulo: "Exportar Excel para SADCE", icono: "sync_alt", funcion: "F9 (exportación a SADCE y lotes)" },
+  { ruta: "bitacora", titulo: "Bitácora de Auditoría", icono: "security_update_good", funcion: "F10 (notificaciones y bitácora)" },
+  { ruta: "notificaciones", titulo: "Notificaciones", icono: "notifications", funcion: "F10 (notificaciones y bitácora)" },
+];
 
 export default function App() {
   return (
@@ -36,10 +50,19 @@ export default function App() {
           </Route>
         </Route>
 
-        <Route element={<Layout />}>
-          <Route element={<RutaProtegida roles={["control_escolar"]} />}>
-            <Route path="/control-escolar" element={<InicioControlEscolar />} />
+        {/* Control escolar con el marco de sus pantallas en stitch/ */}
+        <Route element={<RutaProtegida roles={["control_escolar"]} />}>
+          <Route path="/control-escolar" element={<LayoutControlEscolar />}>
+            <Route index element={<Navigate to="solicitudes" replace />} />
+            <Route path="solicitudes" element={<SolicitudesPage />} />
+            <Route path="solicitudes/:id" element={<RevisarFolioPage />} />
+            {PROXIMAMENTE.map((p) => (
+              <Route key={p.ruta} path={p.ruta} element={<Proximamente {...p} />} />
+            ))}
           </Route>
+        </Route>
+
+        <Route element={<Layout />}>
           <Route element={<RutaProtegida roles={["administrador"]} />}>
             <Route path="/administrador" element={<InicioAdministrador />} />
           </Route>

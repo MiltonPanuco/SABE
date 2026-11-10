@@ -301,22 +301,19 @@ class Solicitud(models.Model):
     def estado(self):
         """
         Estado del folio, derivado de sus movimientos:
-        pendiente si queda alguno por resolver, si no el más avanzado de los resueltos.
+        pendiente si queda alguno por resolver; si no, aprobada, cargada en SADCE, rechazada
+        o cancelada, en ese orden (el primero que tenga algún movimiento).
         """
         # detalles.all() usa el prefetch si lo hay (listados sin una consulta por folio).
         estados = {detalle.estado for detalle in self.detalles.all()}
         E = DetalleSolicitud.Estado
-        if not estados:
+        if not estados or E.PENDIENTE in estados:
             return E.PENDIENTE
-        if E.PENDIENTE in estados:
-            return E.PENDIENTE
-        if estados == {E.RECHAZADA}:
-            return E.RECHAZADA
-        if estados == {E.CANCELADA}:
-            return E.CANCELADA
-        if estados <= {E.CARGADA_SADCE, E.RECHAZADA, E.CANCELADA}:
-            return E.CARGADA_SADCE
-        return E.APROBADA
+        # Ya no queda nada pendiente: manda el resultado más favorable al alumno.
+        for estado in (E.APROBADA, E.CARGADA_SADCE, E.RECHAZADA):
+            if estado in estados:
+                return estado
+        return E.CANCELADA
 
 
 class DetalleSolicitud(models.Model):

@@ -4,6 +4,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from .models import DetalleSolicitud, Estudiante, Grupo, HorarioGrupo, PeriodoEscolar, Solicitud, Usuario
+from .services.bandeja import EstadoBandeja, estado_bandeja
 from .services.catalogo import con_cupo
 from .services.choques import Origen
 from .services.validacion import Codigo, Movimiento
@@ -203,6 +204,7 @@ class EstudianteFolioSerializer(serializers.Serializer):
     matricula = serializers.CharField()
     nombre = serializers.CharField(source="usuario.get_full_name")
     programa = serializers.CharField(source="programa.nombre")
+    semestre = serializers.IntegerField()
 
 
 class MovimientoFolioSerializer(serializers.ModelSerializer):
@@ -230,6 +232,8 @@ class SolicitudSerializer(serializers.ModelSerializer):
 
     ciclo = serializers.CharField(source="periodo.ciclo")
     estado = serializers.ChoiceField(choices=DetalleSolicitud.Estado.choices, read_only=True)
+    # Estado en la bandeja de control escolar (F6); coincide con el filtro ?estado=.
+    estado_bandeja = serializers.SerializerMethodField()
     estudiante = EstudianteFolioSerializer()
     movimientos = MovimientoFolioSerializer(source="detalles", many=True)
     resumen = serializers.SerializerMethodField()
@@ -237,9 +241,13 @@ class SolicitudSerializer(serializers.ModelSerializer):
     class Meta:
         model = Solicitud
         fields = [
-            "id", "folio_digital", "ciclo", "fecha_solicitud", "estado", "extemporanea",
+            "id", "folio_digital", "ciclo", "fecha_solicitud", "estado", "estado_bandeja", "extemporanea",
             "justificacion", "estudiante", "movimientos", "resumen",
         ]
+
+    @extend_schema_field(serializers.ChoiceField(choices=[e.value for e in EstadoBandeja]))
+    def get_estado_bandeja(self, solicitud):
+        return estado_bandeja([d.estado for d in solicitud.detalles.all()]).value
 
     @extend_schema_field(ResumenFolioSerializer)
     def get_resumen(self, solicitud):
@@ -250,3 +258,37 @@ class SolicitudSerializer(serializers.ModelSerializer):
             "aprobadas": sum(e in (E.APROBADA, E.CARGADA_SADCE) for e in estados),
             "resueltas": sum(e != E.PENDIENTE for e in estados),
         }
+
+
+# ---------------------------------------------------------------------------
+# Bandeja y dictamen de control escolar (F6)
+# ---------------------------------------------------------------------------
+
+
+class ResumenBandejaSerializer(serializers.Serializer):
+    folios_pendientes = serializers.IntegerField()
+    movimientos_aprobados = serializers.IntegerField()
+    movimientos_rechazados = serializers.IntegerField()
+    extemporaneos = serializers.IntegerField()
+
+
+class RevisionMovimientoSerializer(serializers.Serializer):
+    """Qué impide aprobar hoy un movimiento pendiente (listas vacías si se puede aprobar)."""
+
+    id = serializers.IntegerField()
+    choques = ChoqueSerializer(many=True)
+    errores = ErrorMovimientoSerializer(many=True)
+
+
+class RevisionSerializer(serializers.Serializer):
+    movimientos = RevisionMovimientoSerializer(many=True)
+
+
+class AprobarSerializer(serializers.Serializer):
+    # Obligatorio en folios extemporáneos.
+    visto_bueno = serializers.BooleanField(default=False)
+
+
+class RechazarSerializer(serializers.Serializer):
+    # Las reglas (obligatorio, máximo 500) están en services.dictamen.
+    motivo = serializers.CharField(allow_blank=True, trim_whitespace=False)

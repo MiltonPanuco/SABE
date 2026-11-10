@@ -24,7 +24,7 @@ class BaseSolicitudesTest(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        call_command("seed_demo", stdout=StringIO())
+        call_command("seed_demo", "--sin-folios", stdout=StringIO())
         cls.periodo = PeriodoEscolar.objects.get(activo=True)
         cls.alumno = Estudiante.objects.get(matricula=ALUMNO)
 
@@ -255,7 +255,7 @@ class CancelarSolicitudTests(BaseSolicitudesTest):
 class EstadoDelFolioTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        call_command("seed_demo", stdout=StringIO())
+        call_command("seed_demo", "--sin-folios", stdout=StringIO())
 
     def test_estado_usa_el_prefetch(self):
         periodo = PeriodoEscolar.objects.get(activo=True)

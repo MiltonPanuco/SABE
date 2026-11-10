@@ -16,7 +16,7 @@ class ChoquesConCargaTests(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        call_command("seed_demo", stdout=StringIO())
+        call_command("seed_demo", "--sin-folios", stdout=StringIO())
         cls.periodo = PeriodoEscolar.objects.get(activo=True)
         # Inscrito en EC601 (lun y mié 7-9), EC602 (lun y mié 9-11), EC603 (mar y jue 9-11), EC604 (vie 7-11).
         cls.alumno = Estudiante.objects.get(matricula="210089334")
@@ -81,7 +81,7 @@ class OcupacionTests(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        call_command("seed_demo", stdout=StringIO())
+        call_command("seed_demo", "--sin-folios", stdout=StringIO())
         cls.periodo = PeriodoEscolar.objects.get(activo=True)
         cls.alumno = Estudiante.objects.get(matricula="210089334")
 

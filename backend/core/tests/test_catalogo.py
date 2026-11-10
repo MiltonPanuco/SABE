@@ -24,7 +24,7 @@ ALUMNO = "210089334"
 class BaseCatalogoTest(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        call_command("seed_demo", stdout=StringIO())
+        call_command("seed_demo", "--sin-folios", stdout=StringIO())
         cls.periodo = PeriodoEscolar.objects.get(activo=True)
 
     def entrar(self, username=ALUMNO):
