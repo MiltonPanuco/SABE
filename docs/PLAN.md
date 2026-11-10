@@ -44,7 +44,7 @@ F12 se puede preparar desde H2 (Dockerfiles y settings de producción) para no d
 | D2 | ¿Una alta que choca con una baja del mismo folio cuenta como choque? | **Decidida:** no cuenta, la baja del mismo folio libera el horario (cambio de grupo) | 11 nov |
 | D3 | Texto "~24 hrs hábiles" de resolución | Quitarlo | 11 nov |
 | D4 | Recuperar contraseña: ¿correo real o reinicio por control escolar? | Correo si hay SMTP listo en H4; si no, control escolar reinicia a contraseña temporal (F11) | 18 nov |
-| D5 | Comprobante del folio: ¿PDF en el servidor o vista imprimible? | Vista imprimible en el frontend (`window.print`), sin dependencias nuevas | 14 nov |
+| D5 | Comprobante del folio: ¿PDF en el servidor o vista imprimible? | **Decidida:** vista imprimible en el frontend (`window.print`), botón "Imprimir acuse", sin dependencias nuevas | 14 nov |
 | D6 | Dónde se hospeda | Un solo servidor con Docker Compose (Render, Railway o un VPS). Elegir en función de costo cero | 20 nov |
 
 ## 4. Convenciones
@@ -123,6 +123,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
   - No se pide otro grupo de una materia que ya se cursa o se pidió, salvo que el mismo folio la dé de baja.
   - Si el alumno quita una baja de la que dependía una alta, la alta se queda en el carrito marcada en rojo y no se puede continuar.
   - Tocar extremos (10:00 a 10:00) no es choque. Una materia con choque no se puede solicitar (no existe "forzar").
+- **Diferencias aceptadas con stitch:** la frase del choque agrega "(en tu carrito)" o "(en trámite)"; otro grupo de una materia que ya se tiene usa la tarjeta de choque con "Ya tienes esta materia en otro grupo"; en el carrito, el movimiento inválido va en rojo con su motivo y "Corrige los movimientos marcados para continuar.".
 - **Terminado cuando:** pruebas unitarias que cubran: sin choque, choque con carga, choque entre dos altas, alta que reemplaza una baja del mismo folio, extremos que se tocan, días distintos; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 13 nov.
 - **Estado:** Pendiente.
@@ -134,18 +135,22 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 - **Backend:** servicio de creación de folio en `transaction.atomic`, con generación de `folio_digital` sin repetidos; listado, detalle y cancelación.
 - **Frontend:** el carrito ya existe desde F3; aquí se conecta al envío. Confirmación (justificación y declaración), acuse con folio, historial, detalle del folio con motivo de rechazo, cancelar, convocatoria cerrada con solicitud extemporánea y comprobante imprimible (D5). Pantallas: `sabe_estudiantes`, `sabe_detalle_de_folio_sabe_2026_014_estudiante`, `sabe_cancelar_solicitud_pendiente_estudiante`, `sabe_convocatoria_cerrada_solicitud_extempor_nea_estudiante`.
 - **Contrato de API:**
-  - `POST /api/solicitudes/` `{justificacion, movimientos: [{grupo, tipo}]}` → `201 {id, folio_digital, estado, extemporanea, detalles: [...]}`
-  - `GET /api/solicitudes/` → folios del alumno (control escolar ve todos, ver F6)
-  - `GET /api/solicitudes/{id}/` → folio con movimientos, estado, motivo de rechazo, revisor y fecha
-  - `POST /api/solicitudes/{id}/cancelar/` → cancela los movimientos pendientes
+  - `POST /api/solicitudes/` `{justificacion, movimientos: [{grupo, tipo}]}` → `201 Solicitud`. `400` con `{"justificacion": [...]}`, `{"detail": "La convocatoria aún no abre."}` o `{"detail", "validacion"}` (misma forma que `/validar/`).
+  - `GET /api/solicitudes/` → `[Solicitud]`, la más reciente primero: el alumno ve las suyas, control escolar y administrador todas (filtros en F6).
+  - `GET /api/solicitudes/{id}/` → `Solicitud`.
+  - `POST /api/solicitudes/{id}/cancelar/` → cancela los movimientos pendientes y devuelve `Solicitud`; `400` si no queda ninguno pendiente.
+  - `Solicitud` = `{id, folio_digital, ciclo, fecha_solicitud, estado, extemporanea, justificacion, estudiante: {matricula, nombre, programa}, movimientos: [{id, grupo, tipo_tramite, estado, motivo_rechazo, revisado_por, fecha_resolucion}], resumen: {total, aprobadas, resueltas}}`.
 - **Reglas de negocio:**
   - Formato de folio `SABE-2026-###`, consecutivo por año.
-  - Justificación obligatoria; más larga si es extemporánea.
+  - Justificación: obligatoria; si es extemporánea, al menos 100 caracteres; siempre 500 como máximo.
   - ALTA: el grupo tiene cupo, el alumno no lo tiene inscrito y no choca (F4). BAJA: el alumno lo tiene inscrito.
   - No se repite un grupo con un movimiento pendiente en otro folio del mismo alumno.
   - Valida con `validar_movimientos` de F4 (cuenta los pendientes de otros folios) y agrega aquí sus reglas.
-  - Fuera de la convocatoria el folio se marca como extemporáneo (fecha de envío posterior a `convocatoria_fin`) y solo se aprueba con `visto_bueno`.
-  - Solo se cancelan movimientos en estado `pendiente`.
+  - Antes de `convocatoria_inicio` no se puede enviar. Después de `convocatoria_fin` el folio se guarda como extemporáneo (`Solicitud.extemporanea`) y solo se aprueba con `visto_bueno`.
+  - Un alumno puede tener varios folios pendientes a la vez; el dashboard sigue el más reciente.
+  - Código de error nuevo en la validación: `en_otro_folio` (el grupo ya tiene un movimiento pendiente en otro folio del alumno).
+  - Solo se cancelan movimientos en estado `pendiente`; se cancela el folio completo, en cualquier momento.
+- **Diferencias con stitch (acordadas):** las pantallas de detalle, cancelar y convocatoria cerrada usan el marco del portal de F3; el historial es el de `sabe_estudiantes` (acuse más tabla); sin código de verificación, sin "Turno asignado", "Ventanilla UAE", "Plan 2020", "Al corriente" ni la línea del correo; "Descargar acuse (PDF)" pasa a "Imprimir acuse"; se quitan las frases de "cupos liberados" al cancelar (un trámite pendiente no aparta lugar); "La convocatoria aún no abre" usa la tarjeta del aviso de cierre.
 - **Terminado cuando:** pruebas del servicio de creación (cada regla de arriba); flujo completo en el navegador con el alumno demo; el folio aparece en historial y horario como "en trámite"; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 17 nov.
 - **Estado:** Pendiente.
@@ -154,7 +159,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 
 - **Objetivo:** control escolar revisa folios y aprueba o rechaza cada movimiento.
 - **Depende de:** F5.
-- **Backend:** servicio de aprobar y rechazar con `transaction.atomic` + `select_for_update` sobre el grupo. Al aprobar una ALTA se crea o reactiva la `CargaAcademica` (origen `solicitud`); al aprobar una BAJA se marca `baja`.
+- **Backend:** el folio ya guarda `extemporanea` (F5) para filtrar. Servicio de aprobar y rechazar con `transaction.atomic` + `select_for_update` sobre el grupo. Al aprobar una ALTA se crea o reactiva la `CargaAcademica` (origen `solicitud`); al aprobar una BAJA se marca `baja`.
 - **Frontend:** bandeja con filtros (estado, extemporáneo, fecha), vista de validación por movimiento con choques visibles, rechazo con motivo, visto bueno. Pantalla: `sabe_solicitudes_control_escolar`.
 - **Contrato de API:**
   - `GET /api/solicitudes/?estado=&extemporanea=&q=` (control escolar ve todas)

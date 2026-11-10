@@ -6,7 +6,7 @@ import { useGrupos, useMiHorario, useValidarCarrito } from "../api/estudiante";
 import type { Choque, Grupo, ResultadoMovimiento } from "../api/tipos";
 import { Simbolo, Spinner } from "../components/acceso";
 import { useCarrito } from "./Carrito";
-import { claveGrupo, diasLargos, hora, horarioTexto, normalizar, sufijoOrigen, textoChoque } from "./formato";
+import { claveGrupo, diasLargos, hora, horarioTexto, normalizar, problemasDe, sufijoOrigen } from "./formato";
 
 export function CatalogoPage() {
   const { items, movimientos, abierto, setAbierto } = useCarrito();
@@ -262,10 +262,7 @@ function CajonCarrito() {
           items.map(({ grupo, tipo }) => {
             const alta = tipo === "ALTA";
             const resultado = revisando ? undefined : resultados.get(grupo.id);
-            const problemas = [
-              ...(resultado?.errores.map((e) => e.detalle) ?? []),
-              ...(resultado?.choques.map(textoChoque) ?? []),
-            ];
+            const problemas = problemasDe(resultado);
             return (
               <div
                 key={grupo.id}

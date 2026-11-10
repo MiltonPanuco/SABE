@@ -5,7 +5,9 @@ import { CatalogoPage } from "./estudiante/CatalogoPage";
 import { DashboardPage } from "./estudiante/DashboardPage";
 import { HorarioPage } from "./estudiante/HorarioPage";
 import { LayoutEstudiante } from "./estudiante/LayoutEstudiante";
-import { ConfirmacionPage, HistorialPage } from "./estudiante/PendientesPage";
+import { ConfirmacionPage } from "./estudiante/ConfirmacionPage";
+import { DetalleFolioPage } from "./estudiante/DetalleFolioPage";
+import { HistorialPage } from "./estudiante/HistorialPage";
 import { CambiarPasswordPage } from "./pages/CambiarPasswordPage";
 import { InicioAdministrador, InicioControlEscolar, NoEncontrada } from "./pages/Inicios";
 import { LoginPage } from "./pages/LoginPage";
@@ -30,6 +32,7 @@ export default function App() {
             <Route path="catalogo" element={<CatalogoPage />} />
             <Route path="confirmacion" element={<ConfirmacionPage />} />
             <Route path="historial" element={<HistorialPage />} />
+            <Route path="historial/:id" element={<DetalleFolioPage />} />
           </Route>
         </Route>
 

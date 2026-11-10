@@ -46,7 +46,7 @@ F12 can be prepared starting in H2 (Dockerfiles and production settings) so it i
 | D2 | Does an add that clashes with a drop in the same folio count as a clash? | **Decided:** no, the drop in the same folio frees the slot (group change) | Nov 11 |
 | D3 | "~24 business hours" resolution text | Remove it | Nov 11 |
 | D4 | Password recovery: real email or reset by Control Escolar? | Email if SMTP is ready in H4; otherwise Control Escolar resets to a temporary password (F11) | Nov 18 |
-| D5 | Folio receipt: server-side PDF or printable view? | Printable view in the frontend (`window.print`), no new dependencies | Nov 14 |
+| D5 | Folio receipt: server-side PDF or printable view? | **Decided:** printable view in the frontend (`window.print`), "Imprimir acuse" button, no new dependencies | Nov 14 |
 | D6 | Where to host | A single server with Docker Compose (Render, Railway or a VPS). Choose based on zero cost | Nov 20 |
 
 ## 4. Conventions
@@ -125,6 +125,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
   - No other group of a course the student is already taking or requested, unless the same folio drops it.
   - If the student removes a drop an add depended on, the add stays in the cart marked red and they can't continue.
   - Touching edges (10:00 to 10:00) is not a clash. A course with a clash cannot be requested (there is no "force").
+- **Accepted differences from stitch:** the clash sentence adds "(en tu carrito)" or "(en trámite)"; another group of a course the student already has uses the clash card with "Ya tienes esta materia en otro grupo"; in the cart, an invalid move is red with its reason and "Corrige los movimientos marcados para continuar.".
 - **Done when:** unit tests covering: no clash, clash with enrollment, clash between two adds, an add replacing a drop in the same folio, touching edges, different days; the screens match their `stitch/` design.
 - **Target date:** Nov 13.
 - **Status:** Pending.
@@ -136,18 +137,22 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 - **Backend:** folio creation service inside `transaction.atomic`, generating a unique `folio_digital`; list, detail and cancel.
 - **Frontend:** the cart already exists from F3; here it is wired to submission. Confirmation (justification and declaration), receipt with folio, history, folio detail with rejection reason, cancel, closed enrollment window with late request, and printable receipt (D5). Screens: `sabe_estudiantes`, `sabe_detalle_de_folio_sabe_2026_014_estudiante`, `sabe_cancelar_solicitud_pendiente_estudiante`, `sabe_convocatoria_cerrada_solicitud_extempor_nea_estudiante`.
 - **API contract:**
-  - `POST /api/solicitudes/` `{justificacion, movimientos: [{grupo, tipo}]}` → `201 {id, folio_digital, estado, extemporanea, detalles: [...]}`
-  - `GET /api/solicitudes/` → the student's folios (Control Escolar sees all, see F6)
-  - `GET /api/solicitudes/{id}/` → folio with moves, status, rejection reason, reviewer and date
-  - `POST /api/solicitudes/{id}/cancelar/` → cancels the pending moves
+  - `POST /api/solicitudes/` `{justificacion, movimientos: [{grupo, tipo}]}` → `201 Solicitud`. `400` with `{"justificacion": [...]}`, `{"detail": "La convocatoria aún no abre."}` or `{"detail", "validacion"}` (same shape as `/validar/`).
+  - `GET /api/solicitudes/` → `[Solicitud]`, newest first: students see their own, Control Escolar and admin see all (filters in F6).
+  - `GET /api/solicitudes/{id}/` → `Solicitud`.
+  - `POST /api/solicitudes/{id}/cancelar/` → cancels the pending moves and returns `Solicitud`; `400` if none are pending.
+  - `Solicitud` = `{id, folio_digital, ciclo, fecha_solicitud, estado, extemporanea, justificacion, estudiante: {matricula, nombre, programa}, movimientos: [{id, grupo, tipo_tramite, estado, motivo_rechazo, revisado_por, fecha_resolucion}], resumen: {total, aprobadas, resueltas}}`.
 - **Business rules:**
   - Folio format `SABE-2026-###`, sequential per year.
-  - Justification is required; longer if the request is late.
+  - Justification: required; at least 100 characters if late; always 500 at most.
   - ALTA (add): the group has seats, the student isn't already enrolled in it, and it doesn't clash (F4). BAJA (drop): the student is enrolled in it.
   - A group can't have a pending move in another folio of the same student.
   - Validates with F4's `validar_movimientos` (pending moves in other folios count) and adds its rules there.
-  - Outside the enrollment window the folio is marked as late (submitted after `convocatoria_fin`) and can only be approved with `visto_bueno`.
-  - Only moves in `pendiente` status can be canceled.
+  - Before `convocatoria_inicio` it can't be sent. After `convocatoria_fin` the folio is saved as late (`Solicitud.extemporanea`) and can only be approved with `visto_bueno`.
+  - A student can have several pending folios at once; the dashboard follows the most recent one.
+  - New validation error code: `en_otro_folio` (the group already has a pending move in another folio of the student).
+  - Only moves in `pendiente` status can be canceled; the whole folio is canceled, at any time.
+- **Differences from stitch (agreed):** the detail, cancel and closed-window screens use the F3 portal frame; the history is the `sabe_estudiantes` one (receipt plus table); no verification code, no "Turno asignado", "Ventanilla UAE", "Plan 2020", "Al corriente" or the email line; "Descargar acuse (PDF)" becomes "Imprimir acuse"; the "seats released" phrases on cancel are dropped (a pending request doesn't hold a seat); "La convocatoria aún no abre" reuses the closing-notice card.
 - **Done when:** tests for the creation service (each rule above); the full flow works in the browser with the demo student; the folio appears in the history and schedule as "in progress"; the screens match their `stitch/` design.
 - **Target date:** Nov 17.
 - **Status:** Pending.
@@ -156,7 +161,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 
 - **Goal:** Control Escolar reviews folios and approves or rejects each move.
 - **Depends on:** F5.
-- **Backend:** approve and reject service with `transaction.atomic` + `select_for_update` on the group. Approving an ALTA creates or reactivates the `CargaAcademica` (origin `solicitud`); approving a BAJA marks it `baja`.
+- **Backend:** the folio already stores `extemporanea` (F5) for filtering. Approve and reject service with `transaction.atomic` + `select_for_update` on the group. Approving an ALTA creates or reactivates the `CargaAcademica` (origin `solicitud`); approving a BAJA marks it `baja`.
 - **Frontend:** inbox with filters (status, late, date), per-move review view with visible clashes, rejection with reason, sign-off (`visto_bueno`). Screen: `sabe_solicitudes_control_escolar`.
 - **API contract:**
   - `GET /api/solicitudes/?estado=&extemporanea=&q=` (Control Escolar sees all)

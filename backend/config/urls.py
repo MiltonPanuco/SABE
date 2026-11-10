@@ -11,11 +11,13 @@ from core.views import (
     HorarioEstudianteView,
     MeView,
     PeriodoActivoView,
+    SolicitudViewSet,
     ValidarMovimientosView,
 )
 
 router = SimpleRouter()
 router.register("grupos", GrupoViewSet, basename="grupo")
+router.register("solicitudes", SolicitudViewSet, basename="solicitud")
 
 
 def health(request):
@@ -34,7 +36,7 @@ urlpatterns = [
     # Catálogo y horario del estudiante (F3).
     path("api/periodos/activo/", PeriodoActivoView.as_view(), name="periodo_activo"),
     path("api/estudiante/horario/", HorarioEstudianteView.as_view(), name="horario_estudiante"),
-    # Choques y validación del carrito (F4). Va antes del router de solicitudes de F5.
+    # Choques y validación del carrito (F4). Va antes del router para que "validar" no se lea como id.
     path("api/solicitudes/validar/", ValidarMovimientosView.as_view(), name="validar_movimientos"),
     path("api/", include(router.urls)),
     # Documentación de la API (contrato para el frontend).

@@ -1,8 +1,12 @@
 // Vista 1 de stitch/sabe_estudiantes: tarjeta del alumno, convocatoria, trámite en curso y accesos.
 import { Link } from "react-router-dom";
 import { usePeriodoActivo } from "../api/estudiante";
+import { useSolicitudes } from "../api/solicitudes";
+import type { Solicitud } from "../api/tipos";
 import { useAuth } from "../auth/AuthProvider";
 import { Simbolo } from "../components/acceso";
+import { ChipEstadoFolio } from "./folio";
+import { fechaLarga } from "./formato";
 
 const ACCESOS = [
   { ruta: "/estudiante/catalogo", icono: "add_box", fondo: "bg-primary-fixed text-primary", titulo: "Solicitar Alta", texto: "Asignaturas con cupo" },
@@ -26,7 +30,10 @@ const ACCESOS = [
 export function DashboardPage() {
   const { usuario } = useAuth();
   const { data: periodo } = usePeriodoActivo();
+  const { data: folios } = useSolicitudes();
   if (!usuario) return null;
+  // Se sigue el folio pendiente más reciente (la lista viene del más nuevo al más viejo).
+  const enCurso = folios?.find((f) => f.estado === "pendiente");
 
   const perfil = usuario.estudiante;
   const ciclo = periodo?.ciclo ?? "";
@@ -113,7 +120,9 @@ export function DashboardPage() {
       {/* Trámite en curso y accesos rápidos */}
       <div className="grid grid-cols-1 gap-space-lg lg:grid-cols-12">
         <div className="flex flex-col justify-between rounded-xl bg-surface-container-lowest p-4 shadow-sm sm:p-space-lg lg:col-span-7">
-          {/* El estado "Seguimiento de Solicitud" (folio y 3 pasos) llega con F5. */}
+          {enCurso ? (
+            <Seguimiento folio={enCurso} />
+          ) : (
           <div className="flex flex-col items-center justify-center px-4 py-8 text-center">
             <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-surface-container-low text-primary-container">
               <Simbolo nombre="assignment_late" className="text-[32px]!" />
@@ -130,6 +139,7 @@ export function DashboardPage() {
               <span>Ir al catálogo de asignaturas</span>
             </Link>
           </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-space-md lg:col-span-5">
@@ -150,6 +160,89 @@ export function DashboardPage() {
               </Link>
             ))}
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** "Seguimiento de Solicitud" de stitch: folio en curso, revisor, los 3 pasos y los movimientos. */
+function Seguimiento({ folio }: { folio: Solicitud }) {
+  return (
+    <div>
+      <div className="mb-space-md flex items-center justify-between gap-2">
+        <div className="flex items-center gap-space-xs">
+          <Simbolo nombre="pending_actions" className="text-primary-container" />
+          <h3 className="font-headline-sm text-headline-sm text-primary">Seguimiento de Solicitud</h3>
+        </div>
+        <ChipEstadoFolio solicitud={folio} className="text-xs" />
+      </div>
+      <Link
+        to={`/estudiante/historial/${folio.id}`}
+        className="mb-space-md flex flex-col items-start justify-between gap-space-sm rounded-xl bg-surface-container-low p-3 transition-colors hover:bg-surface-container sm:flex-row sm:items-center sm:p-space-md"
+      >
+        <div className="flex flex-col">
+          <span className="font-mono font-label-sm text-label-sm text-on-surface-variant">FOLIO ASIGNADO</span>
+          <span className="font-mono font-headline-md text-headline-md font-bold text-primary">#{folio.folio_digital}</span>
+          <span className="mt-0.5 font-body-sm text-body-sm text-on-surface-variant">Enviado: {fechaLarga(folio.fecha_solicitud)}</span>
+        </div>
+        <div className="flex items-center gap-1 text-left sm:flex-col sm:items-end sm:text-right">
+          <span className="font-label-sm text-label-sm text-on-surface-variant">Revisor responsable</span>
+          <span className="font-label-md text-label-md font-semibold text-on-surface">Control Escolar</span>
+        </div>
+      </Link>
+
+      <div className="px-2 py-space-md">
+        <div className="relative flex items-center justify-between">
+          <div className="absolute top-1/2 right-6 left-6 h-1 -translate-y-1/2 bg-surface-container-highest" />
+          <div className="absolute top-1/2 right-1/2 left-6 h-1 -translate-y-1/2 bg-on-tertiary-container" />
+          <div className="z-10 flex flex-col items-center gap-1">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-tertiary-container text-xs font-bold text-on-tertiary-container shadow-sm ring-4 ring-surface-container-lowest sm:h-10 sm:w-10 sm:text-base">
+              <Simbolo nombre="done" className="text-[18px]! sm:text-[20px]!" />
+            </div>
+            <span className="text-center font-label-sm text-[11px] font-bold text-on-surface">
+              Paso 1<br />
+              <span className="font-normal text-on-surface-variant">Ingresada</span>
+            </span>
+          </div>
+          <div className="z-10 flex flex-col items-center gap-1">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary-container font-bold text-on-secondary-container shadow-md ring-4 ring-surface-container-lowest sm:h-10 sm:w-10">
+              <Simbolo nombre="hourglass_top" className="text-[18px]! sm:text-[20px]!" />
+            </div>
+            <span className="text-center font-label-sm text-[11px] font-bold text-on-secondary-container">
+              Paso 2<br />
+              <span className="font-semibold">En dictamen</span>
+            </span>
+          </div>
+          <div className="z-10 flex flex-col items-center gap-1">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-container-high font-bold text-on-surface-variant ring-4 ring-surface-container-lowest sm:h-10 sm:w-10">
+              <Simbolo nombre="database" className="text-[18px]! sm:text-[20px]!" />
+            </div>
+            <span className="text-center font-label-sm text-[11px] font-bold text-on-surface-variant">
+              Paso 3<br />
+              <span className="font-normal">Cargada en SADCE</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-space-sm border-t border-surface-container-high/40 pt-space-sm">
+        <span className="mb-1.5 block font-mono font-label-sm text-xs text-on-surface-variant uppercase">Resumen de solicitud:</span>
+        <div className="flex flex-wrap gap-2">
+          {folio.movimientos.map((m) => {
+            const alta = m.tipo_tramite === "ALTA";
+            return (
+              <span
+                key={m.id}
+                className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 font-label-md text-xs font-semibold ${
+                  alta ? "bg-on-tertiary-container/10 text-on-tertiary-container" : "bg-error-container text-on-error-container"
+                }`}
+              >
+                <Simbolo nombre={alta ? "add_circle" : "remove_circle"} className="text-[15px]!" /> {alta ? "Alta" : "Baja"}:{" "}
+                {m.grupo.materia.nombre} (Gpo {m.grupo.num_grupo})
+              </span>
+            );
+          })}
         </div>
       </div>
     </div>

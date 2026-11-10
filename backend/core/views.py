@@ -1,11 +1,12 @@
 from django.db.models import Prefetch
 from drf_spectacular.utils import OpenApiParameter, extend_schema
-from rest_framework import status, viewsets
+from rest_framework import mixins, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import CargaAcademica, DetalleSolicitud, Estudiante, Grupo, Rol, Usuario
+from .models import CargaAcademica, DetalleSolicitud, Estudiante, Grupo, Rol, Solicitud, Usuario
 from .permissions import EsEstudiante
 from .serializers import (
     CambiarPasswordSerializer,
@@ -14,10 +15,13 @@ from .serializers import (
     HorarioEstudianteSerializer,
     MeSerializer,
     PeriodoActivoSerializer,
+    CrearSolicitudSerializer,
+    SolicitudSerializer,
     ValidacionSerializer,
     ValidarMovimientosSerializer,
 )
 from .services.catalogo import con_cupo, grupos_catalogo, periodo_activo
+from .services.solicitudes import SolicitudInvalida, cancelar_solicitud, crear_solicitud
 from .services.validacion import Contexto, revisar_alta, validar_movimientos
 
 
@@ -219,3 +223,77 @@ class ValidarMovimientosView(APIView):
                 {"valido": all(r.valido for r in resultados), "movimientos": resultados}
             ).data
         )
+
+
+class SolicitudViewSet(
+    mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+):
+    """
+    Folios de altas y bajas. El alumno ve, crea y cancela los suyos;
+    control escolar y administrador los ven todos (F6 agrega filtros y el dictamen).
+    """
+
+    serializer_class = SolicitudSerializer
+    pagination_class = None
+
+    def get_permissions(self):
+        if self.action in ("create", "cancelar"):
+            return [EsEstudiante()]
+        return super().get_permissions()
+
+    def get_queryset(self):
+        folios = Solicitud.objects.select_related(
+            "periodo", "estudiante__usuario", "estudiante__programa"
+        ).prefetch_related(
+            Prefetch(
+                "detalles",
+                queryset=DetalleSolicitud.objects.select_related("revisado_por")
+                .prefetch_related(Prefetch("grupo", queryset=con_cupo(Grupo.objects.all())))
+                .order_by("id"),
+            )
+        )
+        usuario = self.request.user
+        if getattr(usuario, "rol", None) == Rol.ESTUDIANTE:
+            folios = folios.filter(estudiante__usuario=usuario)
+        return folios.order_by("-fecha_solicitud", "-id")
+
+    def _detalle(self, solicitud: Solicitud) -> dict:
+        # Se vuelve a leer con todo precargado para responder igual que GET /{id}/.
+        return SolicitudSerializer(self.get_queryset().get(pk=solicitud.pk)).data
+
+    @extend_schema(request=CrearSolicitudSerializer, responses={201: SolicitudSerializer})
+    def create(self, request, *args, **kwargs):
+        periodo = periodo_activo()
+        if periodo is None:
+            raise NotFound("No hay un periodo activo.")
+        estudiante = estudiante_de(request.user)
+        if estudiante is None:
+            raise PermissionDenied("Tu usuario no tiene perfil de estudiante.")
+        entrada = CrearSolicitudSerializer(data=request.data)
+        entrada.is_valid(raise_exception=True)
+        try:
+            solicitud = crear_solicitud(
+                estudiante,
+                periodo,
+                entrada.validated_data["movimientos"],
+                entrada.validated_data["justificacion"],
+            )
+        except SolicitudInvalida as error:
+            datos = dict(error.datos)
+            if error.resultados is not None:
+                datos["validacion"] = ValidacionSerializer(
+                    {"valido": False, "movimientos": error.resultados}
+                ).data
+            return Response(datos, status=status.HTTP_400_BAD_REQUEST)
+        return Response(self._detalle(solicitud), status=status.HTTP_201_CREATED)
+
+    @extend_schema(request=None, responses=SolicitudSerializer)
+    @action(detail=True, methods=["post"])
+    def cancelar(self, request, pk=None):
+        """Cancela los movimientos pendientes del folio."""
+        solicitud = self.get_object()
+        try:
+            cancelar_solicitud(solicitud)
+        except SolicitudInvalida as error:
+            return Response(error.datos, status=status.HTTP_400_BAD_REQUEST)
+        return Response(self._detalle(solicitud))

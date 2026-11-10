@@ -33,7 +33,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       <div
         role="status"
         aria-live="polite"
-        className={`pointer-events-none fixed top-20 right-3 left-3 z-50 flex transform justify-end transition-all duration-300 sm:top-24 sm:right-6 sm:left-auto ${
+        className={`pointer-events-none fixed top-20 print:hidden right-3 left-3 z-50 flex transform justify-end transition-all duration-300 sm:top-24 sm:right-6 sm:left-auto ${
           visible ? "translate-y-0 scale-100 opacity-100" : "-translate-y-4 scale-95 opacity-0"
         }`}
       >

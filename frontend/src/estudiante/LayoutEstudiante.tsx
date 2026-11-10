@@ -56,7 +56,10 @@ function Portal() {
   const perfil = usuario.estudiante;
   const programa = perfil ? `Licenciatura en ${perfil.programa}` : "";
   const ciclo = periodo?.ciclo;
-  const seccion = SECCIONES.find((s) => s.ruta === pathname.replace(/\/$/, "")) ?? SECCIONES[0];
+  const ruta = pathname.replace(/\/$/, "");
+  const seccion = /^\/estudiante\/historial\/\d+$/.test(ruta)
+    ? { titulo: "Detalle de Folio" }
+    : (SECCIONES.find((s) => s.ruta === ruta) ?? SECCIONES[0]);
 
   const salir = () => {
     cerrarSesion();
@@ -183,7 +186,7 @@ function MenuLateral({
   return (
     <aside
       aria-hidden={!abierto}
-      className={`fixed top-0 left-0 z-50 flex h-screen w-72 max-w-[85vw] shrink-0 transform flex-col justify-between overflow-y-auto bg-[#002B49] text-white shadow-2xl transition-transform duration-300 ease-in-out ${
+      className={`fixed top-0 left-0 z-50 print:hidden flex h-screen w-72 max-w-[85vw] shrink-0 transform flex-col justify-between overflow-y-auto bg-[#002B49] text-white shadow-2xl transition-transform duration-300 ease-in-out ${
         abierto ? "translate-x-0" : "-translate-x-full"
       }`}
     >
@@ -216,7 +219,8 @@ function MenuLateral({
             <NavLink
               key={s.ruta}
               to={s.ruta}
-              end
+              // El inicio solo se marca en /estudiante; Historial también en el detalle de un folio.
+              end={s.ruta !== "/estudiante/historial"}
               onClick={cerrar}
               tabIndex={abierto ? 0 : -1}
               className={({ isActive }) =>

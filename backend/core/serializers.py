@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from .models import DetalleSolicitud, Estudiante, Grupo, HorarioGrupo, PeriodoEscolar, Usuario
+from .models import DetalleSolicitud, Estudiante, Grupo, HorarioGrupo, PeriodoEscolar, Solicitud, Usuario
 from .services.catalogo import con_cupo
 from .services.choques import Origen
 from .services.validacion import Codigo, Movimiento
@@ -186,3 +186,67 @@ class ResultadoMovimientoSerializer(serializers.Serializer):
 class ValidacionSerializer(serializers.Serializer):
     valido = serializers.BooleanField()
     movimientos = ResultadoMovimientoSerializer(many=True)
+
+
+# ---------------------------------------------------------------------------
+# Solicitudes del estudiante (F5)
+# ---------------------------------------------------------------------------
+
+
+class CrearSolicitudSerializer(ValidarMovimientosSerializer):
+    """Entrada de POST /api/solicitudes/. Las reglas de la justificación están en services.solicitudes."""
+
+    justificacion = serializers.CharField(allow_blank=True)
+
+
+class EstudianteFolioSerializer(serializers.Serializer):
+    matricula = serializers.CharField()
+    nombre = serializers.CharField(source="usuario.get_full_name")
+    programa = serializers.CharField(source="programa.nombre")
+
+
+class MovimientoFolioSerializer(serializers.ModelSerializer):
+    grupo = GrupoSerializer()
+    revisado_por = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DetalleSolicitud
+        fields = ["id", "grupo", "tipo_tramite", "estado", "motivo_rechazo", "revisado_por", "fecha_resolucion"]
+
+    @extend_schema_field(serializers.CharField(allow_null=True))
+    def get_revisado_por(self, detalle):
+        usuario = detalle.revisado_por
+        return (usuario.get_full_name() or usuario.username) if usuario else None
+
+
+class ResumenFolioSerializer(serializers.Serializer):
+    total = serializers.IntegerField()
+    aprobadas = serializers.IntegerField()
+    resueltas = serializers.IntegerField()
+
+
+class SolicitudSerializer(serializers.ModelSerializer):
+    """Folio con sus movimientos. Espera el queryset de SolicitudViewSet (todo precargado)."""
+
+    ciclo = serializers.CharField(source="periodo.ciclo")
+    estado = serializers.ChoiceField(choices=DetalleSolicitud.Estado.choices, read_only=True)
+    estudiante = EstudianteFolioSerializer()
+    movimientos = MovimientoFolioSerializer(source="detalles", many=True)
+    resumen = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Solicitud
+        fields = [
+            "id", "folio_digital", "ciclo", "fecha_solicitud", "estado", "extemporanea",
+            "justificacion", "estudiante", "movimientos", "resumen",
+        ]
+
+    @extend_schema_field(ResumenFolioSerializer)
+    def get_resumen(self, solicitud):
+        E = DetalleSolicitud.Estado
+        estados = [d.estado for d in solicitud.detalles.all()]
+        return {
+            "total": len(estados),
+            "aprobadas": sum(e in (E.APROBADA, E.CARGADA_SADCE) for e in estados),
+            "resueltas": sum(e != E.PENDIENTE for e in estados),
+        }

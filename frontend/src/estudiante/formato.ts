@@ -1,5 +1,5 @@
 // Textos del portal del estudiante con el mismo formato que stitch/sabe_estudiantes.
-import type { Choque, DiaSemana, Grupo, HorarioClase, OrigenChoque } from "../api/tipos";
+import type { Choque, DiaSemana, Grupo, HorarioClase, OrigenChoque, ResultadoMovimiento } from "../api/tipos";
 
 export const DIAS: Record<DiaSemana, string> = {
   1: "Lunes",
@@ -98,4 +98,48 @@ export function lugar(aula: string): string {
 /** Lugares distintos del grupo: "Aula E-204" o "Aula E-204, Laboratorio de Cómputo". */
 export function lugares(grupo: Grupo): string {
   return [...new Set(grupo.horarios.map((h) => h.aula).filter(Boolean))].map(lugar).join(", ");
+}
+
+const MESES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
+function partesFecha(iso: string) {
+  const f = new Date(iso);
+  const hh = String(f.getHours()).padStart(2, "0");
+  const mm = String(f.getMinutes()).padStart(2, "0");
+  return { dia: f.getDate(), mes: f.getMonth(), anio: f.getFullYear(), hora: `${hh}:${mm}` };
+}
+
+/** "10 de Febrero de 2026, 09:42 hrs" */
+export function fechaLarga(iso: string): string {
+  const { dia, mes, anio, hora } = partesFecha(iso);
+  return `${dia} de ${MESES[mes]} de ${anio}, ${hora} hrs`;
+}
+
+/** "10 Feb 2026" */
+export function fechaCorta(iso: string): string {
+  const { dia, mes, anio } = partesFecha(iso);
+  return `${dia} ${MESES[mes].slice(0, 3)} ${anio}`;
+}
+
+/** "14:15 hrs" */
+export function horaDe(iso: string): string {
+  return `${partesFecha(iso).hora} hrs`;
+}
+
+/** "13 de febrero de 2026 a las 23:59 hrs" (texto corrido de la convocatoria). */
+export function fechaEnTexto(iso: string): string {
+  const { dia, mes, anio, hora } = partesFecha(iso);
+  return `${dia} de ${MESES[mes].toLowerCase()} de ${anio} a las ${hora} hrs`;
+}
+
+/** "13-Feb-2026 23:59 hrs" (módulos de la convocatoria cerrada). */
+export function fechaModulo(iso: string): string {
+  const { dia, mes, anio, hora } = partesFecha(iso);
+  return `${String(dia).padStart(2, "0")}-${MESES[mes].slice(0, 3)}-${anio} ${hora} hrs`;
+}
+
+/** Motivos por los que un movimiento del carrito no se puede enviar (errores y choques), en texto. */
+export function problemasDe(resultado?: ResultadoMovimiento): string[] {
+  if (!resultado) return [];
+  return [...resultado.errores.map((e) => e.detalle), ...resultado.choques.map(textoChoque)];
 }

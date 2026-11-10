@@ -287,6 +287,8 @@ class Solicitud(models.Model):
     periodo = models.ForeignKey(PeriodoEscolar, on_delete=models.PROTECT, related_name="solicitudes")
     justificacion = models.TextField(blank=True)
     fecha_solicitud = models.DateTimeField(auto_now_add=True)
+    # Enviada después de convocatoria_fin. Se guarda al crearla: si luego cambian las fechas, no cambia.
+    extemporanea = models.BooleanField(default=False)
 
     class Meta:
         db_table = "solicitudes"
@@ -301,7 +303,8 @@ class Solicitud(models.Model):
         Estado del folio, derivado de sus movimientos:
         pendiente si queda alguno por resolver, si no el más avanzado de los resueltos.
         """
-        estados = set(self.detalles.values_list("estado", flat=True))
+        # detalles.all() usa el prefetch si lo hay (listados sin una consulta por folio).
+        estados = {detalle.estado for detalle in self.detalles.all()}
         E = DetalleSolicitud.Estado
         if not estados:
             return E.PENDIENTE

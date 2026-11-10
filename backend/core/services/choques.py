@@ -64,7 +64,7 @@ def movimientos_pendientes(
     )
     if excluir_solicitud is not None:
         pendientes = pendientes.exclude(solicitud=excluir_solicitud)
-    return list(pendientes.select_related("grupo__materia").prefetch_related("grupo__horarios"))
+    return list(pendientes.select_related("solicitud", "grupo__materia").prefetch_related("grupo__horarios"))
 
 
 def ocupacion(
@@ -75,18 +75,21 @@ def ocupacion(
     contar_pendientes: bool = True,
     excluir_solicitud: Solicitud | None = None,
     inscritos: list[Grupo] | None = None,
+    pendientes: list[DetalleSolicitud] | None = None,
 ) -> list[Ocupado]:
     """
     Grupos que ocupan el horario del alumno si se aplicaran `bajas`.
 
     Con `contar_pendientes`, los movimientos pendientes de otros folios también cuentan: sus altas
     ocupan horario y sus bajas lo liberan. Al aprobar (F6) solo cuenta la carga inscrita.
-    `inscritos` evita repetir la consulta si quien llama ya la tiene.
+    `inscritos` y `pendientes` evitan repetir las consultas si quien llama ya las tiene.
     """
     libres = {grupo.pk for grupo in bajas}
     altas_pendientes: list[Grupo] = []
     if contar_pendientes:
-        for detalle in movimientos_pendientes(estudiante, periodo, excluir_solicitud=excluir_solicitud):
+        if pendientes is None:
+            pendientes = movimientos_pendientes(estudiante, periodo, excluir_solicitud=excluir_solicitud)
+        for detalle in pendientes:
             if detalle.tipo_tramite == DetalleSolicitud.Tipo.BAJA:
                 libres.add(detalle.grupo_id)
             else:

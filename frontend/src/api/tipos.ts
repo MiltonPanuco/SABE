@@ -119,3 +119,31 @@ export interface Validacion {
   valido: boolean;
   movimientos: ResultadoMovimiento[];
 }
+
+export type EstadoMovimiento = "pendiente" | "aprobada" | "rechazada" | "cargada_sadce" | "cancelada";
+
+/** Un movimiento de un folio, con su dictamen. */
+export interface MovimientoFolio {
+  id: number;
+  grupo: Grupo;
+  tipo_tramite: TipoTramite;
+  estado: EstadoMovimiento;
+  motivo_rechazo: string;
+  /** Nombre de quien dictaminó, o null mientras está pendiente. */
+  revisado_por: string | null;
+  fecha_resolucion: string | null;
+}
+
+/** Elemento de GET /api/solicitudes/ (el folio). */
+export interface Solicitud {
+  id: number;
+  folio_digital: string;
+  ciclo: string;
+  fecha_solicitud: string;
+  estado: EstadoMovimiento;
+  extemporanea: boolean;
+  justificacion: string;
+  estudiante: { matricula: string; nombre: string; programa: string };
+  movimientos: MovimientoFolio[];
+  resumen: { total: number; aprobadas: number; resueltas: number };
+}

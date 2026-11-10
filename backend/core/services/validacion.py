@@ -12,7 +12,7 @@ from enum import StrEnum
 
 from core.models import DetalleSolicitud, Estudiante, Grupo, PeriodoEscolar, Solicitud
 
-from .choques import Choque, Ocupado, Origen, choques_contra, grupos_inscritos, ocupacion
+from .choques import Choque, Ocupado, Origen, choques_contra, grupos_inscritos, movimientos_pendientes, ocupacion
 
 Tipo = DetalleSolicitud.Tipo
 
@@ -24,6 +24,7 @@ class Codigo(StrEnum):
     SIN_CUPO = "sin_cupo"
     MISMA_MATERIA = "misma_materia"
     NO_INSCRITO = "no_inscrito"
+    EN_OTRO_FOLIO = "en_otro_folio"
 
 
 @dataclass
@@ -58,6 +59,8 @@ class Contexto:
     inscritos: set[int]  # grupos inscritos de verdad, antes de aplicar bajas
     ocupados: list[Ocupado]  # inscritos menos bajas, más altas pendientes de otros folios
     altas: list[Grupo]  # altas de la lista (el carrito o el folio)
+    # Movimiento pendiente de otro folio por grupo (vacío si no se cuentan los pendientes).
+    pendientes: dict[int, DetalleSolicitud] = field(default_factory=dict)
 
     @classmethod
     def para(
@@ -71,15 +74,26 @@ class Contexto:
         excluir_solicitud: Solicitud | None = None,
     ) -> "Contexto":
         inscritos = grupos_inscritos(estudiante, periodo)
+        pendientes = (
+            movimientos_pendientes(estudiante, periodo, excluir_solicitud=excluir_solicitud)
+            if contar_pendientes
+            else []
+        )
         ocupados = ocupacion(
             estudiante,
             periodo,
             bajas=bajas,
             contar_pendientes=contar_pendientes,
-            excluir_solicitud=excluir_solicitud,
             inscritos=inscritos,
+            pendientes=pendientes,
         )
-        return cls(periodo, {g.pk for g in inscritos}, ocupados, list(altas))
+        return cls(
+            periodo,
+            {g.pk for g in inscritos},
+            ocupados,
+            list(altas),
+            {detalle.grupo_id: detalle for detalle in pendientes},
+        )
 
 
 def _cupo_libre(grupo: Grupo) -> int:
@@ -108,9 +122,22 @@ def _misma_materia(grupo: Grupo, contexto: Contexto) -> ErrorMovimiento | None:
     return None
 
 
+def _en_otro_folio(grupo: Grupo, contexto: Contexto) -> ErrorMovimiento | None:
+    detalle = contexto.pendientes.get(grupo.pk)
+    if detalle is None:
+        return None
+    return ErrorMovimiento(
+        Codigo.EN_OTRO_FOLIO,
+        f"Ya pediste {grupo.materia.nombre_materia} grupo {grupo.num_grupo} "
+        f"en el folio {detalle.solicitud.folio_digital}.",
+    )
+
+
 def revisar_alta(grupo: Grupo, contexto: Contexto) -> tuple[list[Choque], list[ErrorMovimiento]]:
     """Choques y errores de pedir el alta de `grupo`. No hace consultas si el grupo viene de `con_cupo`."""
     errores = []
+    if error := _en_otro_folio(grupo, contexto):
+        errores.append(error)
     if grupo.pk in contexto.inscritos:
         errores.append(ErrorMovimiento(Codigo.YA_INSCRITO, "Ya estás inscrito en este grupo."))
     if grupo.periodo_id != contexto.periodo.pk or not grupo.visible:
@@ -164,7 +191,10 @@ def validar_movimientos(
             choques, errores = revisar_alta(movimiento.grupo, contexto)
             resultado.choques += choques
             resultado.errores += errores
-        elif movimiento.grupo.pk not in contexto.inscritos:
-            resultado.errores.append(ErrorMovimiento(Codigo.NO_INSCRITO, "No estás inscrito en este grupo."))
+        else:
+            if error := _en_otro_folio(movimiento.grupo, contexto):
+                resultado.errores.append(error)
+            if movimiento.grupo.pk not in contexto.inscritos:
+                resultado.errores.append(ErrorMovimiento(Codigo.NO_INSCRITO, "No estás inscrito en este grupo."))
         resultados.append(resultado)
     return resultados
