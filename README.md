@@ -12,7 +12,7 @@ Proyecto universitario, 7mo semestre. SABE es independiente: **no se integra a P
 | Frontend | **React + TypeScript** (Vite) | Confirmado |
 | Base de datos | PostgreSQL (SQLite para arrancar rápido) | Recomendado, por confirmar con el equipo |
 | Autenticación | JWT con `djangorestframework-simplejwt` (login con matrícula) | Recomendado, por confirmar |
-| Exportación a SADCE | `openpyxl` (xlsx) y `csv` | Recomendado, por confirmar |
+| Exportación a SADCE | `openpyxl` (xlsx) y `csv` | Confirmado |
 | Frontend: datos y rutas | TanStack Query + React Router | Recomendado, por confirmar |
 | Frontend: estilos | Tailwind CSS (paleta de `stitch/academic_prestige_modern/DESIGN.md`) | Recomendado, por confirmar |
 | Documentación de API | `drf-spectacular` (Swagger en `/api/docs/`) | Incluido |
@@ -101,7 +101,7 @@ Si cambias un modelo: `python manage.py makemigrations` y sube la migración en 
 - [ ] Endpoints de solicitudes: crear folio, listar, cancelar
 - [ ] Aprobar y rechazar con bloqueo de cupo (`transaction.atomic` + `select_for_update`)
 - [x] Permisos por rol (estudiante, control escolar, administrador)
-- [ ] Exportación a SADCE (xlsx/csv) y registro del lote
+- [x] Exportación a SADCE (xlsx/csv) y registro del lote
 - [ ] Comprobante PDF del folio (el dashboard tiene el acceso "Comprobantes")
 - [ ] Notificaciones y bitácora
 - [x] Datos de prueba (seed) iguales a los del prototipo
@@ -110,13 +110,13 @@ Si cambias un modelo: `python manage.py makemigrations` y sube la migración en 
 - [x] Login, recuperar contraseña y cambio obligatorio de contraseña
 - [ ] Estudiante: dashboard, horario, catálogo y carrito (alta y baja), confirmación, historial con acuse y notificaciones
 - [ ] Estudiante: cancelar solicitud pendiente y ver motivo de rechazo
-- [ ] Control escolar: bandeja, validación, exportación, catálogos, oferta, bitácora
-- [x] Control escolar: periodo y convocatoria, importación de CSV
+- [ ] Control escolar: bandeja, validación, catálogos, oferta, bitácora
+- [x] Control escolar: periodo y convocatoria, importación de CSV, exportación a SADCE
 - [ ] Administrador: usuarios y roles
 
 **Diseño**
 - [x] Pantallas del prototipo completas (ver `docs/diseno/Pantallas y Flujos.docx`). Para verlo, abre `stitch/sabe_inicio_de_sesi_n_institucional_uan_uae/code.html` y usa los accesos de demostración
-- [ ] Definir con control escolar el formato exacto del reporte para SADCE
+- [x] Definir con control escolar el formato exacto del reporte para SADCE (D1 en `docs/PLAN.md`)
 
 Más contexto del proyecto en `docs/diseno/SABE_Contexto_Completo.md`.
 

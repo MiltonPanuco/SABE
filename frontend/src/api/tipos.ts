@@ -341,3 +341,69 @@ export interface Importacion {
   actualizados: number;
   excluidos: number;
 }
+
+// ---------------------------------------------------------------------------
+// Exportación a SADCE (F9)
+// ---------------------------------------------------------------------------
+
+export type FormatoLote = "xlsx" | "csv";
+export type EstadoLote = "exportado" | "cargado";
+
+export interface Lote {
+  id: number;
+  /** "LOTE-2026A-006" */
+  folio: string;
+  fecha: string;
+  usuario: string | null;
+  formato: FormatoLote;
+  total_registros: number;
+  cargado: boolean;
+  fecha_carga: string | null;
+  cargado_por: string | null;
+  alumnos: number;
+  altas: number;
+  bajas: number;
+  /** Programas de sus alumnos: "Economía", "Finanzas". */
+  programas: string[];
+}
+
+export interface FiltrosLotes {
+  q: string;
+  formato: "" | FormatoLote;
+  estado: "" | EstadoLote;
+}
+
+/** Movimiento aprobado que todavía no entra a un lote. */
+export interface MovimientoExportacion {
+  id: number;
+  folio: string;
+  matricula: string;
+  alumno: string;
+  programa: string;
+  tipo: TipoTramite;
+  clave: string;
+  materia: string;
+  grupo: string;
+  docente: string;
+  horarios: HorarioClase[];
+  fecha_aprobacion: string | null;
+}
+
+export interface ResumenExportacion {
+  dictaminados: number;
+  altas: number;
+  bajas: number;
+  cargados: number;
+  porcentaje_cargado: number;
+  lotes: number;
+  lotes_en_espera: number;
+  movimientos_en_espera: number;
+  pendientes: number;
+  ultima: { folio: string; fecha: string; usuario: string | null } | null;
+}
+
+export interface ColumnaSadce {
+  encabezado: string;
+  descripcion: string;
+  ejemplo: string;
+}

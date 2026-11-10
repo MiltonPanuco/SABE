@@ -24,6 +24,7 @@ from core.models import (
     Estudiante,
     Grupo,
     HorarioGrupo,
+    LoteExportacion,
     Notificacion,
     PeriodoEscolar,
     Programa,
@@ -343,7 +344,13 @@ class Command(BaseCommand):
                 )
 
     def _limpiar_tramites(self, estudiantes):
-        """Quita lo que dejaron las pruebas a mano: folios, avisos y altas aprobadas de los alumnos demo."""
+        """Quita lo que dejaron las pruebas a mano: folios, lotes, avisos y altas aprobadas de los alumnos demo."""
+        # Un lote con algún folio demo se borra entero; lo que llevara de otros alumnos vuelve a esperar exportación.
+        lotes = LoteExportacion.objects.filter(movimientos__solicitud__estudiante__in=estudiantes.values()).distinct()
+        DetalleSolicitud.objects.filter(lote__in=lotes, estado=DetalleSolicitud.Estado.CARGADA_SADCE).update(
+            estado=DetalleSolicitud.Estado.APROBADA
+        )
+        LoteExportacion.objects.filter(pk__in=list(lotes.values_list("pk", flat=True))).delete()
         Solicitud.objects.filter(estudiante__in=estudiantes.values()).delete()
         usernames = [p["username"] for p in PERSONAL] + list(estudiantes)
         Notificacion.objects.filter(usuario__username__in=usernames).delete()

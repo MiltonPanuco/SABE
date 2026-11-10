@@ -42,7 +42,7 @@ F12 can be prepared starting in H2 (Dockerfiles and production settings) so it i
 
 | # | Question | Recommendation | Decide by |
 |---|---|---|---|
-| D1 | Exact columns of the SADCE Excel file | Matrícula, name, program, course code, course, group, teacher, type (ALTA/BAJA), folio, approval date. Confirm with Control Escolar | Nov 13 |
+| D1 | Exact columns of the SADCE Excel file | **Decided:** Ciclo, Folio, Matrícula, Nombre, Programa, Clave materia, Materia, Grupo, Docente, Tipo (ALTA/BAJA) and Fecha de aprobación; one row per move and a single header row | Nov 13 |
 | D2 | Does an add that clashes with a drop in the same folio count as a clash? | **Decided:** no, the drop in the same folio frees the slot (group change) | Nov 11 |
 | D3 | "~24 business hours" resolution text | Remove it | Nov 11 |
 | D4 | Password recovery: real email or reset by Control Escolar? | Email if SMTP is ready in H4; otherwise Control Escolar resets to a temporary password (F11) | Nov 18 |
@@ -191,14 +191,14 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 - **API contract:**
   - `GET /api/periodos/` → `[Periodo]` with `estado_convocatoria` (`programada|abierta|cerrada`) and `movimientos_pendientes`. Control Escolar and admin.
   - `POST /api/periodos/` and `PATCH /api/periodos/{id}/` `{ciclo, fecha_inicio, fecha_fin, convocatoria_inicio, convocatoria_fin, activar?}` → `Periodo`.
-  - `POST /api/periodos/{id}/activar/` → `Periodo`. `400 {detail}` if the active period has pending moves.
+  - `POST /api/periodos/{id}/activar/` → `Periodo`. `400 {detail}` if the active period has pending moves, approved moves not exported, or batches not marked as uploaded (F9).
   - `GET /api/periodos/ultima-modificacion/` → `{usuario, fecha}` or `null`.
   - `GET /api/grupos/?oferta=1&q=&programa=&cupo=con|sin` (Control Escolar) → `[Grupo]`, hidden ones included.
   - `POST /api/grupos/` and `PATCH /api/grupos/{id}/` `{clave, nombre_materia, programa, num_grupo, cupo_maximo, docente, horarios: [{dia_semana, hora_inicio, hora_fin}]}` → `Grupo`. `PATCH` with only `{visible}` shows or hides it. Control Escolar only.
   - `GET /api/docentes/`, `POST /api/docentes/` `{nombre, grado_academico?}` (Control Escolar). `GET /api/programas/` (any user).
   - `Grupo` adds `visible` and `materia.programa`. No `DELETE` for periods or groups, and no separate endpoints for courses or schedules: the schedule goes inside the group.
 - **Business rules:**
-  - Only one active period. Another one can't be activated while the active one has pending moves: "Dictamina los N movimientos pendientes de 2026-A antes de activar otro periodo." If activation was asked for on create and fails, nothing is saved.
+  - Only one active period. Another one can't be activated while the active one has pending moves: "Dictamina los N movimientos pendientes de 2026-A antes de activar otro periodo." Since F9, not while it has approved moves not exported ("Exporta a SADCE los N movimientos aprobados de 2026-A…") or batches waiting to be uploaded ("Marca como cargado en SADCE los N lotes en espera de 2026-A…") either. If activation was asked for on create and fails, nothing is saved.
   - Cycle in `AAAA-A` or `AAAA-B` format, no duplicates. The semester end and the window close come after their start.
   - The offering is always the active period's. The course is identified by its key: if it exists it is reused and its name and program are updated (in all its groups); if not, it is created with 8 credits.
   - Key and group number can't repeat in the period. Max seats is above 0 and can't go below the number enrolled. A group with students or requests can't change its key.
@@ -228,7 +228,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
   - Enrollments: the student, course and group must exist in the active period, and the cycle must be the active one. Enrollments are only added: an enrolled one stays "Sin cambios" and a dropped one is respected. A student can't be in two groups of the same course.
   - An enrollment over the seat limit or clashing with the student's schedule is imported anyway (it is SADCE's official load) and the preview flags it with a warning.
   - Rows with errors are skipped; with no valid rows nothing is imported.
-- **Differences from stitch (to confirm):** seat and clash warnings under the row's action; "Ver cuentas de estudiantes generadas" downloads the temporary passwords; "Descargar reporte de errores (.csv)" without PDF; error texts adapted to the data ("Materia inexistente: X." instead of "…en el plan curricular 2020", groups "01" and codes "EC504" instead of "G-01" and "ECO-204") and new texts for the other rules; the sample shows up to 10 rows; enrollments use the same wizard with their own columns ("Cargas procesadas", "cargas nuevas"); its own text when there were no new records; the selected card looks like stitch's screenshot (light icon box, no check mark); the screenshot has an older menu and a single type card, and `code.html` is followed.
+- **Differences from stitch (agreed):** seat and clash warnings under the row's action; "Ver cuentas de estudiantes generadas" downloads the temporary passwords; "Descargar reporte de errores (.csv)" without PDF; error texts adapted to the data ("Materia inexistente: X." instead of "…en el plan curricular 2020", groups "01" and codes "EC504" instead of "G-01" and "ECO-204") and new texts for the other rules; the sample shows up to 10 rows; enrollments use the same wizard with their own columns ("Cargas procesadas", "cargas nuevas"); its own text when there were no new records; the selected card looks like stitch's screenshot (light icon box, no check mark); the screenshot has an older menu and a single type card, and `code.html` is followed.
 - **Done when:** tests with a valid CSV, one with errors and one re-imported (students and enrollments); the preview shows errors per row; a new student logs in with the temporary password and changes it; the screens match their `stitch/` design.
 - **Target date:** Nov 22.
 - **Status:** Pending.
@@ -237,15 +237,22 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 
 - **Goal:** Control Escolar downloads approved moves as Excel or CSV and then marks the batch as uploaded to SADCE.
 - **Depends on:** F6, D1.
-- **Backend:** service that takes `aprobada` moves with no batch, generates the file with `openpyxl` or `csv`, creates the `LoteExportacion` and assigns them. Marking as uploaded moves them to `cargada_sadce`.
-- **Frontend:** screen `sabe_lotes_exportados_a_sadce_control_escolar`: pending export, list of batches, download again, mark as uploaded.
-- **API contract:**
-  - `GET /api/exportaciones/pendientes/` → approved moves with no batch
-  - `POST /api/exportaciones/` `{formato: "xlsx"|"csv"}` → downloadable file and created batch
-  - `GET /api/exportaciones/` → batches
-  - `GET /api/exportaciones/{id}/descargar/` → the batch's file
-  - `POST /api/exportaciones/{id}/marcar-cargado/` → `204`
-- **Business rules:** a move belongs to only one batch. Columns per D1. Marking as uploaded notifies the students (F10).
+- **Backend:** `core/services/exportacion.py`. Generating puts every `aprobada` move of the active period that has no batch into a new batch (`transaction.atomic` with `select_for_update` on the period and the moves). `LoteExportacion` adds `periodo`, `numero` (folio `LOTE-2026A-001`, per period), `cargado_por` and `fecha_carga`. The file is not stored: it is built with `openpyxl` or `csv` on each download from the batch's moves, which no longer change. Marking as uploaded moves them to `cargada_sadce`, notifies each student once per folio with `notificar()`, and logs `exportar_sadce` and `marcar_cargado` in the audit log.
+- **Frontend:** screen `sabe_lotes_exportados_a_sadce_control_escolar`: tabs Lotes Exportados, Movimientos Pendientes de Exportar and Plantilla del Excel (in the URL, `?vista=`), four summary cards, filters, download again, "Generar Excel de intercambio" and "Confirmar Carga Manual en SADCE".
+- **API contract:** (Control Escolar only, always the active period; without an active period `400 {detail}`)
+  - `GET /api/exportaciones/?q=&formato=xlsx|csv&estado=exportado|cargado` → `[Lote]`, newest first. `Lote`: `{id, folio, fecha, usuario, formato, total_registros, cargado, fecha_carga, cargado_por, alumnos, altas, bajas, programas}`.
+  - `POST /api/exportaciones/` `{formato}` → `201 Lote`. `400 {detail}` if there is nothing to export. The file is then fetched with `descargar`.
+  - `GET /api/exportaciones/pendientes/` → approved moves with no batch `[{id, folio, matricula, alumno, programa, tipo, clave, materia, grupo, docente, horarios, fecha_aprobacion}]`.
+  - `GET /api/exportaciones/resumen/` → `{dictaminados, altas, bajas, cargados, porcentaje_cargado, lotes, lotes_en_espera, movimientos_en_espera, pendientes, ultima}`.
+  - `GET /api/exportaciones/plantilla/` → `[{encabezado, descripcion, ejemplo}]`, the D1 columns.
+  - `GET /api/exportaciones/{id}/descargar/` → file `LOTE-2026A-001.xlsx` or `.csv`.
+  - `POST /api/exportaciones/{id}/marcar-cargado/` → `Lote`. `400 {detail}` if it was already uploaded.
+- **Business rules:**
+  - A move belongs to only one batch. Each batch takes every pending approved move of the period; moves are not picked by hand.
+  - Columns per D1. In Excel the matrícula and group are text and the date is a date; the CSV is UTF-8 with BOM.
+  - Marking as uploaded notifies the students ("Tu solicitud SABE-2026-014 fue cargada en SADCE.") and can't be repeated.
+  - Another period can't be activated with approved moves not exported or batches waiting (see F7).
+- **Differences from stitch (to confirm):** the pending and template tabs, the guide button and the "Generar Excel de intercambio" dialog are new because stitch doesn't design them (the pending table follows the "Concentrado de Cargas para SADCE"); in stitch "Generar Excel" opens the mark-as-uploaded dialog, here it opens its own; the verification checkbox starts unchecked and the button turns on when it is checked, instead of `alert()`; "Generar Excel" is disabled when there is nothing to export; "Total Movimientos Dictaminados" counts approved and uploaded moves (rejected ones aren't exported); the exporter's name comes from the user, without "Lic.", with "Ventanilla UAE" under it for everyone.
 - **Done when:** service tests (no repeated moves, `total_registros` counted correctly); the Excel file opens correctly in Excel and LibreOffice; the screens match their `stitch/` design.
 - **Target date:** Nov 23.
 - **Status:** Pending.
@@ -254,7 +261,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 
 - **Goal:** users see notices about their requests and there's a record of who did what.
 - **Depends on:** F5, F6.
-- **Backend:** helpers `notificar(usuario, mensaje)` (exists since F6 in `core/services/avisos.py` and notifies on approve and reject) and `registrar(usuario, accion, objeto, request=)` (exists since F7 and logs changes to periods, the offering and teachers, and since F8 the CSV imports), called from the services. Audit log is read-only (no editing or deleting through the API).
+- **Backend:** helpers `notificar(usuario, mensaje)` (exists since F6 in `core/services/avisos.py` and notifies on approve and reject) and `registrar(usuario, accion, objeto, request=)` (exists since F7 and logs changes to periods, the offering and teachers, since F8 the CSV imports and since F9 `exportar_sadce` and `marcar_cargado`; `notificar` already sends the SADCE upload notice), called from the services. Audit log is read-only (no editing or deleting through the API).
 - **Frontend:** bell and panel for students and Control Escolar; audit log with filters and CSV download. Screens: `sabe_panel_de_notificaciones_estudiante_y_control_escolar`, `sabe_notificaciones_de_control_escolar_uae_uan`, `sabe_bitacora_auditoria`.
 - **API contract:**
   - `GET /api/notificaciones/` → `{no_leidas, resultados: [...]}`

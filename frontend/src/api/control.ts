@@ -1,17 +1,24 @@
-// Bandeja y dictamen (F6); periodo, convocatoria y oferta académica (F7); importación de CSV (F8).
+// Bandeja y dictamen (F6); periodo, convocatoria y oferta académica (F7); importación de CSV (F8);
+// exportación a SADCE (F9).
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "./client";
 import type {
+  ColumnaSadce,
   Docente,
+  FiltrosLotes,
+  FormatoLote,
   FiltrosBandeja,
   FiltrosOferta,
   Grupo,
   GrupoEscritura,
   Importacion,
+  Lote,
+  MovimientoExportacion,
   Periodo,
   PeriodoEscritura,
   Programa,
   ResumenBandeja,
+  ResumenExportacion,
   ResultadoImportacion,
   Revision,
   Solicitud,
@@ -214,5 +221,68 @@ export function useImportaciones(activo: boolean) {
     queryKey: ["importaciones"],
     queryFn: () => api<Importacion[]>("/importaciones/"),
     enabled: activo,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Exportación a SADCE (F9)
+// ---------------------------------------------------------------------------
+
+/** Lotes del periodo activo con los filtros de la pantalla. */
+export function useLotes(filtros: FiltrosLotes) {
+  const params = new URLSearchParams();
+  if (filtros.q) params.set("q", filtros.q);
+  if (filtros.formato) params.set("formato", filtros.formato);
+  if (filtros.estado) params.set("estado", filtros.estado);
+  const consulta = params.size ? `?${params}` : "";
+  return useQuery({
+    queryKey: ["exportaciones", "lotes", filtros],
+    queryFn: () => api<Lote[]>(`/exportaciones/${consulta}`),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function usePendientesExportacion() {
+  return useQuery({
+    queryKey: ["exportaciones", "pendientes"],
+    queryFn: () => api<MovimientoExportacion[]>("/exportaciones/pendientes/"),
+  });
+}
+
+export function useResumenExportacion() {
+  return useQuery({
+    queryKey: ["exportaciones", "resumen"],
+    queryFn: () => api<ResumenExportacion>("/exportaciones/resumen/"),
+  });
+}
+
+export function usePlantillaSadce() {
+  return useQuery({
+    queryKey: ["exportaciones", "plantilla"],
+    queryFn: () => api<ColumnaSadce[]>("/exportaciones/plantilla/"),
+    staleTime: Infinity,
+  });
+}
+
+/** Generar un lote o marcarlo como cargado cambia los movimientos: la bandeja y los folios se vuelven a pedir. */
+function invalidarExportacion(cliente: ReturnType<typeof useQueryClient>) {
+  return Promise.all(
+    ["exportaciones", "solicitudes", "periodos"].map((clave) => cliente.invalidateQueries({ queryKey: [clave] })),
+  );
+}
+
+export function useGenerarLote() {
+  const cliente = useQueryClient();
+  return useMutation({
+    mutationFn: (formato: FormatoLote) => api<Lote>("/exportaciones/", { method: "POST", body: { formato } }),
+    onSettled: () => invalidarExportacion(cliente),
+  });
+}
+
+export function useMarcarCargado() {
+  const cliente = useQueryClient();
+  return useMutation({
+    mutationFn: (lote: number) => api<Lote>(`/exportaciones/${lote}/marcar-cargado/`, { method: "POST" }),
+    onSettled: () => invalidarExportacion(cliente),
   });
 }

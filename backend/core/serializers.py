@@ -12,6 +12,7 @@ from .models import (
     Grupo,
     HorarioGrupo,
     ImportacionCSV,
+    LoteExportacion,
     PeriodoEscolar,
     Programa,
     Solicitud,
@@ -524,3 +525,111 @@ class ImportacionSerializer(serializers.ModelSerializer):
     def get_usuario(self, importacion):
         usuario = importacion.usuario
         return (usuario.get_full_name() or usuario.username) if usuario else None
+
+
+def _nombre_usuario(usuario) -> str | None:
+    return (usuario.get_full_name() or usuario.username) if usuario else None
+
+
+class LoteSerializer(serializers.ModelSerializer):
+    """Un lote exportado a SADCE. `alumnos`, `altas` y `bajas` vienen anotados en `exportacion.lotes()`."""
+
+    folio = serializers.CharField(read_only=True)
+    usuario = serializers.SerializerMethodField()
+    cargado = serializers.BooleanField(read_only=True)
+    cargado_por = serializers.SerializerMethodField()
+    alumnos = serializers.IntegerField(read_only=True)
+    altas = serializers.IntegerField(read_only=True)
+    bajas = serializers.IntegerField(read_only=True)
+    programas = serializers.ListField(child=serializers.CharField(), read_only=True)
+
+    class Meta:
+        model = LoteExportacion
+        fields = [
+            "id",
+            "folio",
+            "fecha",
+            "usuario",
+            "formato",
+            "total_registros",
+            "cargado",
+            "fecha_carga",
+            "cargado_por",
+            "alumnos",
+            "altas",
+            "bajas",
+            "programas",
+        ]
+
+    @extend_schema_field(serializers.CharField(allow_null=True))
+    def get_usuario(self, lote):
+        return _nombre_usuario(lote.usuario)
+
+    @extend_schema_field(serializers.CharField(allow_null=True))
+    def get_cargado_por(self, lote):
+        return _nombre_usuario(lote.cargado_por)
+
+
+class GenerarLoteSerializer(serializers.Serializer):
+    formato = serializers.ChoiceField(
+        choices=LoteExportacion.Formato.choices,
+        error_messages={"invalid_choice": "Elige Excel (xlsx) o CSV (csv).", "required": "Elige el formato."},
+    )
+
+
+class MovimientoExportacionSerializer(serializers.ModelSerializer):
+    """Movimiento aprobado que espera entrar a un lote (pestaña de pendientes)."""
+
+    folio = serializers.CharField(source="solicitud.folio_digital")
+    matricula = serializers.CharField(source="solicitud.estudiante.matricula")
+    alumno = serializers.CharField(source="solicitud.estudiante.usuario.get_full_name")
+    programa = serializers.CharField(source="solicitud.estudiante.programa.nombre")
+    tipo = serializers.ChoiceField(source="tipo_tramite", choices=DetalleSolicitud.Tipo.choices)
+    clave = serializers.CharField(source="grupo.materia.clave")
+    materia = serializers.CharField(source="grupo.materia.nombre_materia")
+    grupo = serializers.CharField(source="grupo.num_grupo")
+    docente = serializers.CharField(source="grupo.docente.nombre")
+    horarios = HorarioSerializer(source="grupo.horarios", many=True)
+    fecha_aprobacion = serializers.DateTimeField(source="fecha_resolucion")
+
+    class Meta:
+        model = DetalleSolicitud
+        fields = [
+            "id",
+            "folio",
+            "matricula",
+            "alumno",
+            "programa",
+            "tipo",
+            "clave",
+            "materia",
+            "grupo",
+            "docente",
+            "horarios",
+            "fecha_aprobacion",
+        ]
+
+
+class UltimaExportacionSerializer(serializers.Serializer):
+    folio = serializers.CharField()
+    fecha = serializers.DateTimeField()
+    usuario = serializers.CharField(allow_null=True)
+
+
+class ResumenExportacionSerializer(serializers.Serializer):
+    dictaminados = serializers.IntegerField()
+    altas = serializers.IntegerField()
+    bajas = serializers.IntegerField()
+    cargados = serializers.IntegerField()
+    porcentaje_cargado = serializers.IntegerField()
+    lotes = serializers.IntegerField()
+    lotes_en_espera = serializers.IntegerField()
+    movimientos_en_espera = serializers.IntegerField()
+    pendientes = serializers.IntegerField()
+    ultima = UltimaExportacionSerializer(allow_null=True)
+
+
+class ColumnaSadceSerializer(serializers.Serializer):
+    encabezado = serializers.CharField()
+    descripcion = serializers.CharField()
+    ejemplo = serializers.CharField()

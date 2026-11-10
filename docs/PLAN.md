@@ -40,7 +40,7 @@ F12 se puede preparar desde H2 (Dockerfiles y settings de producción) para no d
 
 | # | Pregunta | Recomendación | Fecha límite |
 |---|---|---|---|
-| D1 | Columnas exactas del Excel para SADCE | Matrícula, nombre, programa, clave de materia, materia, grupo, docente, tipo (ALTA/BAJA), folio, fecha de aprobación. Confirmar con control escolar | 13 nov |
+| D1 | Columnas exactas del Excel para SADCE | **Decidida:** Ciclo, Folio, Matrícula, Nombre, Programa, Clave materia, Materia, Grupo, Docente, Tipo (ALTA/BAJA) y Fecha de aprobación; una fila por movimiento y un solo renglón de encabezados | 13 nov |
 | D2 | ¿Una alta que choca con una baja del mismo folio cuenta como choque? | **Decidida:** no cuenta, la baja del mismo folio libera el horario (cambio de grupo) | 11 nov |
 | D3 | Texto "~24 hrs hábiles" de resolución | Quitarlo | 11 nov |
 | D4 | Recuperar contraseña: ¿correo real o reinicio por control escolar? | Correo si hay SMTP listo en H4; si no, control escolar reinicia a contraseña temporal (F11) | 18 nov |
@@ -189,14 +189,14 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 - **Contrato de API:**
   - `GET /api/periodos/` → `[Periodo]` con `estado_convocatoria` (`programada|abierta|cerrada`) y `movimientos_pendientes`. Control escolar y administrador.
   - `POST /api/periodos/` y `PATCH /api/periodos/{id}/` `{ciclo, fecha_inicio, fecha_fin, convocatoria_inicio, convocatoria_fin, activar?}` → `Periodo`.
-  - `POST /api/periodos/{id}/activar/` → `Periodo`. `400 {detail}` si el periodo activo tiene movimientos pendientes.
+  - `POST /api/periodos/{id}/activar/` → `Periodo`. `400 {detail}` si el periodo activo tiene movimientos pendientes, aprobados sin exportar o lotes sin marcar como cargados (F9).
   - `GET /api/periodos/ultima-modificacion/` → `{usuario, fecha}` o `null`.
   - `GET /api/grupos/?oferta=1&q=&programa=&cupo=con|sin` (control escolar) → `[Grupo]`, también los ocultos.
   - `POST /api/grupos/` y `PATCH /api/grupos/{id}/` `{clave, nombre_materia, programa, num_grupo, cupo_maximo, docente, horarios: [{dia_semana, hora_inicio, hora_fin}]}` → `Grupo`. `PATCH` con solo `{visible}` lo muestra u oculta. Solo control escolar.
   - `GET /api/docentes/`, `POST /api/docentes/` `{nombre, grado_academico?}` (control escolar). `GET /api/programas/` (cualquier usuario).
   - `Grupo` agrega `visible` y `materia.programa`. Sin `DELETE` de periodos ni grupos, y sin endpoints aparte de materias u horarios: el horario va dentro del grupo.
 - **Reglas de negocio:**
-  - Un solo periodo activo. No se activa otro mientras el activo tenga movimientos pendientes: "Dictamina los N movimientos pendientes de 2026-A antes de activar otro periodo." Si se pide activar al crear y no se puede, tampoco se guarda.
+  - Un solo periodo activo. No se activa otro mientras el activo tenga movimientos pendientes: "Dictamina los N movimientos pendientes de 2026-A antes de activar otro periodo." Desde F9 tampoco con movimientos aprobados sin exportar ("Exporta a SADCE los N movimientos aprobados de 2026-A…") ni con lotes en espera ("Marca como cargado en SADCE los N lotes en espera de 2026-A…"). Si se pide activar al crear y no se puede, tampoco se guarda.
   - Ciclo con formato `AAAA-A` o `AAAA-B`, sin repetir. El fin del semestre y el cierre de la convocatoria van después de su inicio.
   - La oferta es siempre la del periodo activo. La materia se identifica por la clave: si existe, se reutiliza y se actualizan su nombre y programa (en todos sus grupos); si no, se crea con 8 créditos.
   - No se repite clave y grupo en el periodo. El cupo máximo es mayor a 0 y no baja de los inscritos. No se cambia la clave de un grupo con alumnos o trámites.
@@ -226,7 +226,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
   - Cargas: el alumno, la materia y el grupo deben existir en el periodo activo, y el ciclo debe ser el activo. Solo se agregan cargas: una inscrita queda "Sin cambios" y una dada de baja se respeta. Un alumno no tiene dos grupos de la misma materia.
   - Una carga que excede el cupo o choca con el horario del alumno se importa igual (es la carga oficial de SADCE) y la vista previa la marca con un aviso.
   - Las filas con error se omiten; si no hay filas válidas no se importa nada.
-- **Diferencias con stitch (a confirmar):** avisos de cupo excedido y choque bajo la acción de la fila; "Ver cuentas de estudiantes generadas" descarga las contraseñas temporales; "Descargar reporte de errores (.csv)" sin PDF; textos de error adaptados a los datos ("Materia inexistente: X." en lugar de "…en el plan curricular 2020", grupos "01" y claves "EC504" en lugar de "G-01" y "ECO-204") y textos nuevos para las demás reglas; la muestra enseña hasta 10 filas; cargas usa el mismo asistente con sus propias columnas ("Cargas procesadas", "cargas nuevas"); texto propio cuando no hubo registros nuevos; la tarjeta elegida se ve como en la captura de stitch (recuadro claro y sin palomita); la captura tiene un menú anterior y una sola tarjeta de tipo, y se sigue el `code.html`.
+- **Diferencias con stitch (acordadas):** avisos de cupo excedido y choque bajo la acción de la fila; "Ver cuentas de estudiantes generadas" descarga las contraseñas temporales; "Descargar reporte de errores (.csv)" sin PDF; textos de error adaptados a los datos ("Materia inexistente: X." en lugar de "…en el plan curricular 2020", grupos "01" y claves "EC504" en lugar de "G-01" y "ECO-204") y textos nuevos para las demás reglas; la muestra enseña hasta 10 filas; cargas usa el mismo asistente con sus propias columnas ("Cargas procesadas", "cargas nuevas"); texto propio cuando no hubo registros nuevos; la tarjeta elegida se ve como en la captura de stitch (recuadro claro y sin palomita); la captura tiene un menú anterior y una sola tarjeta de tipo, y se sigue el `code.html`.
 - **Terminado cuando:** pruebas con un CSV válido, uno con errores y uno reimportado (alumnos y cargas); la vista previa muestra los errores por fila; un alumno nuevo entra con su contraseña temporal y la cambia; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 22 nov.
 - **Estado:** Pendiente.
@@ -235,15 +235,22 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 
 - **Objetivo:** control escolar descarga los movimientos aprobados en Excel o CSV y luego marca el lote como cargado en SADCE.
 - **Depende de:** F6, D1.
-- **Backend:** servicio que toma los movimientos `aprobada` sin lote, genera el archivo con `openpyxl` o `csv`, crea el `LoteExportacion` y los asigna. Marcar como cargado pasa los movimientos a `cargada_sadce`.
-- **Frontend:** pantalla `sabe_lotes_exportados_a_sadce_control_escolar`: pendientes de exportar, lista de lotes, volver a descargar, marcar como cargado.
-- **Contrato de API:**
-  - `GET /api/exportaciones/pendientes/` → movimientos aprobados sin lote
-  - `POST /api/exportaciones/` `{formato: "xlsx"|"csv"}` → archivo descargable y lote creado
-  - `GET /api/exportaciones/` → lotes
-  - `GET /api/exportaciones/{id}/descargar/` → archivo del lote
-  - `POST /api/exportaciones/{id}/marcar-cargado/` → `204`
-- **Reglas de negocio:** un movimiento solo entra a un lote. Columnas según D1. Marcar como cargado notifica a los alumnos (F10).
+- **Backend:** `core/services/exportacion.py`. Generar mete en un lote nuevo todos los movimientos `aprobada` del periodo activo que no tienen lote (`transaction.atomic` con `select_for_update` sobre el periodo y los movimientos). `LoteExportacion` agrega `periodo`, `numero` (folio `LOTE-2026A-001` por periodo), `cargado_por` y `fecha_carga`. El archivo no se guarda: se arma con `openpyxl` o `csv` en cada descarga, a partir de los movimientos del lote, que ya no cambian. Marcar como cargado pasa los movimientos a `cargada_sadce`, avisa a cada alumno por folio con `notificar()` y deja `exportar_sadce` y `marcar_cargado` en la bitácora.
+- **Frontend:** pantalla `sabe_lotes_exportados_a_sadce_control_escolar`: pestañas Lotes Exportados, Movimientos Pendientes de Exportar y Plantilla del Excel (en la URL, `?vista=`), cuatro tarjetas de resumen, filtros, volver a descargar, "Generar Excel de intercambio" y "Confirmar Carga Manual en SADCE".
+- **Contrato de API:** (solo control escolar, siempre del periodo activo; sin periodo activo `400 {detail}`)
+  - `GET /api/exportaciones/?q=&formato=xlsx|csv&estado=exportado|cargado` → `[Lote]` del más nuevo al más viejo. `Lote`: `{id, folio, fecha, usuario, formato, total_registros, cargado, fecha_carga, cargado_por, alumnos, altas, bajas, programas}`.
+  - `POST /api/exportaciones/` `{formato}` → `201 Lote`. `400 {detail}` si no hay movimientos por exportar. El archivo se baja después con `descargar`.
+  - `GET /api/exportaciones/pendientes/` → movimientos aprobados sin lote `[{id, folio, matricula, alumno, programa, tipo, clave, materia, grupo, docente, horarios, fecha_aprobacion}]`.
+  - `GET /api/exportaciones/resumen/` → `{dictaminados, altas, bajas, cargados, porcentaje_cargado, lotes, lotes_en_espera, movimientos_en_espera, pendientes, ultima}`.
+  - `GET /api/exportaciones/plantilla/` → `[{encabezado, descripcion, ejemplo}]`, las columnas de D1.
+  - `GET /api/exportaciones/{id}/descargar/` → archivo `LOTE-2026A-001.xlsx` o `.csv`.
+  - `POST /api/exportaciones/{id}/marcar-cargado/` → `Lote`. `400 {detail}` si ya estaba cargado.
+- **Reglas de negocio:**
+  - Un movimiento solo entra a un lote. Cada lote lleva todos los aprobados pendientes del periodo; no se eligen a mano.
+  - Columnas según D1. En Excel la matrícula y el grupo van como texto y la fecha como fecha; el CSV va en UTF-8 con BOM.
+  - Marcar como cargado notifica a los alumnos ("Tu solicitud SABE-2026-014 fue cargada en SADCE.") y no se puede repetir.
+  - No se activa otro periodo con movimientos aprobados sin exportar ni con lotes en espera (ver F7).
+- **Diferencias con stitch (a confirmar):** las pestañas de pendientes y de plantilla, el botón de la guía y la ventana "Generar Excel de intercambio" son nuevos porque stitch no los diseña (la tabla de pendientes sigue el "Concentrado de Cargas para SADCE"); en stitch "Generar Excel" abre la ventana de marcar como cargado y aquí abre la suya; la casilla de verificación empieza sin marcar y el botón se habilita al marcarla, en lugar del `alert()`; "Generar Excel" se deshabilita sin movimientos por exportar; "Total Movimientos Dictaminados" cuenta los aprobados y los cargados (los rechazados no se exportan); el nombre de quien exportó sale del usuario, sin "Lic.", con "Ventanilla UAE" debajo para todos.
 - **Terminado cuando:** pruebas del servicio (no repite movimientos, cuenta bien `total_registros`); el Excel abre bien en Excel y LibreOffice; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 23 nov.
 - **Estado:** Pendiente.
@@ -252,7 +259,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 
 - **Objetivo:** los usuarios ven avisos de sus trámites y queda registro de quién hizo qué.
 - **Depende de:** F5, F6.
-- **Backend:** helpers `notificar(usuario, mensaje)` (ya existe desde F6 en `core/services/avisos.py` y avisa al aprobar y rechazar) y `registrar(usuario, accion, objeto, request=)` (ya existe desde F7 y registra los cambios de periodos, oferta y docentes, y desde F8 las importaciones de CSV), llamados desde los servicios. Bitácora solo de lectura (sin editar ni borrar desde la API).
+- **Backend:** helpers `notificar(usuario, mensaje)` (ya existe desde F6 en `core/services/avisos.py` y avisa al aprobar y rechazar) y `registrar(usuario, accion, objeto, request=)` (ya existe desde F7 y registra los cambios de periodos, oferta y docentes, desde F8 las importaciones de CSV y desde F9 `exportar_sadce` y `marcar_cargado`; `notificar` ya avisa al cargar en SADCE), llamados desde los servicios. Bitácora solo de lectura (sin editar ni borrar desde la API).
 - **Frontend:** campana y panel en estudiante y control escolar; bitácora con filtros y descarga CSV. Pantallas: `sabe_panel_de_notificaciones_estudiante_y_control_escolar`, `sabe_notificaciones_de_control_escolar_uae_uan`, `sabe_bitacora_auditoria`.
 - **Contrato de API:**
   - `GET /api/notificaciones/` → `{no_leidas, resultados: [...]}`

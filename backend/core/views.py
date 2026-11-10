@@ -15,6 +15,7 @@ from .models import (
     Estudiante,
     Grupo,
     ImportacionCSV,
+    LoteExportacion,
     Programa,
     Rol,
     Solicitud,
@@ -26,14 +27,18 @@ from .serializers import (
     ArchivoCsvSerializer,
     CambiarPasswordSerializer,
     ChoqueSerializer,
+    ColumnaSadceSerializer,
     DocenteSerializer,
     EnTramiteSerializer,
+    GenerarLoteSerializer,
     ErrorMovimientoSerializer,
     GrupoEscrituraSerializer,
     GrupoSerializer,
     HorarioEstudianteSerializer,
     ImportacionSerializer,
+    LoteSerializer,
     MeSerializer,
+    MovimientoExportacionSerializer,
     PeriodoActivoSerializer,
     PeriodoEscrituraSerializer,
     PeriodoSerializer,
@@ -44,6 +49,7 @@ from .serializers import (
     CrearSolicitudSerializer,
     RechazarSerializer,
     ResumenBandejaSerializer,
+    ResumenExportacionSerializer,
     RevisionSerializer,
     SolicitudSerializer,
     ValidacionSerializer,
@@ -52,7 +58,7 @@ from .serializers import (
 )
 from .services.bandeja import EstadoBandeja, folios_bandeja, resumen_bandeja
 from .services.catalogo import con_cupo, grupos_catalogo, periodo_activo
-from .services import importacion
+from .services import exportacion, importacion
 from .services.dictamen import DictamenInvalido, aprobar_movimiento, rechazar_movimiento, revision_folio
 from .services.avisos import registrar
 from .services.oferta import OfertaInvalida, cambiar_visibilidad, grupos_oferta, guardar_grupo
@@ -649,3 +655,114 @@ class ImportacionViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         respuesta = HttpResponse(importacion.plantilla(tipo), content_type="text/csv; charset=utf-8")
         respuesta["Content-Disposition"] = f'attachment; filename="plantilla_{tipo}.csv"'
         return respuesta
+
+
+class ExportacionViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """
+    Exportación a SADCE: lotes del periodo activo, movimientos por exportar, descarga del archivo y
+    "marcar como cargado". Solo control escolar.
+    """
+
+    queryset = LoteExportacion.objects.all()  # el esquema lo usa para el tipo del id
+    serializer_class = LoteSerializer
+    permission_classes = [EsControlEscolar]
+    pagination_class = None
+
+    def initial(self, request, *args, **kwargs):
+        super().initial(request, *args, **kwargs)
+        self.periodo = periodo_activo()
+        if self.periodo is None:
+            raise ValidationError({"detail": "No hay un periodo activo."})
+
+    def get_queryset(self):
+        return exportacion.lotes(self.periodo)
+
+    def _respuesta_lote(self, lote_id: int, codigo=status.HTTP_200_OK) -> Response:
+        lote = exportacion.con_programas([self.get_queryset().get(pk=lote_id)])[0]
+        return Response(LoteSerializer(lote).data, status=codigo)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("q", str, description="Folio del lote (LOTE-2026A-006) o nombre de quien exportó."),
+            OpenApiParameter("formato", str, enum=[f.value for f in LoteExportacion.Formato]),
+            OpenApiParameter("estado", str, enum=["exportado", "cargado"]),
+        ]
+    )
+    def list(self, request):
+        """Lotes del periodo activo, del más nuevo al más viejo."""
+        lotes = self.get_queryset()
+        formato = request.query_params.get("formato")
+        if formato in LoteExportacion.Formato.values:
+            lotes = lotes.filter(formato=formato)
+        estado = request.query_params.get("estado")
+        if estado == "exportado":
+            lotes = lotes.filter(fecha_carga=None)
+        elif estado == "cargado":
+            lotes = lotes.exclude(fecha_carga=None)
+        lista = list(lotes)
+        # El folio se calcula (no está en la base) y los lotes de un periodo son pocos.
+        q = request.query_params.get("q", "").strip().lower()
+        if q:
+            lista = [
+                lote
+                for lote in lista
+                if q in lote.folio.lower() or (lote.usuario and q in lote.usuario.get_full_name().lower())
+            ]
+        return Response(LoteSerializer(exportacion.con_programas(lista), many=True).data)
+
+    @extend_schema(request=GenerarLoteSerializer, responses={201: LoteSerializer})
+    def create(self, request):
+        """Mete en un lote nuevo todos los movimientos aprobados que aún no se exportan."""
+        entrada = GenerarLoteSerializer(data=request.data)
+        entrada.is_valid(raise_exception=True)
+        try:
+            lote = exportacion.generar_lote(
+                self.periodo, request.user, entrada.validated_data["formato"], request=request
+            )
+        except exportacion.ExportacionInvalida as error:
+            return Response(error.datos, status=status.HTTP_400_BAD_REQUEST)
+        return self._respuesta_lote(lote.pk, status.HTTP_201_CREATED)
+
+    @extend_schema(responses=MovimientoExportacionSerializer(many=True))
+    @action(detail=False)
+    def pendientes(self, request):
+        """Movimientos aprobados del periodo activo que todavía no están en un lote."""
+        movimientos = exportacion.movimientos_completos(exportacion.pendientes(self.periodo))
+        return Response(MovimientoExportacionSerializer(movimientos, many=True).data)
+
+    @extend_schema(responses=ResumenExportacionSerializer)
+    @action(detail=False)
+    def resumen(self, request):
+        """Tarjetas de la pantalla: dictaminados, cargados, lotes en espera y última exportación."""
+        return Response(ResumenExportacionSerializer(exportacion.resumen(self.periodo)).data)
+
+    @extend_schema(responses=ColumnaSadceSerializer(many=True))
+    @action(detail=False)
+    def plantilla(self, request):
+        """Columnas del archivo para SADCE, con su descripción y un ejemplo."""
+        return Response(ColumnaSadceSerializer(exportacion.plantilla(), many=True).data)
+
+    @extend_schema(
+        responses={
+            (200, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"): bytes,
+            (200, "text/csv"): bytes,
+        }
+    )
+    @action(detail=True)
+    def descargar(self, request, pk=None):
+        """El archivo del lote (se arma de nuevo con sus movimientos)."""
+        contenido, tipo, nombre = exportacion.archivo(self.get_object())
+        respuesta = HttpResponse(contenido, content_type=tipo)
+        respuesta["Content-Disposition"] = f'attachment; filename="{nombre}"'
+        return respuesta
+
+    @extend_schema(request=None, responses=LoteSerializer)
+    @action(detail=True, methods=["post"], url_path="marcar-cargado")
+    def marcar_cargado(self, request, pk=None):
+        """Control Escolar confirma que pasó el lote a SADCE: se avisa a los alumnos."""
+        lote = self.get_object()
+        try:
+            exportacion.marcar_cargado(lote, request.user, request=request)
+        except exportacion.ExportacionInvalida as error:
+            return Response(error.datos, status=status.HTTP_400_BAD_REQUEST)
+        return self._respuesta_lote(lote.pk)

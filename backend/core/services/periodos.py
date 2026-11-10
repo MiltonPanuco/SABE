@@ -3,7 +3,8 @@ Periodos escolares y su convocatoria (F7).
 
 Solo hay un periodo activo (la base lo garantiza). Para cambiarlo, el periodo activo no debe tener
 movimientos pendientes: la bandeja de control escolar solo muestra el periodo activo y esos folios
-quedarían fuera de vista.
+quedarían fuera de vista. Por lo mismo (F9), tampoco movimientos aprobados sin exportar a SADCE ni
+lotes sin marcar como cargados.
 """
 
 from datetime import datetime
@@ -13,7 +14,7 @@ from django.db import transaction
 from django.db.models import Count, Q, QuerySet
 from django.utils import timezone
 
-from core.models import Bitacora, DetalleSolicitud, PeriodoEscolar, Usuario
+from core.models import Bitacora, DetalleSolicitud, LoteExportacion, PeriodoEscolar, Usuario
 
 from .avisos import registrar
 
@@ -64,7 +65,8 @@ def ultimo_cambio_de_periodo() -> Bitacora | None:
 
 def activar_periodo(periodo: PeriodoEscolar, usuario: Usuario | None, *, request=None) -> PeriodoEscolar:
     """
-    Deja `periodo` como el único activo. Falla si el periodo activo actual tiene movimientos pendientes.
+    Deja `periodo` como el único activo. Falla si el periodo activo actual tiene movimientos pendientes,
+    aprobados sin exportar a SADCE o lotes sin marcar como cargados.
     Activar el periodo que ya está activo no cambia nada.
     """
     with transaction.atomic():
@@ -82,6 +84,21 @@ def activar_periodo(periodo: PeriodoEscolar, usuario: Usuario | None, *, request
                 que = "el movimiento pendiente" if pendientes == 1 else f"los {pendientes} movimientos pendientes"
                 raise PeriodoInvalido(
                     {"detail": f"Dictamina {que} de {actual.ciclo} antes de activar otro periodo."}
+                )
+            # Lo aprobado tiene que llegar a SADCE: la pantalla de exportación solo ve el periodo activo.
+            sin_lote = DetalleSolicitud.objects.filter(
+                solicitud__periodo=actual, estado=DetalleSolicitud.Estado.APROBADA, lote=None
+            ).count()
+            if sin_lote:
+                que = "el movimiento aprobado" if sin_lote == 1 else f"los {sin_lote} movimientos aprobados"
+                raise PeriodoInvalido(
+                    {"detail": f"Exporta a SADCE {que} de {actual.ciclo} antes de activar otro periodo."}
+                )
+            en_espera = LoteExportacion.objects.filter(periodo=actual, fecha_carga=None).count()
+            if en_espera:
+                que = "el lote en espera" if en_espera == 1 else f"los {en_espera} lotes en espera"
+                raise PeriodoInvalido(
+                    {"detail": f"Marca como cargado en SADCE {que} de {actual.ciclo} antes de activar otro periodo."}
                 )
             # Primero se apaga el actual: la base no permite dos activos ni por un instante.
             actual.activo = False

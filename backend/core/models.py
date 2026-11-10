@@ -260,24 +260,45 @@ class CargaAcademica(models.Model):
 # ---------------------------------------------------------------------------
 
 class LoteExportacion(models.Model):
-    """Cada descarga del reporte para SADCE. Respalda 'marcar como cargado'."""
+    """
+    Cada Excel o CSV generado para SADCE con los movimientos aprobados de un periodo.
+    El archivo no se guarda: se vuelve a armar con sus movimientos, que ya no cambian.
+    """
 
     class Formato(models.TextChoices):
         XLSX = "xlsx", "Excel"
         CSV = "csv", "CSV"
 
+    periodo = models.ForeignKey(PeriodoEscolar, on_delete=models.PROTECT, related_name="lotes")
+    numero = models.PositiveIntegerField()  # consecutivo dentro del periodo: LOTE-2026A-001
     usuario = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="lotes_exportados"
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="lotes_exportados"
     )
     fecha = models.DateTimeField(auto_now_add=True)
     formato = models.CharField(max_length=4, choices=Formato.choices)
     total_registros = models.PositiveIntegerField(default=0)
+    # Se llenan al marcar el lote como cargado en SADCE.
+    cargado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="lotes_cargados"
+    )
+    fecha_carga = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "lotes_exportacion"
+        ordering = ["-fecha", "-id"]
+        constraints = [models.UniqueConstraint(fields=["periodo", "numero"], name="lote_unico_por_periodo")]
+
+    @property
+    def folio(self) -> str:
+        """LOTE-2026A-006"""
+        return f"LOTE-{self.periodo.ciclo.replace('-', '')}-{self.numero:03d}"
+
+    @property
+    def cargado(self) -> bool:
+        return self.fecha_carga is not None
 
     def __str__(self):
-        return f"Lote {self.pk} ({self.fecha:%Y-%m-%d})"
+        return self.folio
 
 
 class Solicitud(models.Model):

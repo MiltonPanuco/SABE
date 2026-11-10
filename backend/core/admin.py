@@ -35,6 +35,12 @@ class SolicitudAdmin(admin.ModelAdmin):
     inlines = [DetalleInline]
 
 
+@admin.register(models.LoteExportacion)
+class LoteExportacionAdmin(admin.ModelAdmin):
+    list_display = ("folio", "periodo", "fecha", "usuario", "formato", "total_registros", "fecha_carga")
+    list_filter = ("periodo", "formato")
+
+
 for modelo in (
     models.Programa,
     models.Estudiante,
@@ -42,7 +48,6 @@ for modelo in (
     models.PeriodoEscolar,
     models.UnidadAprendizaje,
     models.CargaAcademica,
-    models.LoteExportacion,
     models.Notificacion,
     models.Bitacora,
     models.ImportacionCSV,
