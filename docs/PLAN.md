@@ -43,7 +43,7 @@ F12 se puede preparar desde H2 (Dockerfiles y settings de producción) para no d
 | D1 | Columnas exactas del Excel para SADCE | **Decidida:** Ciclo, Folio, Matrícula, Nombre, Programa, Clave materia, Materia, Grupo, Docente, Tipo (ALTA/BAJA) y Fecha de aprobación; una fila por movimiento y un solo renglón de encabezados | 13 nov |
 | D2 | ¿Una alta que choca con una baja del mismo folio cuenta como choque? | **Decidida:** no cuenta, la baja del mismo folio libera el horario (cambio de grupo) | 11 nov |
 | D3 | Texto "~24 hrs hábiles" de resolución | Quitarlo | 11 nov |
-| D4 | Recuperar contraseña: ¿correo real o reinicio por control escolar? | Correo si hay SMTP listo en H4; si no, control escolar reinicia a contraseña temporal (F11) | 18 nov |
+| D4 | Recuperar contraseña: ¿correo real o reinicio por control escolar? | **Decidida:** sin correo. El administrador (Usuarios y Roles) o control escolar (desde el folio del alumno) restablecen a una contraseña temporal que se muestra una sola vez en pantalla (F11) | 18 nov |
 | D5 | Comprobante del folio: ¿PDF en el servidor o vista imprimible? | **Decidida:** vista imprimible en el frontend (`window.print`), botón "Imprimir acuse", sin dependencias nuevas | 14 nov |
 | D6 | Dónde se hospeda | Un solo servidor con Docker Compose (Render, Railway o un VPS). Elegir en función de costo cero | 20 nov |
 
@@ -271,7 +271,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
   - Se notifica al enviar folio (al alumno y a control escolar; "Petición extemporánea recibida" si es extemporáneo), al cancelar (a control escolar), al aprobar, al rechazar (con el motivo), al cargar en SADCE (un aviso por folio) y al terminar una importación de CSV (a control escolar).
   - Se registra en la bitácora: inicio de sesión, enviar y cancelar folio, aprobar, rechazar, importar CSV, exportar, marcar cargado, cambios de periodo y de oferta (y de usuarios en F11). Un inicio de sesión fallido no se registra.
   - Categorías del filtro "Acción": Dictamen, Importación, Exportación, Oferta, Periodo, Usuarios y Acceso.
-- **Diferencias con stitch (a confirmar):** en control escolar se quitan "Configurar alertas", "Canales de Notificación Activa", la tarjeta "Servidor SABE 100% / Latencia" (queda "Folios Extemporáneos"), la extensión de soporte, el adjunto PDF de los folios extemporáneos, "Cupos reincorporados / N plazas devueltas" (los folios pendientes no apartan lugar) y "Submódulo 2.9"; la tarjeta de importación no tiene "Ver reporte de errores" (los errores no se guardan) y su botón lleva a Importación de Datos; los textos empiezan con el nombre del alumno, sin "El estudiante" / "La estudiante"; la campana del estudiante sigue siendo desplegable (en `prototipo.js` lleva directo a la página) y agrega "Ver todas las notificaciones"; "Ver dictamen…" abre la página del folio en lugar del modal; la página del estudiante usa el marco del portal y no el menú anterior del panel; la bitácora muestra todos los registros, no solo "del ciclo 2026-A", con "Cargar más registros"; sin "24 horas hábiles" ni "Tiempo promedio de resolución" (D3).
+- **Diferencias con stitch (acordadas):** en control escolar se quitan "Configurar alertas", "Canales de Notificación Activa", la tarjeta "Servidor SABE 100% / Latencia" (queda "Folios Extemporáneos"), la extensión de soporte, el adjunto PDF de los folios extemporáneos, "Cupos reincorporados / N plazas devueltas" (los folios pendientes no apartan lugar) y "Submódulo 2.9"; la tarjeta de importación no tiene "Ver reporte de errores" (los errores no se guardan) y su botón lleva a Importación de Datos; los textos empiezan con el nombre del alumno, sin "El estudiante" / "La estudiante"; la campana del estudiante sigue siendo desplegable (en `prototipo.js` lleva directo a la página) y agrega "Ver todas las notificaciones"; "Ver dictamen…" abre la página del folio en lugar del modal; la página del estudiante usa el marco del portal y no el menú anterior del panel; la bitácora muestra todos los registros, no solo "del ciclo 2026-A", con "Cargar más registros"; sin "24 horas hábiles" ni "Tiempo promedio de resolución" (D3).
 - **Terminado cuando:** cada acción de la lista deja su fila en la bitácora; el alumno ve la notificación de su dictamen; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 24 nov.
 - **Estado:** Pendiente.
@@ -280,12 +280,23 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 
 - **Objetivo:** el administrador da de alta personal de control escolar, cambia roles, desactiva cuentas y reinicia contraseñas.
 - **Depende de:** F2.
-- **Backend:** CRUD de usuarios solo para administrador; reinicio a contraseña temporal.
-- **Frontend:** pantalla `sabe_usuarios_y_roles_administrador`.
-- **Contrato de API:** `/api/usuarios/`, `POST /api/usuarios/{id}/reiniciar-password/` → `{password_temporal}`.
-- **Reglas de negocio:** no se borran usuarios, se desactivan. El administrador no puede quitarse su propio rol. El reinicio activa `debe_cambiar_password`.
+- **Backend:** `core/services/usuarios.py` (`crear_personal`, `cambiar_rol`, `cambiar_estado`, `reiniciar_password`), cada cambio en `transaction.atomic` con `select_for_update` y su fila en la bitácora (categoría "Usuarios"). Las contraseñas temporales usan el generador y el hasher ligero de F8. `EntrarView` actualiza `last_login` ("Último acceso").
+- **Frontend:** el administrador usa el mismo marco que control escolar con el menú de stitch (Usuarios y Roles, Periodo y Convocatoria, Bitácora de Auditoría; sin campana). Pantalla `sabe_usuarios_y_roles_administrador` (`/administrador/usuarios`): tarjetas, regla de creación de cuentas, búsqueda, filtros de rol y estado, tabla con restablecer contraseña, cambiar rol y activar/desactivar, "+ Nuevo usuario" y "Exportar Auditoría". Control escolar tiene "Restablecer contraseña" en el expediente del alumno al revisar un folio.
+- **Contrato de API:**
+  - `GET /api/usuarios/?q=&rol=&estado=activos|inactivos&pagina=` (administrador) → `{total, pagina, paginas, conteos: {todos, estudiantes, estudiantes_activos, control_escolar, administradores}, resultados: [{id, username, nombre, apellidos, email, rol, activo, ultimo_acceso, origen, ip, matricula, programa, es_yo}]}`, 20 por página.
+  - `POST /api/usuarios/` `{nombre, apellidos, email, rol: control_escolar|administrador}` → `201 {usuario, password_temporal}`.
+  - `PATCH /api/usuarios/{id}/` `{rol}` o `{activo}` → el usuario. Sin `DELETE`.
+  - `POST /api/usuarios/{id}/reiniciar-password/` → `{password_temporal}`.
+  - `GET /api/usuarios/exportar/?…` → CSV `Nombre,Usuario,Correo,Rol,Estado,Ultimo acceso`.
+  - `POST /api/solicitudes/{id}/reiniciar-password/` (control escolar) → `{password_temporal}` del alumno del folio.
+- **Reglas de negocio:**
+  - No se borran usuarios, se desactivan. Una cuenta desactivada no entra y su sesión abierta deja de servir.
+  - Solo se crean cuentas de control escolar y de administrador; los alumnos llegan por CSV (F8) y su rol no cambia. El usuario es lo que va antes de la @ del correo, que debe ser `@uan.edu.mx` y no repetirse.
+  - El administrador no cambia su propio rol ni se desactiva, y siempre queda al menos un administrador activo. El rol de administrador también da acceso al admin de Django.
+  - Una contraseña nueva es temporal, se muestra una sola vez y activa `debe_cambiar_password` (D4).
+- **Diferencias con stitch (a confirmar):** el alta pide "Nombre" y "Apellidos" en lugar de un solo "Nombre Completo" (decisión del equipo); no se envía correo: la contraseña provisional se muestra una vez en pantalla con "Copiar" (D4); "Último acceso" muestra el origen por rol y la IP real; el encabezado muestra el nombre del administrador y "Administrador del sistema"; sin "BUILD v2.11-SEC" en el pie; "Restablecer contraseña" en el folio de control escolar es nuevo (decisión del equipo); la columna del nombre se recorta para que las acciones quepan sin desplazar la tabla.
 - **Terminado cuando:** el admin crea un usuario de control escolar que puede iniciar sesión; las pantallas coinciden con su diseño en `stitch/`.
-- **Fecha objetivo:** 24 nov. **Opcional** si H3 se atrasa (se puede usar el admin de Django).
+- **Fecha objetivo:** 24 nov.
 - **Estado:** Pendiente.
 
 ### F12. Despliegue

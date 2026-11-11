@@ -45,7 +45,7 @@ F12 can be prepared starting in H2 (Dockerfiles and production settings) so it i
 | D1 | Exact columns of the SADCE Excel file | **Decided:** Ciclo, Folio, Matrícula, Nombre, Programa, Clave materia, Materia, Grupo, Docente, Tipo (ALTA/BAJA) and Fecha de aprobación; one row per move and a single header row | Nov 13 |
 | D2 | Does an add that clashes with a drop in the same folio count as a clash? | **Decided:** no, the drop in the same folio frees the slot (group change) | Nov 11 |
 | D3 | "~24 business hours" resolution text | Remove it | Nov 11 |
-| D4 | Password recovery: real email or reset by Control Escolar? | Email if SMTP is ready in H4; otherwise Control Escolar resets to a temporary password (F11) | Nov 18 |
+| D4 | Password recovery: real email or reset by Control Escolar? | **Decided:** no email. The admin (Usuarios y Roles) or Control Escolar (from the student's folio) resets to a temporary password shown once on screen (F11) | Nov 18 |
 | D5 | Folio receipt: server-side PDF or printable view? | **Decided:** printable view in the frontend (`window.print`), "Imprimir acuse" button, no new dependencies | Nov 14 |
 | D6 | Where to host | A single server with Docker Compose (Render, Railway or a VPS). Choose based on zero cost | Nov 20 |
 
@@ -273,7 +273,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
   - Notices are sent when a folio is sent (to the student and Control Escolar; "Petición extemporánea recibida" if late), cancelled (to Control Escolar), approved, rejected (with the motive), uploaded to SADCE (one per folio) and when a CSV import finishes (to Control Escolar).
   - The audit log records: sign-in, sending and cancelling a folio, approve, reject, CSV import, export, mark as uploaded, period and offering changes (and user changes in F11). A failed sign-in is not logged.
   - "Acción" filter categories: Dictamen, Importación, Exportación, Oferta, Periodo, Usuarios and Acceso.
-- **Differences from stitch (to confirm):** on Control Escolar's screen, "Configurar alertas", "Canales de Notificación Activa", the "Servidor SABE 100% / Latencia" card (now "Folios Extemporáneos"), the support extension, the PDF attachment on late folios, "Cupos reincorporados / N plazas devueltas" (pending folios don't hold seats) and "Submódulo 2.9" are removed; the import card has no "Ver reporte de errores" (errors aren't stored) and its button goes to Importación de Datos; texts start with the student's name, without "El estudiante" / "La estudiante"; the student bell stays a dropdown (in `prototipo.js` it goes straight to the page) and adds "Ver todas las notificaciones"; "Ver dictamen…" opens the folio page instead of the modal; the student page uses the portal's frame, not the panel's older menu; the audit log shows every record, not only "del ciclo 2026-A", with "Cargar más registros"; no "24 horas hábiles" or "Tiempo promedio de resolución" (D3).
+- **Differences from stitch (agreed):** on Control Escolar's screen, "Configurar alertas", "Canales de Notificación Activa", the "Servidor SABE 100% / Latencia" card (now "Folios Extemporáneos"), the support extension, the PDF attachment on late folios, "Cupos reincorporados / N plazas devueltas" (pending folios don't hold seats) and "Submódulo 2.9" are removed; the import card has no "Ver reporte de errores" (errors aren't stored) and its button goes to Importación de Datos; texts start with the student's name, without "El estudiante" / "La estudiante"; the student bell stays a dropdown (in `prototipo.js` it goes straight to the page) and adds "Ver todas las notificaciones"; "Ver dictamen…" opens the folio page instead of the modal; the student page uses the portal's frame, not the panel's older menu; the audit log shows every record, not only "del ciclo 2026-A", with "Cargar más registros"; no "24 horas hábiles" or "Tiempo promedio de resolución" (D3).
 - **Done when:** each action on the list leaves its row in the audit log; the student sees the notice of their decision; the screens match their `stitch/` design.
 - **Target date:** Nov 24.
 - **Status:** Pending.
@@ -282,12 +282,23 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 
 - **Goal:** the administrator creates Control Escolar staff accounts, changes roles, deactivates accounts and resets passwords.
 - **Depends on:** F2.
-- **Backend:** user CRUD for administrators only; reset to a temporary password.
-- **Frontend:** screen `sabe_usuarios_y_roles_administrador`.
-- **API contract:** `/api/usuarios/`, `POST /api/usuarios/{id}/reiniciar-password/` → `{password_temporal}`.
-- **Business rules:** users aren't deleted, they're deactivated. The administrator can't remove their own role. A reset turns on `debe_cambiar_password`.
+- **Backend:** `core/services/usuarios.py` (`crear_personal`, `cambiar_rol`, `cambiar_estado`, `reiniciar_password`), each change in `transaction.atomic` with `select_for_update` and its audit-log row (category "Usuarios"). Temporary passwords use F8's generator and light hasher. `EntrarView` updates `last_login` ("Último acceso").
+- **Frontend:** the admin uses the same frame as Control Escolar with stitch's menu (Usuarios y Roles, Periodo y Convocatoria, Bitácora de Auditoría; no bell). Screen `sabe_usuarios_y_roles_administrador` (`/administrador/usuarios`): cards, the account-creation rule, search, role and status filters, a table with reset password, change role and activate/deactivate, "+ Nuevo usuario" and "Exportar Auditoría". Control Escolar gets "Restablecer contraseña" in the student's record when reviewing a folio.
+- **API contract:**
+  - `GET /api/usuarios/?q=&rol=&estado=activos|inactivos&pagina=` (admin) → `{total, pagina, paginas, conteos: {todos, estudiantes, estudiantes_activos, control_escolar, administradores}, resultados: [{id, username, nombre, apellidos, email, rol, activo, ultimo_acceso, origen, ip, matricula, programa, es_yo}]}`, 20 per page.
+  - `POST /api/usuarios/` `{nombre, apellidos, email, rol: control_escolar|administrador}` → `201 {usuario, password_temporal}`.
+  - `PATCH /api/usuarios/{id}/` `{rol}` or `{activo}` → the user. No `DELETE`.
+  - `POST /api/usuarios/{id}/reiniciar-password/` → `{password_temporal}`.
+  - `GET /api/usuarios/exportar/?…` → CSV `Nombre,Usuario,Correo,Rol,Estado,Ultimo acceso`.
+  - `POST /api/solicitudes/{id}/reiniciar-password/` (Control Escolar) → `{password_temporal}` for the folio's student.
+- **Business rules:**
+  - Users aren't deleted, they're deactivated. A deactivated account can't log in and its open session stops working.
+  - Only Control Escolar and admin accounts are created here; students come from CSV (F8) and their role doesn't change. The username is the part of the email before the @; the email must be `@uan.edu.mx` and unique.
+  - The admin can't change their own role or deactivate themself, and at least one active admin always remains. The admin role also grants Django admin access.
+  - A new password is temporary, shown once, and turns on `debe_cambiar_password` (D4).
+- **Differences from stitch (to confirm):** the form asks for "Nombre" and "Apellidos" instead of a single "Nombre Completo" (team decision); no email is sent: the temporary password is shown once with "Copiar" (D4); "Último acceso" shows the origin by role and the real IP; the header shows the admin's name and "Administrador del sistema"; no "BUILD v2.11-SEC" in the footer; Control Escolar's "Restablecer contraseña" on the folio is new (team decision); the name column truncates so the actions fit without scrolling the table.
 - **Done when:** the admin creates a Control Escolar user who can log in; the screens match their `stitch/` design.
-- **Target date:** Nov 24. **Optional** if H3 slips (the Django admin can be used instead).
+- **Target date:** Nov 24.
 - **Status:** Pending.
 
 ### F12. Deployment

@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { RedirigirPorRol, RutaProtegida } from "./auth/RutaProtegida";
-import { Layout } from "./components/Layout";
+import { UsuariosPage } from "./admin/UsuariosPage";
 import { BitacoraPage } from "./control/BitacoraPage";
 import { ExportacionPage } from "./control/ExportacionPage";
 import { ImportacionPage } from "./control/ImportacionPage";
@@ -19,7 +19,7 @@ import { DetalleFolioPage } from "./estudiante/DetalleFolioPage";
 import { HistorialPage } from "./estudiante/HistorialPage";
 import { NotificacionesPage } from "./estudiante/NotificacionesPage";
 import { CambiarPasswordPage } from "./pages/CambiarPasswordPage";
-import { InicioAdministrador, NoEncontrada } from "./pages/Inicios";
+import { NoEncontrada } from "./pages/Inicios";
 import { LoginPage } from "./pages/LoginPage";
 import { RecuperarPasswordPage } from "./pages/RecuperarPasswordPage";
 
@@ -62,9 +62,13 @@ export default function App() {
           </Route>
         </Route>
 
-        <Route element={<Layout />}>
-          <Route element={<RutaProtegida roles={["administrador"]} />}>
-            <Route path="/administrador" element={<InicioAdministrador />} />
+        {/* Administrador: el mismo marco con el menú de stitch/sabe_usuarios_y_roles_administrador */}
+        <Route element={<RutaProtegida roles={["administrador"]} />}>
+          <Route path="/administrador" element={<LayoutControlEscolar portal="admin" />}>
+            <Route index element={<Navigate to="usuarios" replace />} />
+            <Route path="usuarios" element={<UsuariosPage />} />
+            <Route path="periodo" element={<PeriodoPage />} />
+            <Route path="bitacora" element={<BitacoraPage />} />
           </Route>
         </Route>
       </Route>

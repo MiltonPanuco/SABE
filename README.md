@@ -112,7 +112,7 @@ Si cambias un modelo: `python manage.py makemigrations` y sube la migración en 
 - [ ] Estudiante: cancelar solicitud pendiente y ver motivo de rechazo
 - [ ] Control escolar: bandeja, validación, catálogos, oferta
 - [x] Control escolar: periodo y convocatoria, importación de CSV, exportación a SADCE, notificaciones y bitácora
-- [ ] Administrador: usuarios y roles
+- [x] Administrador: usuarios y roles
 
 **Diseño**
 - [x] Pantallas del prototipo completas (ver `docs/diseno/Pantallas y Flujos.docx`). Para verlo, abre `stitch/sabe_inicio_de_sesi_n_institucional_uan_uae/code.html` y usa los accesos de demostración

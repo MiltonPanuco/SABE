@@ -121,6 +121,8 @@ SPECTACULAR_SETTINGS = {
     "ENUM_NAME_OVERRIDES": {
         "TipoTramiteEnum": "core.models.DetalleSolicitud.Tipo",
         "TipoImportacionEnum": "core.models.ImportacionCSV.Tipo",
+        "RolEnum": "core.models.Rol",
+        "RolPersonalEnum": ["control_escolar", "administrador"],
     },
 }
 

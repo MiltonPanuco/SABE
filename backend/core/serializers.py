@@ -17,6 +17,7 @@ from .models import (
     Notificacion,
     PeriodoEscolar,
     Programa,
+    Rol,
     Solicitud,
     Usuario,
 )
@@ -722,3 +723,113 @@ class PaginaBitacoraSerializer(serializers.Serializer):
     pagina = serializers.IntegerField()
     paginas = serializers.IntegerField()
     resultados = RegistroBitacoraSerializer(many=True)
+
+
+# ---------------------------------------------------------------------------
+# Usuarios y roles (F11)
+# ---------------------------------------------------------------------------
+
+ORIGEN_ACCESO = {
+    "estudiante": "Portal del estudiante",
+    "control_escolar": "Ventanilla de Control Escolar",
+    "administrador": "Panel de administración",
+}
+
+
+class UsuarioAdminSerializer(serializers.ModelSerializer):
+    """Fila de Usuarios y Roles. `ip` viene anotada (último inicio de sesión en la bitácora)."""
+
+    nombre = serializers.CharField(source="first_name")
+    apellidos = serializers.CharField(source="last_name")
+    activo = serializers.BooleanField(source="is_active")
+    ultimo_acceso = serializers.DateTimeField(source="last_login", allow_null=True)
+    origen = serializers.SerializerMethodField()
+    ip = serializers.CharField(allow_null=True, read_only=True, default=None)
+    matricula = serializers.SerializerMethodField()
+    programa = serializers.SerializerMethodField()
+    es_yo = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Usuario
+        fields = [
+            "id",
+            "username",
+            "nombre",
+            "apellidos",
+            "email",
+            "rol",
+            "activo",
+            "ultimo_acceso",
+            "origen",
+            "ip",
+            "matricula",
+            "programa",
+            "es_yo",
+        ]
+
+    def _perfil(self, usuario):
+        return getattr(usuario, "perfil_estudiante", None) if usuario.rol == "estudiante" else None
+
+    def get_origen(self, usuario) -> str:
+        return ORIGEN_ACCESO.get(usuario.rol, "")
+
+    @extend_schema_field(serializers.CharField(allow_null=True))
+    def get_matricula(self, usuario):
+        perfil = self._perfil(usuario)
+        return perfil.matricula if perfil else None
+
+    @extend_schema_field(serializers.CharField(allow_null=True))
+    def get_programa(self, usuario):
+        perfil = self._perfil(usuario)
+        return perfil.programa.nombre if perfil else None
+
+    def get_es_yo(self, usuario) -> bool:
+        solicitante = self.context.get("usuario")
+        return solicitante is not None and solicitante.pk == usuario.pk
+
+
+class ConteosUsuariosSerializer(serializers.Serializer):
+    todos = serializers.IntegerField()
+    estudiantes = serializers.IntegerField()
+    estudiantes_activos = serializers.IntegerField()
+    control_escolar = serializers.IntegerField()
+    administradores = serializers.IntegerField()
+
+
+class PaginaUsuariosSerializer(serializers.Serializer):
+    total = serializers.IntegerField()
+    pagina = serializers.IntegerField()
+    paginas = serializers.IntegerField()
+    conteos = ConteosUsuariosSerializer()
+    resultados = UsuarioAdminSerializer(many=True)
+
+
+class CrearPersonalSerializer(serializers.Serializer):
+    nombre = serializers.CharField(max_length=150, error_messages={"blank": "Escribe el nombre."})
+    apellidos = serializers.CharField(max_length=150, error_messages={"blank": "Escribe los apellidos."})
+    email = serializers.EmailField(error_messages={"invalid": "Escribe un correo válido."})
+    rol = serializers.ChoiceField(
+        choices=["control_escolar", "administrador"],
+        error_messages={"invalid_choice": "Los estudiantes se crean por importación de CSV."},
+    )
+
+
+class CambioUsuarioSerializer(serializers.Serializer):
+    """Uno de los dos: el rol (personal) o el estado de la cuenta."""
+
+    rol = serializers.ChoiceField(choices=Rol.choices, required=False)
+    activo = serializers.BooleanField(required=False)
+
+    def validate(self, datos):
+        if len(datos) != 1:
+            raise serializers.ValidationError("Envía solo el rol o solo el estado (activo).")
+        return datos
+
+
+class PasswordTemporalSerializer(serializers.Serializer):
+    password_temporal = serializers.CharField()
+
+
+class PersonalCreadoSerializer(serializers.Serializer):
+    usuario = UsuarioAdminSerializer()
+    password_temporal = serializers.CharField()

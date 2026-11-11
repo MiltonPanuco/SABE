@@ -3,10 +3,13 @@ import { useState, type ReactNode } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { useAprobar, useRechazar, useRevision } from "../api/control";
 import { useSolicitud } from "../api/solicitudes";
+import { useReiniciarPasswordAlumno } from "../api/usuarios";
 import type { Choque, MovimientoFolio, RevisionMovimiento, Solicitud } from "../api/tipos";
 import { Simbolo, Spinner } from "../components/acceso";
+import { PasswordTemporal } from "../components/PasswordTemporal";
 import { DIAS_CORTOS, fechaHora, hora, horarioDictamen, unir } from "../estudiante/formato";
 import { ESTADO_BANDEJA } from "./estado";
+import { Modal } from "./Modal";
 import { ChipExtemporaneo } from "./SolicitudesPage";
 import { useAviso } from "./Toast";
 
@@ -63,6 +66,7 @@ export function RevisarFolioPage() {
               <Dato etiqueta="Programa" valor={`Lic. en ${folio.estudiante.programa}`} />
               <Dato etiqueta="Avance" valor={`${folio.estudiante.semestre}° semestre`} />
             </div>
+            <RestablecerPassword folio={folio} />
           </Tarjeta>
           <Tarjeta icono="format_quote" titulo="Justificación del alumno">
             <p className="font-body-md text-body-md break-words text-on-surface-variant italic">“{folio.justificacion}”</p>
@@ -402,6 +406,76 @@ function Pie({
             </button>
           </div>
         </div>
+      )}
+    </>
+  );
+}
+
+/**
+ * Control escolar restablece la contraseña del alumno del folio (ventanilla, "Recuperar contraseña").
+ * La temporal se muestra una sola vez.
+ */
+function RestablecerPassword({ folio }: { folio: Solicitud }) {
+  const [confirmando, setConfirmando] = useState(false);
+  const [password, setPassword] = useState<string | null>(null);
+  const reiniciar = useReiniciarPasswordAlumno();
+  const { nombre, matricula } = folio.estudiante;
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setConfirmando(true)}
+        className="mt-space-sm inline-flex items-center gap-1 self-start rounded-lg px-space-sm py-1 font-label-md text-label-md font-semibold text-primary hover:bg-surface-container"
+      >
+        <Simbolo nombre="lock_reset" className="text-[18px]!" />
+        Restablecer contraseña
+      </button>
+      {confirmando && (
+        <Modal cerrar={() => setConfirmando(false)} fondo="bg-primary/40 backdrop-blur-sm" className="max-w-md p-space-lg" titulo="titulo-restablecer">
+          <div className="flex flex-col gap-space-md">
+            <h3 id="titulo-restablecer" className="font-headline-sm text-headline-sm font-bold text-primary">
+              Restablecer contraseña del alumno
+            </h3>
+            <p className="font-body-md text-body-md text-on-surface-variant">
+              Se generará una contraseña provisional para {nombre} ({matricula}). La actual dejará de funcionar y deberá cambiarla al entrar.
+            </p>
+            {reiniciar.error && <p className="font-body-sm text-body-sm text-error">{reiniciar.error.message}</p>}
+            <div className="flex items-center justify-end gap-space-sm">
+              <button
+                type="button"
+                onClick={() => setConfirmando(false)}
+                className="rounded-lg bg-surface-container px-space-md py-2 font-label-md text-label-md font-semibold text-on-surface hover:bg-surface-container-high"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={reiniciar.isPending}
+                onClick={() =>
+                  reiniciar.mutate(folio.id, {
+                    onSuccess: (r) => {
+                      setConfirmando(false);
+                      setPassword(r.password_temporal);
+                    },
+                  })
+                }
+                className="inline-flex items-center gap-space-xs rounded-lg bg-primary-container px-space-md py-2 font-label-md text-label-md font-semibold text-on-primary shadow-sm hover:bg-primary disabled:opacity-60"
+              >
+                {reiniciar.isPending && <Spinner />}
+                Restablecer
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+      {password && (
+        <PasswordTemporal
+          titulo="Contraseña provisional restablecida"
+          usuario={`${nombre} (${matricula})`}
+          password={password}
+          cerrar={() => setPassword(null)}
+        />
       )}
     </>
   );

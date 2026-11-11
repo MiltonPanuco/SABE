@@ -21,6 +21,7 @@ from core.views import (
     PeriodoViewSet,
     ProgramaViewSet,
     SolicitudViewSet,
+    UsuarioViewSet,
     ValidarMovimientosView,
 )
 
@@ -35,6 +36,7 @@ router.register("importaciones", ImportacionViewSet, basename="importacion")
 router.register("exportaciones", ExportacionViewSet, basename="exportacion")
 router.register("notificaciones", NotificacionViewSet, basename="notificacion")
 router.register("bitacora", BitacoraViewSet, basename="bitacora")
+router.register("usuarios", UsuarioViewSet, basename="usuario")
 
 
 def health(request):

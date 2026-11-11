@@ -2,7 +2,8 @@ import csv
 import io
 from datetime import date, datetime, time, timedelta
 
-from django.db.models import Count, Prefetch, Q
+from django.contrib.auth.models import update_last_login
+from django.db.models import Case, Count, IntegerField, OuterRef, Prefetch, Q, Subquery, Value, When
 from django.utils import timezone
 from django.http import HttpResponse
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
@@ -30,9 +31,15 @@ from .models import (
     Solicitud,
     Usuario,
 )
-from .permissions import EsControlEscolar, EsEstudiante, EsPersonalEscolar
+from .permissions import EsAdministrador, EsControlEscolar, EsEstudiante, EsPersonalEscolar
 from .serializers import (
     ROLES,
+    CambioUsuarioSerializer,
+    CrearPersonalSerializer,
+    PaginaUsuariosSerializer,
+    PasswordTemporalSerializer,
+    PersonalCreadoSerializer,
+    UsuarioAdminSerializer,
     usuario_bitacora,
     AprobarSerializer,
     ArchivoCsvSerializer,
@@ -75,7 +82,7 @@ from .serializers import (
 )
 from .services.bandeja import EstadoBandeja, folios_bandeja, resumen_bandeja
 from .services.catalogo import con_cupo, grupos_catalogo, periodo_activo
-from .services import exportacion, importacion
+from .services import exportacion, importacion, usuarios
 from .services.dictamen import DictamenInvalido, aprobar_movimiento, rechazar_movimiento, revision_folio
 from .services.avisos import (
     CATEGORIAS_BITACORA,
@@ -419,7 +426,7 @@ class SolicitudViewSet(
     def get_permissions(self):
         if self.action in ("create", "cancelar"):
             return [EsEstudiante()]
-        if self.action in ("resumen", "revision"):
+        if self.action in ("resumen", "revision", "reiniciar_password"):
             return [EsControlEscolar()]
         return super().get_permissions()
 
@@ -473,6 +480,14 @@ class SolicitudViewSet(
                 ).data
             return Response(datos, status=status.HTTP_400_BAD_REQUEST)
         return Response(folio_actualizado(solicitud.pk), status=status.HTTP_201_CREATED)
+
+    @extend_schema(request=None, responses=PasswordTemporalSerializer)
+    @action(detail=True, methods=["post"], url_path="reiniciar-password")
+    def reiniciar_password(self, request, pk=None):
+        """Control escolar restablece la contraseña del alumno del folio (se muestra una sola vez)."""
+        solicitud = self.get_object()
+        password = usuarios.reiniciar_password(solicitud.estudiante.usuario, request.user, request=request)
+        return Response({"password_temporal": password})
 
     @extend_schema(request=None, responses=SolicitudSerializer)
     @action(detail=True, methods=["post"])
@@ -822,6 +837,7 @@ class EntrarView(TokenObtainPairView):
         except TokenError as error:
             raise InvalidToken(error.args[0]) from error
         usuario = serializer.user
+        update_last_login(None, usuario)  # "Último acceso" en Usuarios y Roles
         origen = ORIGEN_SESION.get(usuario.rol, "SABE")
         registrar(usuario, "iniciar_sesion", usuario, detalle=f"Inicio de sesión desde {origen}.", request=request)
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
@@ -1006,6 +1022,157 @@ class BitacoraViewSet(viewsets.GenericViewSet):
             )
         periodo = periodo_activo()
         nombre = f"bitacora_sabe_{periodo.ciclo.replace('-', '')}.csv" if periodo else "bitacora_sabe.csv"
+        respuesta = HttpResponse("\ufeff" + salida.getvalue(), content_type="text/csv; charset=utf-8")
+        respuesta["Content-Disposition"] = f'attachment; filename="{nombre}"'
+        return respuesta
+
+
+# ---------------------------------------------------------------------------
+# Usuarios y roles (F11)
+# ---------------------------------------------------------------------------
+
+POR_PAGINA_USUARIOS = 20
+ORDEN_ROL = {Rol.ADMINISTRADOR: 0, Rol.CONTROL_ESCOLAR: 1, Rol.ESTUDIANTE: 2}
+
+
+class UsuarioViewSet(viewsets.GenericViewSet):
+    """Cuentas de SABE para el administrador. No se borran: se desactivan."""
+
+    serializer_class = UsuarioAdminSerializer
+    permission_classes = [EsAdministrador]
+    pagination_class = None
+
+    def get_queryset(self):
+        ultima_ip = Bitacora.objects.filter(usuario=OuterRef("pk"), accion="iniciar_sesion").order_by("-fecha", "-id")
+        return Usuario.objects.select_related("perfil_estudiante__programa").annotate(
+            ip=Subquery(ultima_ip.values("ip")[:1])
+        )
+
+    def filtrar(self, request):
+        usuarios_qs = self.get_queryset()
+        params = request.query_params
+        if q := params.get("q", "").strip():
+            usuarios_qs = usuarios_qs.filter(
+                Q(username__icontains=q)
+                | Q(first_name__icontains=q)
+                | Q(last_name__icontains=q)
+                | Q(email__icontains=q)
+                | Q(perfil_estudiante__matricula__icontains=q)
+            )
+        if params.get("rol") in Rol.values:
+            usuarios_qs = usuarios_qs.filter(rol=params["rol"])
+        estado = params.get("estado")
+        if estado == "activos":
+            usuarios_qs = usuarios_qs.filter(is_active=True)
+        elif estado == "inactivos":
+            usuarios_qs = usuarios_qs.filter(is_active=False)
+        return usuarios_qs
+
+    def _ordenados(self, usuarios_qs):
+        orden = Case(*[When(rol=r, then=Value(n)) for r, n in ORDEN_ROL.items()], output_field=IntegerField())
+        return usuarios_qs.order_by(orden, "first_name", "last_name", "username")
+
+    def _datos(self, usuario):
+        usuario = self.get_queryset().get(pk=usuario.pk)
+        return UsuarioAdminSerializer(usuario, context={"usuario": self.request.user}).data
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("q", str, description="Nombre, usuario, matrícula o correo."),
+            OpenApiParameter("rol", str, enum=Rol.values),
+            OpenApiParameter("estado", str, enum=["activos", "inactivos"]),
+            OpenApiParameter("pagina", int, description=f"Desde 1; {POR_PAGINA_USUARIOS} por página."),
+        ],
+        responses=PaginaUsuariosSerializer,
+    )
+    def list(self, request):
+        conteos = Usuario.objects.aggregate(
+            todos=Count("id"),
+            estudiantes=Count("id", filter=Q(rol=Rol.ESTUDIANTE)),
+            estudiantes_activos=Count("id", filter=Q(rol=Rol.ESTUDIANTE, is_active=True)),
+            control_escolar=Count("id", filter=Q(rol=Rol.CONTROL_ESCOLAR)),
+            administradores=Count("id", filter=Q(rol=Rol.ADMINISTRADOR)),
+        )
+        filtrados = self.filtrar(request)
+        total = filtrados.count()
+        paginas = max(1, -(-total // POR_PAGINA_USUARIOS))
+        try:
+            pagina = min(max(int(request.query_params.get("pagina", 1)), 1), paginas)
+        except ValueError:
+            pagina = 1
+        inicio = (pagina - 1) * POR_PAGINA_USUARIOS
+        filas = self._ordenados(filtrados)[inicio : inicio + POR_PAGINA_USUARIOS]
+        return Response(
+            {
+                "total": total,
+                "pagina": pagina,
+                "paginas": paginas,
+                "conteos": conteos,
+                "resultados": UsuarioAdminSerializer(filas, many=True, context={"usuario": request.user}).data,
+            }
+        )
+
+    @extend_schema(request=CrearPersonalSerializer, responses={201: PersonalCreadoSerializer})
+    def create(self, request):
+        """Alta de personal de control escolar o de un administrador (los alumnos llegan por CSV)."""
+        entrada = CrearPersonalSerializer(data=request.data)
+        entrada.is_valid(raise_exception=True)
+        try:
+            usuario, password = usuarios.crear_personal(entrada.validated_data, request.user, request=request)
+        except usuarios.UsuarioInvalido as error:
+            return Response(error.datos, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"usuario": self._datos(usuario), "password_temporal": password}, status=status.HTTP_201_CREATED)
+
+    @extend_schema(request=CambioUsuarioSerializer, responses=UsuarioAdminSerializer)
+    def partial_update(self, request, pk=None):
+        """Cambia el rol (solo personal) o activa/desactiva la cuenta."""
+        usuario = self.get_object()
+        entrada = CambioUsuarioSerializer(data=request.data)
+        entrada.is_valid(raise_exception=True)
+        datos = entrada.validated_data
+        try:
+            if "rol" in datos:
+                usuario = usuarios.cambiar_rol(usuario, datos["rol"], request.user, request=request)
+            else:
+                usuario = usuarios.cambiar_estado(usuario, datos["activo"], request.user, request=request)
+        except usuarios.UsuarioInvalido as error:
+            return Response(error.datos, status=status.HTTP_400_BAD_REQUEST)
+        return Response(self._datos(usuario))
+
+    @extend_schema(request=None, responses=PasswordTemporalSerializer)
+    @action(detail=True, methods=["post"], url_path="reiniciar-password")
+    def reiniciar_password(self, request, pk=None):
+        """Contraseña temporal nueva para cualquier cuenta (se muestra una sola vez)."""
+        password = usuarios.reiniciar_password(self.get_object(), request.user, request=request)
+        return Response({"password_temporal": password})
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("q", str),
+            OpenApiParameter("rol", str, enum=Rol.values),
+            OpenApiParameter("estado", str, enum=["activos", "inactivos"]),
+        ],
+        responses={(200, "text/csv"): bytes},
+    )
+    @action(detail=False)
+    def exportar(self, request):
+        """Las cuentas filtradas en CSV ("Exportar Auditoría")."""
+        salida = io.StringIO()
+        escritor = csv.writer(salida, lineterminator="\r\n")
+        escritor.writerow(["Nombre", "Usuario", "Correo", "Rol", "Estado", "Ultimo acceso"])
+        for u in self._ordenados(self.filtrar(request)).iterator(chunk_size=500):
+            escritor.writerow(
+                [
+                    u.get_full_name(),
+                    u.username,
+                    u.email,
+                    ROLES.get(u.rol, u.rol),
+                    "Activo" if u.is_active else "Inactivo",
+                    timezone.localtime(u.last_login).strftime("%d/%m/%Y %H:%M") if u.last_login else "Nunca",
+                ]
+            )
+        periodo = periodo_activo()
+        nombre = f"usuarios_sabe_{periodo.ciclo.replace('-', '')}.csv" if periodo else "usuarios_sabe.csv"
         respuesta = HttpResponse("\ufeff" + salida.getvalue(), content_type="text/csv; charset=utf-8")
         respuesta["Content-Disposition"] = f'attachment; filename="{nombre}"'
         return respuesta

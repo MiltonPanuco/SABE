@@ -135,6 +135,7 @@ PERSONAL = [
 # Acciones de la bitácora que `seed_demo` borra de los usuarios demo al reiniciar.
 ACCIONES_DEMO = [
     "enviar_folio", "cancelar_folio", "aprobar", "rechazar", "exportar_sadce", "marcar_cargado", "iniciar_sesion",
+    "crear_usuario", "cambiar_rol_usuario", "activar_usuario", "desactivar_usuario", "reiniciar_password_usuario",
 ]
 
 CARGAS = {

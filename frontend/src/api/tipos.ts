@@ -518,3 +518,47 @@ export interface FiltrosBitacora {
   categoria: "" | CategoriaBitacora;
   rol: "" | "estudiante" | "control_escolar" | "administrador";
 }
+
+// ---------------------------------------------------------------------------
+// Usuarios y roles (F11)
+// ---------------------------------------------------------------------------
+
+export interface UsuarioAdmin {
+  id: number;
+  username: string;
+  nombre: string;
+  apellidos: string;
+  email: string;
+  rol: Rol;
+  activo: boolean;
+  ultimo_acceso: string | null;
+  /** "Portal del estudiante", "Ventanilla de Control Escolar" o "Panel de administración". */
+  origen: string;
+  ip: string | null;
+  matricula: string | null;
+  programa: string | null;
+  /** La fila del administrador que consulta. */
+  es_yo: boolean;
+}
+
+export interface PaginaUsuarios {
+  total: number;
+  pagina: number;
+  paginas: number;
+  conteos: { todos: number; estudiantes: number; estudiantes_activos: number; control_escolar: number; administradores: number };
+  resultados: UsuarioAdmin[];
+}
+
+export interface FiltrosUsuarios {
+  q: string;
+  rol: "" | Rol;
+  estado: "" | "activos" | "inactivos";
+  pagina: number;
+}
+
+export interface NuevoPersonal {
+  nombre: string;
+  apellidos: string;
+  email: string;
+  rol: "control_escolar" | "administrador";
+}

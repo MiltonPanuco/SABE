@@ -18,12 +18,14 @@ import {
   semanas,
 } from "./fechas";
 import { Modal } from "./Modal";
+import { useVentanilla } from "./LayoutControlEscolar";
 import { useAviso } from "./Toast";
 
 /** "2026-A" → "26A" (insignia de la tabla). */
 const insignia = (ciclo: string) => ciclo.slice(2).replace("-", "");
 
 export function PeriodoPage() {
+  const ventanilla = useVentanilla();
   const { data: periodos, isPending, error } = usePeriodos();
   const activo = periodos?.find((p) => p.activo) ?? null;
   // null: cerrado; "nuevo": alta; Periodo: edición.
@@ -37,7 +39,7 @@ export function PeriodoPage() {
       <div className="flex flex-col justify-between gap-space-md lg:flex-row lg:items-center">
         <div className="flex flex-col">
           <div className="mb-1 flex items-center gap-space-xs font-label-sm text-label-sm text-on-surface-variant">
-            <span>Ventanilla de Control Escolar</span>
+            <span>{ventanilla}</span>
             <Simbolo nombre="chevron_right" className="text-[14px]!" />
             <span className="font-semibold text-primary">Parámetros Operativos</span>
           </div>

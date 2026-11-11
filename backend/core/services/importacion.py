@@ -267,7 +267,7 @@ def analizar_alumnos(filas: list[tuple[int, dict[str, str]]]) -> Analisis:
     return Analisis(len(filas), validas, errores)
 
 
-def _contrasena_temporal() -> str:
+def contrasena_temporal() -> str:
     return "".join(secrets.choice(ALFABETO) for _ in range(LARGO_TEMPORAL))
 
 
@@ -276,7 +276,7 @@ def _importar_alumnos(analisis: Analisis) -> tuple[int, int, list[dict]]:
     for fila in analisis.validas:
         d, estudiante = fila.datos, fila.interno["estudiante"]
         if estudiante is None:
-            temporal = _contrasena_temporal()
+            temporal = contrasena_temporal()
             usuario = Usuario(
                 username=d["matricula"],
                 first_name=d["nombre"],

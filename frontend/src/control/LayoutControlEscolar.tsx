@@ -1,5 +1,6 @@
-// Marco de las pantallas de control escolar: menú lateral y encabezado que comparten las 6 pantallas
-// de control escolar en stitch/ (aquí, el de sabe_solicitudes_control_escolar).
+// Marco de las pantallas de control escolar y del administrador: menú lateral y encabezado que comparten
+// sus pantallas en stitch/ (el de sabe_solicitudes_control_escolar). El administrador usa el menú de
+// sabe_usuarios_y_roles_administrador, sin campana (como en prototipo.js).
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useCampana } from "../api/avisos";
@@ -8,18 +9,60 @@ import { useAuth } from "../auth/AuthProvider";
 import { Simbolo } from "../components/acceso";
 import { AvisoProvider } from "./Toast";
 
-export const SECCIONES_CONTROL = {
-  tramites: [
-    { ruta: "solicitudes", icono: "pending_actions", texto: "Solicitudes Pendientes" },
-    { ruta: "oferta", icono: "menu_book", texto: "Oferta Académica" },
-  ],
-  mantenimiento: [
-    { ruta: "periodo", icono: "event_available", texto: "Periodo y Convocatoria" },
-    { ruta: "importacion", icono: "badge", texto: "Importación de Datos (CSV)" },
-    { ruta: "exportacion", icono: "sync_alt", texto: "Exportar Excel para SADCE" },
-    { ruta: "bitacora", icono: "security_update_good", texto: "Bitácora de Auditoría" },
-  ],
+interface Enlace {
+  ruta: string;
+  icono: string;
+  texto: string;
+}
+
+export type Portal = "control" | "admin";
+
+const PORTALES: Record<Portal, { base: string; subtitulo: string; campana: boolean; secciones: { titulo: string; enlaces: Enlace[] }[] }> = {
+  control: {
+    base: "/control-escolar",
+    subtitulo: "Ventanilla Control Escolar UAE",
+    campana: true,
+    secciones: [
+      {
+        titulo: "Gestión de Trámites",
+        enlaces: [
+          { ruta: "solicitudes", icono: "pending_actions", texto: "Solicitudes Pendientes" },
+          { ruta: "oferta", icono: "menu_book", texto: "Oferta Académica" },
+        ],
+      },
+      {
+        titulo: "Mantenimiento",
+        enlaces: [
+          { ruta: "periodo", icono: "event_available", texto: "Periodo y Convocatoria" },
+          { ruta: "importacion", icono: "badge", texto: "Importación de Datos (CSV)" },
+          { ruta: "exportacion", icono: "sync_alt", texto: "Exportar Excel para SADCE" },
+          { ruta: "bitacora", icono: "security_update_good", texto: "Bitácora de Auditoría" },
+        ],
+      },
+    ],
+  },
+  admin: {
+    base: "/administrador",
+    subtitulo: "Administrador del sistema",
+    campana: false,
+    secciones: [
+      {
+        titulo: "Gestión y Accesos",
+        enlaces: [
+          { ruta: "usuarios", icono: "admin_panel_settings", texto: "Usuarios y Roles" },
+          { ruta: "periodo", icono: "date_range", texto: "Periodo y Convocatoria" },
+        ],
+      },
+      { titulo: "Sistema y Auditoría", enlaces: [{ ruta: "bitacora", icono: "history_edu", texto: "Bitácora de Auditoría" }] },
+    ],
+  },
 };
+
+/** "Ventanilla de Control Escolar" o "Ventanilla de Administración" (migas de las pantallas compartidas). */
+export function useVentanilla(): string {
+  const { usuario } = useAuth();
+  return usuario?.rol === "administrador" ? "Ventanilla de Administración" : "Ventanilla de Control Escolar";
+}
 
 // Pantallas de stitch con el pie institucional.
 // Pie institucional de stitch y su leyenda derecha, por pantalla.
@@ -28,15 +71,18 @@ const PIES: Record<string, string> = {
   "/control-escolar/importacion":
     "Plataforma interna auxiliar. No se conecta ni sincroniza automáticamente con SADCE; la captura final corresponde a Control Escolar.",
   "/control-escolar/notificaciones": "Plataforma auxiliar independiente de SADCE Central",
+  "/administrador/periodo": "Plataforma auxiliar independiente de SADCE Central",
+  "/administrador/usuarios": "Plataforma auxiliar independiente de SADCE Central",
 };
 
-export function LayoutControlEscolar() {
+export function LayoutControlEscolar({ portal = "control" }: { portal?: Portal }) {
+  const config = PORTALES[portal];
   const { usuario, cerrarSesion } = useAuth();
   const { data: periodo } = usePeriodoActivo();
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const [menuAbierto, setMenuAbierto] = useState(false);
-  const { data: campana } = useCampana();
+  const { data: campana } = useCampana(config.campana);
 
   // En teléfono el menú es un panel: Esc lo cierra y la página de atrás no se desplaza.
   useEffect(() => {
@@ -87,8 +133,9 @@ export function LayoutControlEscolar() {
                 </span>
               </div>
             </div>
-            <Seccion titulo="Gestión de Trámites" enlaces={SECCIONES_CONTROL.tramites} className="py-space-sm" />
-            <Seccion titulo="Mantenimiento" enlaces={SECCIONES_CONTROL.mantenimiento} className="py-space-xs" />
+            {config.secciones.map((s, i) => (
+              <Seccion key={s.titulo} titulo={s.titulo} base={config.base} enlaces={s.enlaces} className={i ? "py-space-xs" : "py-space-sm"} />
+            ))}
           </div>
           <div className="m-space-md flex items-center gap-space-sm rounded-xl bg-surface-container p-space-md">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-container-lowest text-primary shadow-[0_1px_3px_rgba(0,43,73,0.08)]">
@@ -130,12 +177,14 @@ export function LayoutControlEscolar() {
             <div className="flex items-center gap-space-sm sm:gap-space-lg">
               {/* Campana y salida: prototipo.js las agrega antes del usuario, con 8 px de margen. */}
               <div className="flex items-center gap-2 sm:mr-2">
-                <BotonEncabezado
-                  icono="notifications"
-                  titulo={campana?.no_leidas ? `Notificaciones (${campana.no_leidas} sin leer)` : "Notificaciones"}
-                  insignia={campana?.no_leidas}
-                  onClick={() => navigate("/control-escolar/notificaciones")}
-                />
+                {config.campana && (
+                  <BotonEncabezado
+                    icono="notifications"
+                    titulo={campana?.no_leidas ? `Notificaciones (${campana.no_leidas} sin leer)` : "Notificaciones"}
+                    insignia={campana?.no_leidas}
+                    onClick={() => navigate("/control-escolar/notificaciones")}
+                  />
+                )}
                 <BotonEncabezado icono="logout" titulo="Cerrar sesión" onClick={salir} />
               </div>
               <div className="flex items-center gap-space-sm text-right">
@@ -143,7 +192,7 @@ export function LayoutControlEscolar() {
                   <span className="font-label-lg text-label-lg leading-tight font-semibold text-on-surface">
                     {usuario.nombre} {usuario.apellidos}
                   </span>
-                  <span className="font-label-sm text-label-sm leading-tight text-on-surface-variant">Ventanilla Control Escolar UAE</span>
+                  <span className="font-label-sm text-label-sm leading-tight text-on-surface-variant">{config.subtitulo}</span>
                 </div>
                 <div className="hidden h-8 w-8 items-center justify-center rounded-full bg-primary sm:flex">
                   <Simbolo nombre="person" className="text-[18px]! text-on-primary" />
@@ -178,15 +227,7 @@ function Pie({ ciclo, leyenda }: { ciclo?: string; leyenda: string }) {
   );
 }
 
-function Seccion({
-  titulo,
-  enlaces,
-  className,
-}: {
-  titulo: string;
-  enlaces: { ruta: string; icono: string; texto: string }[];
-  className: string;
-}) {
+function Seccion({ titulo, base, enlaces, className }: { titulo: string; base: string; enlaces: Enlace[]; className: string }) {
   return (
     <div className={`px-space-md ${className}`}>
       <div className="px-space-sm py-space-xs font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase">{titulo}</div>
@@ -194,7 +235,7 @@ function Seccion({
         {enlaces.map((e) => (
           <NavLink
             key={e.ruta}
-            to={`/control-escolar/${e.ruta}`}
+            to={`${base}/${e.ruta}`}
             className={({ isActive }) =>
               `flex items-center gap-space-sm rounded-lg px-space-md py-space-sm transition-colors ${
                 isActive

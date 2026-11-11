@@ -8,6 +8,7 @@ import type { CategoriaBitacora, FiltrosBitacora } from "../api/tipos";
 import { Simbolo, Spinner } from "../components/acceso";
 import { fechaPeriodo, horaMinuto } from "./fechas";
 import { useCambiarFiltro } from "./filtrosUrl";
+import { useVentanilla } from "./LayoutControlEscolar";
 import { useAviso } from "./Toast";
 
 const CATEGORIAS: CategoriaBitacora[] = ["Dictamen", "Importación", "Exportación", "Oferta", "Periodo", "Usuarios", "Acceso"];
@@ -42,6 +43,7 @@ function leerFiltros(params: URLSearchParams): FiltrosBitacora {
 const CAMPO = "rounded-xl border border-outline-variant bg-surface-container-lowest px-space-md py-space-sm font-body-md text-body-md";
 
 export function BitacoraPage() {
+  const ventanilla = useVentanilla();
   const [params] = useSearchParams();
   const cambiar = useCambiarFiltro();
   const filtros = leerFiltros(params);
@@ -74,7 +76,7 @@ export function BitacoraPage() {
       <div className="flex flex-col justify-between gap-space-md lg:flex-row lg:items-center">
         <div className="flex flex-col">
           <div className="mb-1 flex items-center gap-space-xs font-label-sm text-label-sm text-on-surface-variant">
-            <span>Ventanilla de Control Escolar</span>
+            <span>{ventanilla}</span>
             <Simbolo nombre="chevron_right" className="text-[14px]!" />
             <span className="font-semibold text-primary">Bitácora de Auditoría</span>
           </div>
