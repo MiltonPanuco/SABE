@@ -1,0 +1,62 @@
+# Pruebas del backend y build del frontend en cada PR y push (F12).
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: sabe
+          POSTGRES_USER: sabe
+          POSTGRES_PASSWORD: sabe
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U sabe"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      POSTGRES_DB: sabe
+      POSTGRES_USER: sabe
+      POSTGRES_PASSWORD: sabe
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: "5432"
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - run: pip install -r requirements.txt
+      - name: Migraciones al día
+        run: python manage.py makemigrations --check --dry-run
+      - name: Contrato de la API
+        run: python manage.py spectacular --validate --fail-on-warn --file /dev/null
+      - name: Pruebas
+        run: python manage.py test core --noinput
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run build

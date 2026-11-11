@@ -9,6 +9,7 @@ Se puede correr las veces que quieras: actualiza lo que existe y deja los datos
 de demostración como al inicio (contraseñas, cargas y folios de la bandeja incluidos).
 """
 
+import os
 from datetime import date, datetime, time, timedelta
 
 from django.conf import settings
@@ -325,9 +326,16 @@ class Command(BaseCommand):
         usuario.save(update_fields=["password"])
         return usuario
 
+    @staticmethod
+    def _password(rol):
+        """En el despliegue público el administrador usa SABE_ADMIN_PASSWORD (.env.prod), no la de demostración."""
+        if rol == Rol.ADMINISTRADOR and os.getenv("SABE_ADMIN_PASSWORD"):
+            return os.environ["SABE_ADMIN_PASSWORD"]
+        return PASSWORD_DEMO
+
     def _usuarios(self, programas):
         for p in PERSONAL:
-            self._usuario(p["username"], p["nombre"], p["apellidos"], p["email"], p["rol"], PASSWORD_DEMO)
+            self._usuario(p["username"], p["nombre"], p["apellidos"], p["email"], p["rol"], self._password(p["rol"]))
 
         estudiantes = {}
         for e in ESTUDIANTES:
@@ -459,4 +467,5 @@ class Command(BaseCommand):
         self.stdout.write(f"    estudiante       210089334 / {PASSWORD_DEMO}")
         self.stdout.write(f"    primer acceso    230012345 / {PASSWORD_TEMPORAL}")
         self.stdout.write(f"    control escolar  valeria.ruiz / {PASSWORD_DEMO}")
-        self.stdout.write(f"    administrador    admin / {PASSWORD_DEMO}")
+        admin = "(SABE_ADMIN_PASSWORD)" if os.getenv("SABE_ADMIN_PASSWORD") else PASSWORD_DEMO
+        self.stdout.write(f"    administrador    admin / {admin}")

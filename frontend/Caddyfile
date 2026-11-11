@@ -1,0 +1,36 @@
+# SABE en producción (F12). SABE_DOMINIO es el dominio público (Caddy saca el certificado HTTPS)
+# o ":80" para probar sin HTTPS.
+{$SABE_DOMINIO}
+
+encode zstd gzip
+
+header {
+	X-Content-Type-Options nosniff
+	Referrer-Policy same-origin
+	# Igual que Django (SECURE_HSTS_SECONDS): un día, sin preload. Por HTTP el navegador lo ignora.
+	Strict-Transport-Security "max-age=86400; includeSubDomains"
+	-Server
+}
+
+# API, admin de Django y sus estáticos (WhiteNoise): al backend.
+@backend path /api/* /admin/* /static/*
+handle @backend {
+	reverse_proxy backend:8000
+}
+
+# La aplicación React.
+handle {
+	root * /srv
+	header {
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+		X-Frame-Options DENY
+	}
+	# Los archivos de Vite llevan hash en el nombre: se guardan un año. index.html nunca.
+	@assets path /assets/*
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+	@html not path /assets/* /img/*
+	header @html Cache-Control "no-cache"
+	# Rutas de React Router (/estudiante/horario...) al recargar.
+	try_files {path} /index.html
+	file_server
+}

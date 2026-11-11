@@ -16,7 +16,7 @@ Proyecto universitario, 7mo semestre. SABE es independiente: **no se integra a P
 | Frontend: datos y rutas | TanStack Query + React Router | Recomendado, por confirmar |
 | Frontend: estilos | Tailwind CSS (paleta de `stitch/academic_prestige_modern/DESIGN.md`) | Recomendado, por confirmar |
 | Documentación de API | `drf-spectacular` (Swagger en `/api/docs/`) | Incluido |
-| Contenedores | Docker Compose, solo para PostgreSQL | Opcional |
+| Contenedores | Docker Compose: PostgreSQL en desarrollo; db, Gunicorn y Caddy en producción | Confirmado |
 
 "Por confirmar" significa que el proyecto base ya viene con eso, pero el equipo puede cambiarlo antes de construir encima.
 
@@ -119,6 +119,26 @@ Si cambias un modelo: `python manage.py makemigrations` y sube la migración en 
 - [x] Definir con control escolar el formato exacto del reporte para SADCE (D1 en `docs/PLAN.md`)
 
 Más contexto del proyecto en `docs/diseno/SABE_Contexto_Completo.md`.
+
+## Despliegue
+
+Demostración pública: **https://sabe.163-192-148-141.sslip.io** (VM de Oracle Cloud, decisión D6). Corre con `docker-compose.prod.yml`: PostgreSQL, backend (Gunicorn), web (Caddy, con HTTPS automático) y un respaldo diario de la base. Los comandos van en la raíz del repositorio y usan `sudo` para Docker.
+
+**Primer despliegue**
+1. Abre los puertos 80 y 443 en la Security List de la VCN (consola de Oracle Cloud) y en el firewall: `sudo firewall-cmd --permanent --add-service=http --add-service=https && sudo firewall-cmd --reload`.
+2. Copia `.env.prod.example` como `.env.prod`, pon claves largas (`python3 -c "import secrets; print(secrets.token_urlsafe(50))"`) y `chmod 600 .env.prod`. Nunca lo subas.
+3. Levanta todo: `sudo docker compose -p sabe-prod -f docker-compose.prod.yml up -d --build`.
+4. Carga la demostración: `sudo docker compose -p sabe-prod -f docker-compose.prod.yml exec backend python manage.py seed_demo --permitir-produccion`. El usuario `admin` usa la contraseña `SABE_ADMIN_PASSWORD` de `.env.prod`; los demás, `demo1234`.
+
+**Actualizar:** `git pull` y el mismo `up -d --build` (las migraciones corren solas al arrancar el backend). Después, `sudo docker builder prune -f` libera espacio.
+
+**Reiniciar la demostración:** el mismo comando de `seed_demo` del paso 4.
+
+**Respaldos:** quedan en `backups/` (uno diario, 7 días). Para restaurar uno: `gunzip -c backups/sabe_AAAAMMDD_HHMM.sql.gz | sudo docker compose -p sabe-prod -f docker-compose.prod.yml exec -T db psql -U sabe -d sabe` (sobre una base vacía).
+
+**Registros:** `sudo docker compose -p sabe-prod -f docker-compose.prod.yml logs -f backend web`.
+
+La integración continua (`.github/workflows/ci.yml`) corre las pruebas del backend y el build del frontend en cada push y PR.
 
 ## Equipo y responsables
 

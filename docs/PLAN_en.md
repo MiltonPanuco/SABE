@@ -47,7 +47,7 @@ F12 can be prepared starting in H2 (Dockerfiles and production settings) so it i
 | D3 | "~24 business hours" resolution text | Remove it | Nov 11 |
 | D4 | Password recovery: real email or reset by Control Escolar? | **Decided:** no email. The admin (Usuarios y Roles) or Control Escolar (from the student's folio) resets to a temporary password shown once on screen (F11) | Nov 18 |
 | D5 | Folio receipt: server-side PDF or printable view? | **Decided:** printable view in the frontend (`window.print`), "Imprimir acuse" button, no new dependencies | Nov 14 |
-| D6 | Where to host | A single server with Docker Compose (Render, Railway or a VPS). Choose based on zero cost | Nov 20 |
+| D6 | Where to host | **Decided:** the team's Oracle Cloud VM with Docker Compose (Postgres, Gunicorn and Caddy), at `https://sabe.163-192-148-141.sslip.io` (a free sslip.io name with a Let's Encrypt certificate) | Nov 20 |
 
 ## 4. Conventions
 
@@ -296,7 +296,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
   - Only Control Escolar and admin accounts are created here; students come from CSV (F8) and their role doesn't change. The username is the part of the email before the @; the email must be `@uan.edu.mx` and unique.
   - The admin can't change their own role or deactivate themself, and at least one active admin always remains. The admin role also grants Django admin access.
   - A new password is temporary, shown once, and turns on `debe_cambiar_password` (D4).
-- **Differences from stitch (to confirm):** the form asks for "Nombre" and "Apellidos" instead of a single "Nombre Completo" (team decision); no email is sent: the temporary password is shown once with "Copiar" (D4); "Último acceso" shows the origin by role and the real IP; the header shows the admin's name and "Administrador del sistema"; no "BUILD v2.11-SEC" in the footer; Control Escolar's "Restablecer contraseña" on the folio is new (team decision); the name column truncates so the actions fit without scrolling the table.
+- **Differences from stitch (agreed):** the form asks for "Nombre" and "Apellidos" instead of a single "Nombre Completo" (team decision); no email is sent: the temporary password is shown once with "Copiar" (D4); "Último acceso" shows the origin by role and the real IP; the header shows the admin's name and "Administrador del sistema"; no "BUILD v2.11-SEC" in the footer; Control Escolar's "Restablecer contraseña" on the folio is new (team decision); the name column truncates so the actions fit without scrolling the table.
 - **Done when:** the admin creates a Control Escolar user who can log in; the screens match their `stitch/` design.
 - **Target date:** Nov 24.
 - **Status:** Pending.
@@ -306,10 +306,13 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 - **Goal:** the app runs on a public URL with HTTPS.
 - **Depends on:** everything above; preparation starts in H2.
 - **Backend:** production settings via environment variables (`DEBUG=0`, `SECRET_KEY`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, secure cookies, HSTS), Gunicorn, static files with WhiteNoise, `python manage.py check --deploy` with no warnings.
-- **Frontend:** `npm run build` served by Nginx, which also forwards `/api/` to the backend.
-- **Infrastructure:** `Dockerfile` for the backend and frontend; `docker-compose.prod.yml` with db, backend and frontend; database backup; SMTP email if D4 requires it. CI on GitHub Actions: backend tests and `npm run build` on every PR.
-- **API contract:** not applicable.
-- **Business rules:** the production `.env` is never committed to the repository. `seed_demo` only in the demo environment.
+- **Frontend:** `npm run build` served by **Caddy** (instead of Nginx: it gets and renews the HTTPS certificate on its own), which also forwards `/api/`, `/admin/` and `/static/` to the backend and sends React routes to `index.html`. Security headers (CSP on the React app). The admin demo-login button only shows in development.
+- **Infrastructure:** `backend/Dockerfile` (Python 3.14, Gunicorn, migrations on start, non-root user), `frontend/Dockerfile` (Vite build + Caddy) and `docker-compose.prod.yml` (project `sabe-prod`: db with no published port, backend, web on 80/443 and `backup`, which keeps a daily `pg_dump` in `./backups` for 7 days). Variables in `.env.prod` (template `.env.prod.example`). No SMTP (D4). CI on GitHub Actions (`.github/workflows/ci.yml`): migrations, API contract, backend tests on Postgres and `npm run build` on every PR and push.
+- **API contract:** not applicable. `POST /api/auth/token/` returns `429` after 10 attempts per minute from the same IP (`SABE_LOGIN_RATE`). The count lives in a cache shared through PostgreSQL (Gunicorn's processes share it) and the IP comes from Caddy's `X-Forwarded-For`.
+- **Business rules:**
+  - `.env.prod` is never committed (mode 600 on the server). With `DJANGO_DEBUG=0` the backend refuses to start without its own `DJANGO_SECRET_KEY` of 50+ characters.
+  - `seed_demo` never runs on its own: it's run by hand after the first deploy and to reset the demo. In production `admin` uses `SABE_ADMIN_PASSWORD`; the other demo users keep `demo1234`.
+  - HSTS starts at one day (`SECURE_HSTS_SECONDS`), without preload (the domain isn't ours).
 - **Done when:** the H2 and H3 flows can be completed on the public URL from both a phone and a computer; the screens on the public URL look the same as in `stitch/`.
 - **Target date:** Nov 27.
 - **Status:** Pending.

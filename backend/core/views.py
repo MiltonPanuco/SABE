@@ -12,6 +12,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -828,7 +829,13 @@ ORIGEN_SESION = {
 
 
 class EntrarView(TokenObtainPairView):
-    """Login con matrícula o usuario. Cada inicio de sesión correcto queda en la bitácora."""
+    """
+    Login con matrícula o usuario. Cada inicio de sesión correcto queda en la bitácora.
+    Los intentos por IP están limitados (SABE_LOGIN_RATE, 10 por minuto): la URL es pública.
+    """
+
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "login"
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

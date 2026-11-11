@@ -12,7 +12,8 @@ const ACCESOS_DEMO = [
   { etiqueta: "Estudiante (primer acceso)", username: "230012345", password: "temporal" },
   { etiqueta: "Estudiante", username: "210089334", password: "demo1234" },
   { etiqueta: "Control Escolar", username: "valeria.ruiz", password: "demo1234" },
-  { etiqueta: "Administrador", username: "admin", password: "demo1234" },
+  // En el despliegue público el administrador tiene su propia contraseña (SABE_ADMIN_PASSWORD).
+  ...(import.meta.env.DEV ? [{ etiqueta: "Administrador", username: "admin", password: "demo1234" }] : []),
 ];
 const MOSTRAR_DEMO = import.meta.env.DEV || import.meta.env.VITE_ACCESOS_DEMO === "1";
 

@@ -17,6 +17,7 @@ dist/
 .env
 .env.*
 !.env.example
+!.env.prod.example
 
 # --- Editor / sistema ---
 .vscode/
@@ -27,5 +28,7 @@ Thumbs.db
 
 # --- Trabajo local que no va al repo ---
 tmp/
+# Respaldos de la base en producción (F12)
+backups/
 # Material de la maestra (no es nuestro)
 Clases/Material de clases/
