@@ -6,6 +6,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from .models import (
+    Bitacora,
     DetalleSolicitud,
     Docente,
     Estudiante,
@@ -13,11 +14,13 @@ from .models import (
     HorarioGrupo,
     ImportacionCSV,
     LoteExportacion,
+    Notificacion,
     PeriodoEscolar,
     Programa,
     Solicitud,
     Usuario,
 )
+from .services.avisos import CATEGORIAS_AVISO, categoria_de
 from .services.bandeja import EstadoBandeja, estado_bandeja
 from .services.catalogo import con_cupo
 from .services.choques import Origen
@@ -633,3 +636,89 @@ class ColumnaSadceSerializer(serializers.Serializer):
     encabezado = serializers.CharField()
     descripcion = serializers.CharField()
     ejemplo = serializers.CharField()
+
+
+# ---------------------------------------------------------------------------
+# Notificaciones y bitácora (F10)
+# ---------------------------------------------------------------------------
+
+class NotificacionSerializer(serializers.ModelSerializer):
+    folio = serializers.CharField(source="solicitud.folio_digital", allow_null=True, default=None)
+    categorias = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Notificacion
+        fields = ["id", "tipo", "titulo", "mensaje", "leida", "fecha", "folio", "solicitud", "datos", "categorias"]
+
+    @extend_schema_field(serializers.ListField(child=serializers.CharField()))
+    def get_categorias(self, aviso):
+        return CATEGORIAS_AVISO.get(aviso.tipo, [])
+
+
+class ConteosNotificacionesSerializer(serializers.Serializer):
+    todas = serializers.IntegerField()
+    no_leidas = serializers.IntegerField()
+    tramites = serializers.IntegerField()
+    resoluciones = serializers.IntegerField()
+    convocatoria = serializers.IntegerField()
+    nuevas = serializers.IntegerField()
+    cancelaciones = serializers.IntegerField()
+    sistema = serializers.IntegerField()
+
+
+class ListaNotificacionesSerializer(serializers.Serializer):
+    no_leidas = serializers.IntegerField()
+    total = serializers.IntegerField(help_text="Cuántas cumplen los filtros (para 'Cargar anteriores').")
+    conteos = ConteosNotificacionesSerializer()
+    resultados = NotificacionSerializer(many=True)
+
+
+class LeerTodasSerializer(serializers.Serializer):
+    marcadas = serializers.IntegerField()
+
+
+class ResumenOperativoSerializer(serializers.Serializer):
+    cancelaciones_hoy = serializers.IntegerField()
+    cancelaciones_ayer = serializers.IntegerField()
+
+
+ROLES = {"estudiante": "Estudiante", "control_escolar": "Control Escolar", "administrador": "Administrador"}
+
+
+def usuario_bitacora(usuario) -> str:
+    """"Carlos E. Pérez Villa (210089334)" para alumnos; el nombre para el personal; "Sistema" sin usuario."""
+    if usuario is None:
+        return "Sistema"
+    nombre = usuario.get_full_name() or usuario.username
+    return f"{nombre} ({usuario.username})" if usuario.rol == "estudiante" else nombre
+
+
+class RegistroBitacoraSerializer(serializers.ModelSerializer):
+    usuario = serializers.SerializerMethodField()
+    rol = serializers.SerializerMethodField()
+    categoria = serializers.SerializerMethodField()
+    detalle = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Bitacora
+        fields = ["id", "fecha", "usuario", "rol", "categoria", "accion", "detalle", "ip"]
+
+    def get_usuario(self, registro) -> str:
+        return usuario_bitacora(registro.usuario)
+
+    def get_rol(self, registro) -> str:
+        return ROLES.get(registro.usuario.rol, "") if registro.usuario else ""
+
+    def get_categoria(self, registro) -> str:
+        return categoria_de(registro.accion)
+
+    def get_detalle(self, registro) -> str:
+        # Las filas de antes de F10 no tienen frase: se muestra la entidad.
+        return registro.detalle or registro.entidad
+
+
+class PaginaBitacoraSerializer(serializers.Serializer):
+    total = serializers.IntegerField()
+    pagina = serializers.IntegerField()
+    paginas = serializers.IntegerField()
+    resultados = RegistroBitacoraSerializer(many=True)

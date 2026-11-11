@@ -24,9 +24,9 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
 
-from core.models import DetalleSolicitud, LoteExportacion, PeriodoEscolar, Usuario
+from core.models import DetalleSolicitud, LoteExportacion, PeriodoEscolar, Solicitud, Usuario
 
-from .avisos import notificar, registrar
+from .avisos import aviso_cargada_sadce, plural, quitar_aviso_exportacion, registrar
 
 Estado = DetalleSolicitud.Estado
 Tipo = DetalleSolicitud.Tipo
@@ -199,7 +199,16 @@ def generar_lote(periodo: PeriodoEscolar, usuario: Usuario, formato: str, *, req
             periodo=periodo, numero=numero, usuario=usuario, formato=formato, total_registros=len(ids)
         )
         DetalleSolicitud.objects.filter(pk__in=ids, lote=None).update(lote=lote)
-        registrar(usuario, "exportar_sadce", lote, descripcion=f"{lote.folio} {formato}", request=request)
+        registrar(
+            usuario,
+            "exportar_sadce",
+            lote,
+            descripcion=f"{lote.folio} {formato}",
+            detalle=f"Generó el {'Excel' if formato == Formato.XLSX else 'CSV'} {lote.folio} con "
+            f"{plural(len(ids), 'movimiento aprobado', 'movimientos aprobados')}.",
+            request=request,
+        )
+        quitar_aviso_exportacion(periodo)
     return lote
 
 
@@ -257,12 +266,18 @@ def marcar_cargado(lote: LoteExportacion, usuario: Usuario, *, request=None) -> 
         lote.fecha_carga = timezone.now()
         lote.save(update_fields=["cargado_por", "fecha_carga"])
         folios = (
-            lote.movimientos.values_list("solicitud__folio_digital", "solicitud__estudiante__usuario")
-            .order_by("solicitud__folio_digital")
+            Solicitud.objects.filter(detalles__lote=lote)
+            .select_related("estudiante__usuario")
+            .order_by("folio_digital")
             .distinct()
         )
-        usuarios = {u.pk: u for u in Usuario.objects.filter(pk__in={u for _, u in folios})}
-        for folio, usuario_id in folios:
-            notificar(usuarios[usuario_id], f"Tu solicitud {folio} fue cargada en SADCE.")
-        registrar(usuario, "marcar_cargado", lote, request=request)
+        for solicitud in folios:
+            aviso_cargada_sadce(solicitud, solicitud.estudiante.usuario)
+        registrar(
+            usuario,
+            "marcar_cargado",
+            lote,
+            detalle=f"Marcó el lote {lote.folio} como cargado en SADCE.",
+            request=request,
+        )
     return lote

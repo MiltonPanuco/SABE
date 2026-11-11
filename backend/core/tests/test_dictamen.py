@@ -70,9 +70,9 @@ class AprobarTests(BaseDictamenTest):
         carga = self.carga("EC605")
         self.assertEqual((carga.estado, carga.origen), ("inscrito", "solicitud"))
         self.assertEqual(self.grupo("EC605").cupo_disponible, libres - 1)
-        aviso = Notificacion.objects.get(usuario__username=ALUMNO)
-        self.assertIn("Tu alta de Econometría II (grupo 02)", aviso.mensaje)
-        self.assertIn("fue aprobada", aviso.mensaje)
+        aviso = Notificacion.objects.get(usuario__username=ALUMNO, tipo="movimiento_aprobado")
+        self.assertEqual(aviso.titulo, "Se aprobó tu alta en Econometría II (Gpo. 02)")
+        self.assertEqual(aviso.mensaje, f"Folio {folio['folio_digital']}. Asignatura incorporada a tu tira horaria.")
 
     def test_alta_reactiva_una_baja_anterior(self):
         anterior = CargaAcademica.objects.create(
@@ -89,7 +89,8 @@ class AprobarTests(BaseDictamenTest):
         self.aprobar(self.mov(folio, "EC602"))
         self.assertEqual(self.carga("EC602").estado, "baja")
         self.assertEqual(self.grupo("EC602").cupo_disponible, libres + 1)
-        self.assertIn("Tu baja de Finanzas Públicas", Notificacion.objects.get(usuario__username=ALUMNO).mensaje)
+        aviso = Notificacion.objects.get(usuario__username=ALUMNO, tipo="movimiento_aprobado")
+        self.assertEqual(aviso.titulo, "Se aprobó tu baja en Finanzas Públicas (Gpo. 01)")
 
     def test_ultimo_cupo(self):
         Grupo.objects.filter(pk=self.grupo("EC605").pk).update(cupo_maximo=1)
@@ -214,8 +215,9 @@ class RechazarTests(BaseDictamenTest):
         )
         self.assertEqual((r["estado"], r["estado_bandeja"]), ("rechazada", "rechazada"))
         self.assertIsNone(self.carga("EC605"))
-        aviso = Notificacion.objects.get(usuario__username=ALUMNO).mensaje
-        self.assertIn("fue rechazada. Motivo: El grupo no tiene cupo disponible.", aviso)
+        aviso = Notificacion.objects.get(usuario__username=ALUMNO, tipo="movimiento_rechazado")
+        self.assertEqual(aviso.titulo, "Se rechazó tu alta en Econometría II (Gpo. 02)")
+        self.assertEqual(aviso.mensaje, f"Folio {folio['folio_digital']}. Motivo: El grupo no tiene cupo disponible.")
 
 
 class PermisosDictamenTests(BaseDictamenTest):

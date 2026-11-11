@@ -9,6 +9,7 @@ from django.utils import timezone
 
 from core.models import DetalleSolicitud, Estudiante, PeriodoEscolar, Solicitud
 
+from .avisos import aviso_cancelacion, aviso_folio_enviado, conteo_folio, plural, registrar
 from .validacion import Movimiento, ResultadoMovimiento, validar_movimientos
 
 JUSTIFICACION_MAX = 500
@@ -58,6 +59,7 @@ def crear_solicitud(
     justificacion: str,
     *,
     ahora: datetime | None = None,
+    request=None,
 ) -> Solicitud:
     """
     Crea el folio con sus movimientos pendientes, o lanza SolicitudInvalida.
@@ -100,17 +102,41 @@ def crear_solicitud(
                 if intento == INTENTOS_FOLIO - 1:
                     raise
 
-        DetalleSolicitud.objects.bulk_create(
+        detalles = DetalleSolicitud.objects.bulk_create(
             DetalleSolicitud(solicitud=solicitud, grupo=m.grupo, tipo_tramite=m.tipo) for m in movimientos
+        )
+        aviso_folio_enviado(solicitud)
+        registrar(
+            estudiante.usuario,
+            "enviar_folio",
+            solicitud,
+            detalle=f"Envió el folio {solicitud.folio_digital} con {conteo_folio(detalles)}.",
+            request=request,
         )
     return solicitud
 
 
-def cancelar_solicitud(solicitud: Solicitud) -> int:
-    """Cancela los movimientos pendientes del folio. Devuelve cuántos canceló."""
-    canceladas = solicitud.detalles.filter(estado=DetalleSolicitud.Estado.PENDIENTE).update(
-        estado=DetalleSolicitud.Estado.CANCELADA
-    )
-    if not canceladas:
-        raise SolicitudInvalida({"detail": "Este folio ya no tiene movimientos pendientes."})
-    return canceladas
+def cancelar_solicitud(solicitud: Solicitud, *, request=None) -> int:
+    """Cancela los movimientos pendientes del folio y avisa a control escolar. Devuelve cuántos canceló."""
+    with transaction.atomic():
+        pendientes = list(
+            solicitud.detalles.select_for_update(of=("self",))
+            .filter(estado=DetalleSolicitud.Estado.PENDIENTE)
+            .select_related("grupo__materia")
+            .order_by("id")
+        )
+        if not pendientes:
+            raise SolicitudInvalida({"detail": "Este folio ya no tiene movimientos pendientes."})
+        DetalleSolicitud.objects.filter(pk__in=[d.pk for d in pendientes]).update(
+            estado=DetalleSolicitud.Estado.CANCELADA
+        )
+        aviso_cancelacion(solicitud, pendientes)
+        registrar(
+            solicitud.estudiante.usuario,
+            "cancelar_folio",
+            solicitud,
+            detalle=f"Canceló el folio {solicitud.folio_digital}: "
+            f"{plural(len(pendientes), 'movimiento pendiente cancelado', 'movimientos pendientes cancelados')}.",
+            request=request,
+        )
+    return len(pendientes)

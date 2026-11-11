@@ -66,6 +66,7 @@ function useDictamen<T>(accion: string, cuerpo: (datos: T) => object) {
       Promise.all([
         cliente.invalidateQueries({ queryKey: ["solicitudes"] }),
         cliente.invalidateQueries({ queryKey: ["grupos"] }),
+        cliente.invalidateQueries({ queryKey: ["notificaciones"] }),
       ]),
   });
 }
@@ -209,7 +210,7 @@ export function useConfirmarImportacion() {
       api<ResultadoImportacion>(`/importaciones/${tipo}/?modo=confirmar`, { method: "POST", body: formulario(archivo) }),
     onSuccess: () =>
       Promise.all(
-        ["importaciones", "grupos", "solicitudes", "mi-horario"].map((clave) =>
+        ["importaciones", "grupos", "solicitudes", "mi-horario", "notificaciones"].map((clave) =>
           cliente.invalidateQueries({ queryKey: [clave] }),
         ),
       ),
@@ -267,7 +268,9 @@ export function usePlantillaSadce() {
 /** Generar un lote o marcarlo como cargado cambia los movimientos: la bandeja y los folios se vuelven a pedir. */
 function invalidarExportacion(cliente: ReturnType<typeof useQueryClient>) {
   return Promise.all(
-    ["exportaciones", "solicitudes", "periodos"].map((clave) => cliente.invalidateQueries({ queryKey: [clave] })),
+    ["exportaciones", "solicitudes", "periodos", "notificaciones"].map((clave) =>
+      cliente.invalidateQueries({ queryKey: [clave] }),
+    ),
   );
 }
 

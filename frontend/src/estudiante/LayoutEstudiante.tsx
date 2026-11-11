@@ -1,9 +1,12 @@
 // Marco del portal del estudiante: encabezado, menú lateral y pie de stitch/sabe_estudiantes.
 import { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useCampana, useLeer } from "../api/avisos";
 import { usePeriodoActivo } from "../api/estudiante";
+import type { Notificacion } from "../api/tipos";
 import { useAuth } from "../auth/AuthProvider";
 import { Simbolo } from "../components/acceso";
+import { iconoCampana } from "../components/notificaciones";
 import { CarritoProvider, useCarrito } from "./Carrito";
 import { nombreCorto } from "./formato";
 import { ToastProvider } from "./Toast";
@@ -59,7 +62,9 @@ function Portal() {
   const ruta = pathname.replace(/\/$/, "");
   const seccion = /^\/estudiante\/historial\/\d+$/.test(ruta)
     ? { titulo: "Detalle de Folio" }
-    : (SECCIONES.find((s) => s.ruta === ruta) ?? SECCIONES[0]);
+    : ruta === "/estudiante/notificaciones"
+      ? { titulo: "Centro de Notificaciones" }
+      : (SECCIONES.find((s) => s.ruta === ruta) ?? SECCIONES[0]);
 
   const salir = () => {
     cerrarSesion();
@@ -272,10 +277,15 @@ function MenuLateral({
   );
 }
 
-/** Campana de avisos. Las notificaciones reales llegan en F10; mientras, el panel sale vacío. */
+/** Campana de avisos: las 5 más recientes y el número de no leídas (se vuelve a pedir cada minuto). */
 function Campana({ ciclo }: { ciclo?: string }) {
   const [abierta, setAbierta] = useState(false);
   const caja = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const { data } = useCampana();
+  const leer = useLeer();
+  const avisos = data?.resultados ?? [];
+  const noLeidas = data?.no_leidas ?? 0;
 
   useEffect(() => {
     if (!abierta) return;
@@ -286,18 +296,31 @@ function Campana({ ciclo }: { ciclo?: string }) {
     return () => document.removeEventListener("click", alClic);
   }, [abierta]);
 
+  const abrir = (aviso: Notificacion) => {
+    if (!aviso.leida) leer.mutate(aviso.id);
+    setAbierta(false);
+    navigate(aviso.solicitud ? `/estudiante/historial/${aviso.solicitud}` : "/estudiante/notificaciones");
+  };
+
   return (
     <div className="relative" ref={caja}>
       <button
         type="button"
         onClick={() => setAbierta(!abierta)}
         title="Notificaciones"
+        aria-label={noLeidas ? `Notificaciones (${noLeidas} sin leer)` : "Notificaciones"}
+        aria-expanded={abierta}
         className="relative cursor-pointer rounded-lg p-1.5 text-on-surface-variant transition-all hover:bg-surface-container-high sm:p-2"
       >
         <Simbolo nombre="notifications" className="text-[18px]! sm:text-[20px]!" />
+        {noLeidas > 0 && (
+          <span className="absolute top-1 right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-secondary-container px-1 text-[10px] leading-none font-bold text-[#002B49] sm:top-1.5 sm:right-1.5">
+            {noLeidas > 99 ? "99+" : noLeidas}
+          </span>
+        )}
       </button>
       {abierta && (
-        <div className="absolute right-0 z-50 mt-2 flex w-80 flex-col gap-2 rounded-xl border border-surface-container-high bg-surface-container-lowest p-space-md shadow-2xl sm:w-96">
+        <div className="absolute right-0 z-50 mt-2 flex w-80 max-w-[calc(100vw-1.5rem)] flex-col gap-2 rounded-xl border border-surface-container-high bg-surface-container-lowest p-space-md shadow-2xl sm:w-96">
           <div className="flex items-center justify-between border-b border-surface-container-high pb-2">
             <div className="flex items-center gap-1.5">
               <Simbolo nombre="notifications_active" className="text-[18px]! text-primary-container" />
@@ -305,15 +328,50 @@ function Campana({ ciclo }: { ciclo?: string }) {
             </div>
             {ciclo && <span className="rounded bg-primary-fixed px-1.5 py-0.5 font-mono text-[10px] font-bold text-primary">Ciclo {ciclo}</span>}
           </div>
-          <div className="flex flex-col items-center gap-1 py-4 text-center">
-            <Simbolo nombre="notifications_off" className="text-[22px]! text-on-surface-variant" />
-            <p className="font-body-sm text-[11px] text-on-surface-variant">No tienes notificaciones por ahora.</p>
-          </div>
-          <div className="border-t border-surface-container-high pt-2 text-center">
+          {avisos.length ? (
+            <div className="flex max-h-64 flex-col gap-2 overflow-y-auto pt-1">
+              {avisos.map((aviso) => {
+                const { icono, color } = iconoCampana(aviso);
+                return (
+                  <button
+                    key={aviso.id}
+                    type="button"
+                    onClick={() => abrir(aviso)}
+                    className="flex cursor-pointer items-start gap-2.5 rounded-lg bg-surface-container-low p-2.5 text-left transition-colors hover:bg-surface-container"
+                  >
+                    <Simbolo nombre={icono} className={`mt-0.5 shrink-0 text-[18px]! ${color}`} />
+                    <div className="min-w-0 flex-1">
+                      <span className="block font-label-md text-xs font-bold text-on-surface">
+                        {aviso.titulo || aviso.mensaje}
+                        {!aviso.leida && <span className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-secondary-container align-middle" />}
+                      </span>
+                      {aviso.titulo && <p className="line-clamp-2 font-body-sm text-[11px] text-on-surface-variant">{aviso.mensaje}</p>}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-1 py-4 text-center">
+              <Simbolo nombre="notifications_off" className="text-[22px]! text-on-surface-variant" />
+              <p className="font-body-sm text-[11px] text-on-surface-variant">No tienes notificaciones por ahora.</p>
+            </div>
+          )}
+          <div className="flex items-center justify-between gap-2 border-t border-surface-container-high pt-2">
+            <button
+              type="button"
+              onClick={() => {
+                setAbierta(false);
+                navigate("/estudiante/notificaciones");
+              }}
+              className="cursor-pointer font-label-sm text-xs font-semibold text-primary-container hover:underline"
+            >
+              Ver todas las notificaciones
+            </button>
             <button
               type="button"
               onClick={() => setAbierta(false)}
-              className="cursor-pointer font-label-sm text-xs font-semibold text-primary-container hover:underline"
+              className="cursor-pointer font-label-sm text-xs font-semibold text-on-surface-variant hover:underline"
             >
               Cerrar notificaciones
             </button>

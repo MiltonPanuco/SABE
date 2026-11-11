@@ -38,7 +38,7 @@ from core.models import (
     UnidadAprendizaje,
     Usuario,
 )
-from core.services.avisos import registrar
+from core.services.avisos import aviso_importacion, plural, registrar
 from core.services.catalogo import con_cupo
 from core.services.choques import choques_entre
 
@@ -470,6 +470,18 @@ def vista_previa(tipo: str, archivo, periodo: PeriodoEscolar) -> dict:
     }
 
 
+def _detalle_bitacora(importacion: ImportacionCSV) -> str:
+    """"Importó padron.csv: 6 alumnos creados, 1 actualizado, 3 filas con error." """
+    if importacion.tipo == Tipo.ALUMNOS:
+        creados = plural(importacion.creados, "alumno creado", "alumnos creados")
+        actualizados = plural(importacion.actualizados, "actualizado", "actualizados")
+    else:
+        creados = plural(importacion.creados, "carga nueva", "cargas nuevas")
+        actualizados = f"{importacion.actualizados} sin cambios"
+    errores = plural(importacion.excluidos, "fila con error", "filas con error")
+    return f"Importó {importacion.archivo}: {creados}, {actualizados}, {errores}."
+
+
 def confirmar(tipo: str, archivo, usuario: Usuario, periodo: PeriodoEscolar, *, request=None) -> dict:
     """Importa las filas válidas, omite las de error y deja el historial y la bitácora."""
     try:
@@ -489,7 +501,15 @@ def confirmar(tipo: str, archivo, usuario: Usuario, periodo: PeriodoEscolar, *, 
                 actualizados=actualizados,
                 excluidos=len(analisis.errores),
             )
-            registrar(usuario, "importar_csv", importacion, descripcion=f"{importacion.folio} {tipo}", request=request)
+            registrar(
+                usuario,
+                "importar_csv",
+                importacion,
+                descripcion=f"{importacion.folio} {tipo}",
+                detalle=_detalle_bitacora(importacion),
+                request=request,
+            )
+            aviso_importacion(importacion)
     except IntegrityError:
         raise ImportacionInvalida(
             {"detail": "Otra importación cambió estos datos; vuelve a analizar el archivo."}

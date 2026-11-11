@@ -3,10 +3,12 @@ from django.http import JsonResponse
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import SimpleRouter
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenRefreshView
 
 from core.views import (
+    BitacoraViewSet,
     CambiarPasswordView,
+    EntrarView,
     DocenteViewSet,
     ExportacionViewSet,
     GrupoViewSet,
@@ -14,6 +16,7 @@ from core.views import (
     ImportacionViewSet,
     MeView,
     MovimientoViewSet,
+    NotificacionViewSet,
     PeriodoActivoView,
     PeriodoViewSet,
     ProgramaViewSet,
@@ -30,6 +33,8 @@ router.register("docentes", DocenteViewSet, basename="docente")
 router.register("programas", ProgramaViewSet, basename="programa")
 router.register("importaciones", ImportacionViewSet, basename="importacion")
 router.register("exportaciones", ExportacionViewSet, basename="exportacion")
+router.register("notificaciones", NotificacionViewSet, basename="notificacion")
+router.register("bitacora", BitacoraViewSet, basename="bitacora")
 
 
 def health(request):
@@ -41,7 +46,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/health/", health),
     # Login: el username es la matrícula en alumnos.
-    path("api/auth/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/auth/token/", EntrarView.as_view(), name="token_obtain_pair"),
     path("api/auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("api/auth/cambiar-password/", CambiarPasswordView.as_view(), name="cambiar_password"),
     path("api/me/", MeView.as_view(), name="me"),

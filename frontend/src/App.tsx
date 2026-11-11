@@ -1,12 +1,13 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { RedirigirPorRol, RutaProtegida } from "./auth/RutaProtegida";
 import { Layout } from "./components/Layout";
+import { BitacoraPage } from "./control/BitacoraPage";
 import { ExportacionPage } from "./control/ExportacionPage";
 import { ImportacionPage } from "./control/ImportacionPage";
 import { LayoutControlEscolar } from "./control/LayoutControlEscolar";
+import { NotificacionesPage as NotificacionesControlPage } from "./control/NotificacionesPage";
 import { OfertaPage } from "./control/OfertaPage";
 import { PeriodoPage } from "./control/PeriodoPage";
-import { Proximamente } from "./control/Proximamente";
 import { RevisarFolioPage } from "./control/RevisarFolioPage";
 import { SolicitudesPage } from "./control/SolicitudesPage";
 import { CatalogoPage } from "./estudiante/CatalogoPage";
@@ -16,16 +17,11 @@ import { LayoutEstudiante } from "./estudiante/LayoutEstudiante";
 import { ConfirmacionPage } from "./estudiante/ConfirmacionPage";
 import { DetalleFolioPage } from "./estudiante/DetalleFolioPage";
 import { HistorialPage } from "./estudiante/HistorialPage";
+import { NotificacionesPage } from "./estudiante/NotificacionesPage";
 import { CambiarPasswordPage } from "./pages/CambiarPasswordPage";
 import { InicioAdministrador, NoEncontrada } from "./pages/Inicios";
 import { LoginPage } from "./pages/LoginPage";
 import { RecuperarPasswordPage } from "./pages/RecuperarPasswordPage";
-
-// Secciones del menú de control escolar que llegan con funciones posteriores del plan.
-const PROXIMAMENTE = [
-  { ruta: "bitacora", titulo: "Bitácora de Auditoría", icono: "security_update_good", funcion: "F10 (notificaciones y bitácora)" },
-  { ruta: "notificaciones", titulo: "Notificaciones", icono: "notifications", funcion: "F10 (notificaciones y bitácora)" },
-];
 
 export default function App() {
   return (
@@ -47,6 +43,7 @@ export default function App() {
             <Route path="confirmacion" element={<ConfirmacionPage />} />
             <Route path="historial" element={<HistorialPage />} />
             <Route path="historial/:id" element={<DetalleFolioPage />} />
+            <Route path="notificaciones" element={<NotificacionesPage />} />
           </Route>
         </Route>
 
@@ -60,9 +57,8 @@ export default function App() {
             <Route path="periodo" element={<PeriodoPage />} />
             <Route path="importacion" element={<ImportacionPage />} />
             <Route path="exportacion" element={<ExportacionPage />} />
-            {PROXIMAMENTE.map((p) => (
-              <Route key={p.ruta} path={p.ruta} element={<Proximamente {...p} />} />
-            ))}
+            <Route path="bitacora" element={<BitacoraPage />} />
+            <Route path="notificaciones" element={<NotificacionesControlPage />} />
           </Route>
         </Route>
 

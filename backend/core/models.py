@@ -394,19 +394,59 @@ class DetalleSolicitud(models.Model):
 # ---------------------------------------------------------------------------
 
 class Notificacion(models.Model):
+    """
+    Aviso para un usuario. `tipo` decide el icono, el chip y los enlaces de la tarjeta; `datos` guarda
+    lo que la tarjeta muestra aparte del texto (movimientos, horario, conteos...).
+    """
+
+    class Tipo(models.TextChoices):
+        # Estudiante
+        FOLIO_ENVIADO = "folio_enviado", "Folio enviado"
+        MOVIMIENTO_APROBADO = "movimiento_aprobado", "Movimiento aprobado"
+        MOVIMIENTO_RECHAZADO = "movimiento_rechazado", "Movimiento rechazado"
+        CARGADA_SADCE = "cargada_sadce", "Cargada en SADCE"
+        CONVOCATORIA_CIERRA = "convocatoria_cierra", "La convocatoria cierra"
+        # Control escolar
+        NUEVA_SOLICITUD = "nueva_solicitud", "Nueva solicitud"
+        SOLICITUD_EXTEMPORANEA = "solicitud_extemporanea", "Solicitud extemporánea"
+        CANCELACION = "cancelacion", "Cancelación de alumno"
+        IMPORTACION = "importacion", "Importación de CSV"
+        EXPORTACION_PENDIENTE = "exportacion_pendiente", "Movimientos por exportar"
+        # Avisos de antes de F10 (solo texto)
+        AVISO = "aviso", "Aviso"
+
     usuario = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notificaciones"
     )
-    mensaje = models.CharField(max_length=255)
+    tipo = models.CharField(max_length=30, choices=Tipo.choices, default=Tipo.AVISO)
+    titulo = models.CharField(max_length=200, blank=True)
+    mensaje = models.TextField()
+    solicitud = models.ForeignKey(
+        "Solicitud", null=True, blank=True, on_delete=models.CASCADE, related_name="notificaciones"
+    )
+    periodo = models.ForeignKey(
+        PeriodoEscolar, null=True, blank=True, on_delete=models.CASCADE, related_name="notificaciones"
+    )
+    datos = models.JSONField(default=dict, blank=True)
     leida = models.BooleanField(default=False)
     fecha = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "notificaciones"
-        ordering = ["-fecha"]
+        ordering = ["-fecha", "-id"]
+        indexes = [models.Index(fields=["usuario", "leida"], name="notificacion_usuario_leida")]
+        constraints = [
+            # Los avisos que se crean al consultar (cierre de convocatoria, movimientos por exportar)
+            # son uno por usuario y periodo.
+            models.UniqueConstraint(
+                fields=["usuario", "tipo", "periodo"],
+                condition=Q(tipo__in=["convocatoria_cierra", "exportacion_pendiente"]),
+                name="aviso_de_estado_unico",
+            )
+        ]
 
     def __str__(self):
-        return f"{self.usuario}: {self.mensaje[:40]}"
+        return f"{self.usuario}: {(self.titulo or self.mensaje)[:40]}"
 
 
 class Bitacora(models.Model):
@@ -415,14 +455,16 @@ class Bitacora(models.Model):
     usuario = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="bitacora"
     )
-    accion = models.CharField(max_length=100)  # "aprobar", "rechazar", "exportar", "importar_csv"
+    accion = models.CharField(max_length=100)  # "aprobar", "rechazar", "exportar_sadce", "importar_csv"
     entidad = models.CharField(max_length=100, blank=True)  # "DetalleSolicitud #12"
+    # La frase que lee control escolar: "Aprobó la baja de Pensamiento Económico II (EC504) del folio..."
+    detalle = models.TextField(blank=True)
     ip = models.GenericIPAddressField(null=True, blank=True)
-    fecha = models.DateTimeField(auto_now_add=True)
+    fecha = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
         db_table = "bitacora"
-        ordering = ["-fecha"]
+        ordering = ["-fecha", "-id"]
 
     def __str__(self):
         return f"{self.fecha:%Y-%m-%d %H:%M} {self.accion}"

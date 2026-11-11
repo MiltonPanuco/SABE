@@ -76,6 +76,9 @@ def activar_periodo(periodo: PeriodoEscolar, usuario: Usuario | None, *, request
         if periodo.activo:
             return periodo
         actual = next((p for p in periodos.values() if p.activo), None)
+        detalle = f"Activó el periodo {periodo.ciclo}."
+        if actual is not None:
+            detalle += f" El periodo {actual.ciclo} quedó inactivo."
         if actual is not None:
             pendientes = DetalleSolicitud.objects.filter(
                 solicitud__periodo=actual, estado=DetalleSolicitud.Estado.PENDIENTE
@@ -105,7 +108,7 @@ def activar_periodo(periodo: PeriodoEscolar, usuario: Usuario | None, *, request
             actual.save(update_fields=["activo"])
         periodo.activo = True
         periodo.save(update_fields=["activo"])
-        registrar(usuario, "activar_periodo", periodo, request=request)
+        registrar(usuario, "activar_periodo", periodo, detalle=detalle, request=request)
     return periodo
 
 
@@ -122,13 +125,22 @@ def guardar_periodo(
         nuevo = periodo is None
         if nuevo:
             periodo = PeriodoEscolar.objects.create(**{c: datos[c] for c in CAMPOS}, activo=False)
+            detalle = f"Creó el periodo {periodo.ciclo}."
         else:
-            cambios = [c for c in CAMPOS if c in datos]
+            cambios = [c for c in CAMPOS if c in datos and getattr(periodo, c) != datos[c]]
             for campo in cambios:
                 setattr(periodo, campo, datos[campo])
             if cambios:
                 periodo.save(update_fields=cambios)
-        registrar(usuario, "crear_periodo" if nuevo else "editar_periodo", periodo, request=request)
+            if any(c.startswith("convocatoria") for c in cambios):
+                detalle = f"Editó las fechas de la convocatoria del periodo {periodo.ciclo}."
+            elif cambios:
+                detalle = f"Editó las fechas del periodo {periodo.ciclo}."
+            else:
+                detalle = f"Guardó el periodo {periodo.ciclo} sin cambios."
+        registrar(
+            usuario, "crear_periodo" if nuevo else "editar_periodo", periodo, detalle=detalle, request=request
+        )
         if activar:
             periodo = activar_periodo(periodo, usuario, request=request)
     return periodo

@@ -407,3 +407,114 @@ export interface ColumnaSadce {
   descripcion: string;
   ejemplo: string;
 }
+
+// ---------------------------------------------------------------------------
+// Notificaciones y bitácora (F10)
+// ---------------------------------------------------------------------------
+
+export type TipoNotificacion =
+  | "folio_enviado"
+  | "movimiento_aprobado"
+  | "movimiento_rechazado"
+  | "cargada_sadce"
+  | "convocatoria_cierra"
+  | "nueva_solicitud"
+  | "solicitud_extemporanea"
+  | "cancelacion"
+  | "importacion"
+  | "exportacion_pendiente"
+  | "aviso";
+
+export type CategoriaNotificacion = "tramites" | "resoluciones" | "convocatoria" | "nuevas" | "cancelaciones" | "sistema";
+
+export interface MovimientoAviso {
+  tipo: TipoTramite;
+  materia: string;
+  grupo: string;
+}
+
+/** Lo que cada tarjeta muestra aparte del texto. Depende del tipo. */
+export interface DatosNotificacion {
+  // nueva_solicitud, solicitud_extemporanea, cancelacion
+  alumno?: string;
+  matricula?: string;
+  programa?: string;
+  semestre?: number;
+  movimientos?: MovimientoAviso[] | number;
+  justificacion?: string;
+  canceladas?: number;
+  // movimiento_aprobado / rechazado
+  movimiento?: TipoTramite;
+  materia?: string;
+  grupo?: string;
+  docente?: string;
+  horarios?: { dia_semana: DiaSemana; hora_inicio: string; hora_fin: string }[];
+  // importacion
+  folio?: string;
+  tipo?: TipoImportacion;
+  archivo?: string;
+  creados?: number;
+  actualizados?: number;
+  excluidos?: number;
+}
+
+export interface Notificacion {
+  id: number;
+  tipo: TipoNotificacion;
+  titulo: string;
+  mensaje: string;
+  leida: boolean;
+  fecha: string;
+  folio: string | null;
+  /** Id del folio, para abrirlo. */
+  solicitud: number | null;
+  datos: DatosNotificacion;
+  categorias: CategoriaNotificacion[];
+}
+
+export interface ListaNotificaciones {
+  no_leidas: number;
+  /** Cuántas cumplen los filtros. */
+  total: number;
+  conteos: Record<"todas" | "no_leidas" | CategoriaNotificacion, number>;
+  resultados: Notificacion[];
+}
+
+export interface FiltrosNotificaciones {
+  estado: "" | "no_leidas";
+  categoria: "" | CategoriaNotificacion;
+  q: string;
+  orden: "" | "antiguas";
+  limite: number;
+}
+
+export interface ResumenOperativo {
+  cancelaciones_hoy: number;
+  cancelaciones_ayer: number;
+}
+
+export type CategoriaBitacora = "Dictamen" | "Importación" | "Exportación" | "Oferta" | "Periodo" | "Usuarios" | "Acceso" | "Otros";
+
+export interface RegistroBitacora {
+  id: number;
+  fecha: string;
+  usuario: string;
+  rol: "" | "Estudiante" | "Control Escolar" | "Administrador";
+  categoria: CategoriaBitacora;
+  accion: string;
+  detalle: string;
+  ip: string | null;
+}
+
+export interface PaginaBitacora {
+  total: number;
+  pagina: number;
+  paginas: number;
+  resultados: RegistroBitacora[];
+}
+
+export interface FiltrosBitacora {
+  q: string;
+  categoria: "" | CategoriaBitacora;
+  rol: "" | "estudiante" | "control_escolar" | "administrador";
+}

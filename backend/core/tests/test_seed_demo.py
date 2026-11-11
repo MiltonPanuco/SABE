@@ -11,6 +11,7 @@ from core.models import (
     Estudiante,
     Grupo,
     HorarioGrupo,
+    Notificacion,
     PeriodoEscolar,
     Programa,
     Rol,
@@ -59,8 +60,8 @@ class SeedDemoTests(TestCase):
                 # 2026-A y los tres ciclos anteriores del catálogo histórico.
                 "periodos": 4,
                 "periodos_activos": 1,
-                # La activación de 2026-A por control escolar.
-                "bitacora": 1,
+                # La activación de 2026-A, el envío de los 3 folios y la aprobación del de Diego.
+                "bitacora": 5,
                 "folios": 3,
                 "movimientos": 3,
             },
@@ -199,9 +200,24 @@ class SeedDemoTests(TestCase):
             list(PeriodoEscolar.objects.order_by("-fecha_inicio").values_list("ciclo", "activo")),
             [("2026-A", True), ("2025-B", False), ("2025-A", False), ("2024-B", False)],
         )
-        registro = Bitacora.objects.get()
-        self.assertEqual((registro.usuario.username, registro.accion), ("valeria.ruiz", "activar_periodo"))
+        registro = Bitacora.objects.get(accion="activar_periodo")
+        self.assertEqual(registro.usuario.username, "valeria.ruiz")
         self.assertTrue(registro.entidad.endswith("(2026-A)"))
+        self.assertEqual(registro.detalle, "Activó el periodo 2026-A. El periodo 2025-B quedó inactivo.")
+
+    def test_avisos_de_los_folios(self):
+        seed()
+        seed()  # reiniciar no duplica avisos ni bitácora
+        self.assertEqual(
+            sorted(Notificacion.objects.values_list("usuario__username", "tipo")),
+            sorted(
+                [("220011456", "folio_enviado"), ("220011456", "movimiento_aprobado"),
+                 ("200045129", "folio_enviado"), ("200078511", "folio_enviado")]
+                + [(u, t) for u in ("valeria.ruiz", "roberto.pena")
+                   for t in ("nueva_solicitud", "nueva_solicitud", "solicitud_extemporanea")]
+            ),
+        )
+        self.assertEqual(Bitacora.objects.count(), 5)
 
 
 @override_settings(DEBUG=False)

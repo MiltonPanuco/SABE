@@ -4,7 +4,7 @@ import { api } from "./client";
 import type { MovimientoEntrada, Solicitud } from "./tipos";
 
 /** Lo que cambia cuando se crea o cancela un folio: historial, horario, catálogo y validación del carrito. */
-const AFECTADAS = [["solicitudes"], ["mi-horario"], ["grupos"], ["validar"]];
+const AFECTADAS = [["solicitudes"], ["mi-horario"], ["grupos"], ["validar"], ["notificaciones"]];
 
 export function useSolicitudes() {
   return useQuery({ queryKey: ["solicitudes"], queryFn: () => api<Solicitud[]>("/solicitudes/") });

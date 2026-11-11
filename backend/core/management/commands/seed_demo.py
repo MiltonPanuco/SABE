@@ -34,7 +34,14 @@ from core.models import (
     UnidadAprendizaje,
     Usuario,
 )
-from core.services.avisos import entidad_de, registrar
+from core.services.avisos import (
+    aviso_dictamen,
+    aviso_folio_enviado,
+    conteo_folio,
+    entidad_de,
+    movimiento_en_texto,
+    registrar,
+)
 from core.services.solicitudes import siguiente_folio
 
 PASSWORD_DEMO = "demo1234"
@@ -125,6 +132,11 @@ PERSONAL = [
 ]
 
 # matrícula -> claves de materia inscritas
+# Acciones de la bitácora que `seed_demo` borra de los usuarios demo al reiniciar.
+ACCIONES_DEMO = [
+    "enviar_folio", "cancelar_folio", "aprobar", "rechazar", "exportar_sadce", "marcar_cargado", "iniciar_sesion",
+]
+
 CARGAS = {
     "210089334": ["EC601", "EC602", "EC603", "EC604"],
     "220011456": ["EC504"],
@@ -238,7 +250,11 @@ class Command(BaseCommand):
         """La activación del ciclo por control escolar (pie "Última modificación" de la pantalla de periodos)."""
         valeria = Usuario.objects.get(username="valeria.ruiz")
         Bitacora.objects.filter(usuario=valeria, accion="activar_periodo", entidad=entidad_de(periodo)).delete()
-        registro = registrar(valeria, "activar_periodo", periodo)
+        anterior = PeriodoEscolar.objects.filter(ciclo__lt=periodo.ciclo).order_by("-ciclo").first()
+        detalle = f"Activó el periodo {periodo.ciclo}." + (
+            f" El periodo {anterior.ciclo} quedó inactivo." if anterior else ""
+        )
+        registro = registrar(valeria, "activar_periodo", periodo, detalle=detalle)
         fecha = timezone.localtime(periodo.convocatoria_inicio - timedelta(days=1)).replace(
             hour=9, minute=14, second=0, microsecond=0
         )
@@ -354,6 +370,8 @@ class Command(BaseCommand):
         Solicitud.objects.filter(estudiante__in=estudiantes.values()).delete()
         usernames = [p["username"] for p in PERSONAL] + list(estudiantes)
         Notificacion.objects.filter(usuario__username__in=usernames).delete()
+        # La bitácora de los trámites y accesos de los usuarios demo (lo demás se conserva).
+        Bitacora.objects.filter(usuario__username__in=usernames, accion__in=ACCIONES_DEMO).delete()
         CargaAcademica.objects.filter(
             estudiante__in=estudiantes.values(), origen=CargaAcademica.Origen.SOLICITUD
         ).delete()
@@ -379,9 +397,10 @@ class Command(BaseCommand):
             # fecha_solicitud es auto_now_add: se ajusta después de crearla.
             Solicitud.objects.filter(pk=solicitud.pk).update(fecha_solicitud=enviada)
             revisor = revisores.get(f.get("aprobado_por", ""))
+            detalles = []
             for clave, tipo in f["movimientos"]:
                 grupo = grupos[clave]
-                DetalleSolicitud.objects.create(
+                detalle = DetalleSolicitud.objects.create(
                     solicitud=solicitud,
                     grupo=grupo,
                     tipo_tramite=tipo,
@@ -389,6 +408,7 @@ class Command(BaseCommand):
                     revisado_por=revisor,
                     fecha_resolucion=enviada + timedelta(hours=2) if revisor else None,
                 )
+                detalles.append(detalle)
                 if revisor and tipo == DetalleSolicitud.Tipo.ALTA:
                     CargaAcademica.objects.update_or_create(
                         estudiante=estudiante,
@@ -398,7 +418,28 @@ class Command(BaseCommand):
                             "origen": CargaAcademica.Origen.SOLICITUD,
                         },
                     )
+            self._avisos(solicitud, detalles, enviada, revisor)
         return len(FOLIOS)
+
+    def _avisos(self, solicitud, detalles, enviada, revisor):
+        """Los avisos y la bitácora que habría dejado el folio, con las fechas del folio."""
+        aviso_folio_enviado(solicitud)
+        envio = registrar(
+            solicitud.estudiante.usuario,
+            "enviar_folio",
+            solicitud,
+            detalle=f"Envió el folio {solicitud.folio_digital} con {conteo_folio(detalles)}.",
+        )
+        Notificacion.objects.filter(solicitud=solicitud).update(fecha=enviada)
+        Bitacora.objects.filter(pk=envio.pk).update(fecha=enviada)
+        if revisor is None:
+            return
+        resuelta = enviada + timedelta(hours=2)
+        for detalle in detalles:
+            aviso = aviso_dictamen(detalle)
+            registro = registrar(revisor, "aprobar", detalle, detalle=f"Aprobó {movimiento_en_texto(detalle)}.")
+            Notificacion.objects.filter(pk=aviso.pk).update(fecha=resuelta)
+            Bitacora.objects.filter(pk=registro.pk).update(fecha=resuelta)
 
     def _resumen(self, periodo, folios):
         estado = "abierta" if periodo.convocatoria_abierta else "cerrada"

@@ -1,4 +1,9 @@
-from django.db.models import Prefetch
+import csv
+import io
+from datetime import date, datetime, time, timedelta
+
+from django.db.models import Count, Prefetch, Q
+from django.utils import timezone
 from django.http import HttpResponse
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from rest_framework import mixins, status, viewsets
@@ -7,8 +12,11 @@ from rest_framework.exceptions import NotFound, PermissionDenied, ValidationErro
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .models import (
+    Bitacora,
     CargaAcademica,
     DetalleSolicitud,
     Docente,
@@ -16,6 +24,7 @@ from .models import (
     Grupo,
     ImportacionCSV,
     LoteExportacion,
+    Notificacion,
     Programa,
     Rol,
     Solicitud,
@@ -23,6 +32,8 @@ from .models import (
 )
 from .permissions import EsControlEscolar, EsEstudiante, EsPersonalEscolar
 from .serializers import (
+    ROLES,
+    usuario_bitacora,
     AprobarSerializer,
     ArchivoCsvSerializer,
     CambiarPasswordSerializer,
@@ -36,7 +47,11 @@ from .serializers import (
     GrupoSerializer,
     HorarioEstudianteSerializer,
     ImportacionSerializer,
+    LeerTodasSerializer,
+    ListaNotificacionesSerializer,
     LoteSerializer,
+    NotificacionSerializer,
+    PaginaBitacoraSerializer,
     MeSerializer,
     MovimientoExportacionSerializer,
     PeriodoActivoSerializer,
@@ -50,6 +65,8 @@ from .serializers import (
     RechazarSerializer,
     ResumenBandejaSerializer,
     ResumenExportacionSerializer,
+    ResumenOperativoSerializer,
+    RegistroBitacoraSerializer,
     RevisionSerializer,
     SolicitudSerializer,
     ValidacionSerializer,
@@ -60,7 +77,14 @@ from .services.bandeja import EstadoBandeja, folios_bandeja, resumen_bandeja
 from .services.catalogo import con_cupo, grupos_catalogo, periodo_activo
 from .services import exportacion, importacion
 from .services.dictamen import DictamenInvalido, aprobar_movimiento, rechazar_movimiento, revision_folio
-from .services.avisos import registrar
+from .services.avisos import (
+    CATEGORIAS_BITACORA,
+    acciones_de,
+    avisos_al_leer,
+    categoria_de,
+    registrar,
+    tipos_de_categoria,
+)
 from .services.oferta import OfertaInvalida, cambiar_visibilidad, grupos_oferta, guardar_grupo
 from .services.periodos import (
     PeriodoInvalido,
@@ -439,6 +463,7 @@ class SolicitudViewSet(
                 periodo,
                 entrada.validated_data["movimientos"],
                 entrada.validated_data["justificacion"],
+                request=request,
             )
         except SolicitudInvalida as error:
             datos = dict(error.datos)
@@ -455,7 +480,7 @@ class SolicitudViewSet(
         """Cancela los movimientos pendientes del folio."""
         solicitud = self.get_object()
         try:
-            cancelar_solicitud(solicitud)
+            cancelar_solicitud(solicitud, request=request)
         except SolicitudInvalida as error:
             return Response(error.datos, status=status.HTTP_400_BAD_REQUEST)
         return Response(folio_actualizado(solicitud.pk))
@@ -508,7 +533,9 @@ class MovimientoViewSet(viewsets.GenericViewSet):
         entrada = AprobarSerializer(data=request.data)
         entrada.is_valid(raise_exception=True)
         visto_bueno = entrada.validated_data["visto_bueno"]
-        return self._responder(lambda d: aprobar_movimiento(d, request.user, visto_bueno=visto_bueno))
+        return self._responder(
+            lambda d: aprobar_movimiento(d, request.user, visto_bueno=visto_bueno, request=request)
+        )
 
     @extend_schema(request=RechazarSerializer, responses=SolicitudSerializer)
     @action(detail=True, methods=["post"])
@@ -517,7 +544,7 @@ class MovimientoViewSet(viewsets.GenericViewSet):
         entrada = RechazarSerializer(data=request.data)
         entrada.is_valid(raise_exception=True)
         motivo = entrada.validated_data["motivo"]
-        return self._responder(lambda d: rechazar_movimiento(d, request.user, motivo))
+        return self._responder(lambda d: rechazar_movimiento(d, request.user, motivo, request=request))
 
 
 # ---------------------------------------------------------------------------
@@ -591,7 +618,13 @@ class DocenteViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.Ge
 
     def perform_create(self, serializer):
         docente = serializer.save()
-        registrar(self.request.user, "crear_docente", docente, request=self.request)
+        registrar(
+            self.request.user,
+            "crear_docente",
+            docente,
+            detalle=f"Registró al docente {docente.nombre}.",
+            request=self.request,
+        )
 
 
 class ProgramaViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -766,3 +799,213 @@ class ExportacionViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         except exportacion.ExportacionInvalida as error:
             return Response(error.datos, status=status.HTTP_400_BAD_REQUEST)
         return self._respuesta_lote(lote.pk)
+
+
+# ---------------------------------------------------------------------------
+# Inicio de sesión, notificaciones y bitácora (F10)
+# ---------------------------------------------------------------------------
+
+ORIGEN_SESION = {
+    Rol.ESTUDIANTE: "el portal del estudiante",
+    Rol.CONTROL_ESCOLAR: "la ventanilla de Control Escolar",
+    Rol.ADMINISTRADOR: "el panel de administración",
+}
+
+
+class EntrarView(TokenObtainPairView):
+    """Login con matrícula o usuario. Cada inicio de sesión correcto queda en la bitácora."""
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except TokenError as error:
+            raise InvalidToken(error.args[0]) from error
+        usuario = serializer.user
+        origen = ORIGEN_SESION.get(usuario.rol, "SABE")
+        registrar(usuario, "iniciar_sesion", usuario, detalle=f"Inicio de sesión desde {origen}.", request=request)
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+
+
+LIMITE_AVISOS = 20
+CATEGORIAS_FILTRO = ["tramites", "resoluciones", "convocatoria", "nuevas", "cancelaciones", "sistema"]
+
+
+class NotificacionViewSet(viewsets.GenericViewSet):
+    """Avisos del usuario que inició sesión (cada quien ve solo los suyos)."""
+
+    queryset = Notificacion.objects.all()  # el esquema lo usa para el tipo del id
+    serializer_class = NotificacionSerializer
+    pagination_class = None
+
+    def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Notificacion.objects.none()
+        return Notificacion.objects.filter(usuario=self.request.user).select_related("solicitud")
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("estado", str, enum=["no_leidas"]),
+            OpenApiParameter("categoria", str, enum=CATEGORIAS_FILTRO),
+            OpenApiParameter("q", str, description="Folio, título o texto del aviso."),
+            OpenApiParameter("orden", str, enum=["recientes", "antiguas"]),
+            OpenApiParameter("limite", int, description=f"Cuántos devolver (por omisión {LIMITE_AVISOS}, máximo 100)."),
+        ],
+        responses=ListaNotificacionesSerializer,
+    )
+    def list(self, request):
+        avisos_al_leer(request.user)
+        todos = self.get_queryset()
+        conteos = todos.aggregate(
+            todas=Count("id"),
+            no_leidas=Count("id", filter=Q(leida=False)),
+            **{c: Count("id", filter=Q(tipo__in=tipos_de_categoria(c))) for c in CATEGORIAS_FILTRO},
+        )
+        avisos = todos
+        params = request.query_params
+        if params.get("estado") == "no_leidas":
+            avisos = avisos.filter(leida=False)
+        if params.get("categoria") in CATEGORIAS_FILTRO:
+            avisos = avisos.filter(tipo__in=tipos_de_categoria(params["categoria"]))
+        if q := params.get("q", "").strip():
+            avisos = avisos.filter(
+                Q(solicitud__folio_digital__icontains=q) | Q(titulo__icontains=q) | Q(mensaje__icontains=q)
+            )
+        if params.get("orden") == "antiguas":
+            avisos = avisos.order_by("fecha", "id")
+        try:
+            limite = min(max(int(params.get("limite", LIMITE_AVISOS)), 1), 100)
+        except ValueError:
+            limite = LIMITE_AVISOS
+        return Response(
+            {
+                "no_leidas": conteos["no_leidas"],
+                "total": avisos.count(),
+                "conteos": conteos,
+                "resultados": NotificacionSerializer(avisos[:limite], many=True).data,
+            }
+        )
+
+    @extend_schema(request=None, responses=NotificacionSerializer)
+    @action(detail=True, methods=["post"])
+    def leer(self, request, pk=None):
+        aviso = self.get_object()
+        if not aviso.leida:
+            aviso.leida = True
+            aviso.save(update_fields=["leida"])
+        return Response(NotificacionSerializer(aviso).data)
+
+    @extend_schema(request=None, responses=LeerTodasSerializer)
+    @action(detail=False, methods=["post"], url_path="leer-todas")
+    def leer_todas(self, request):
+        marcadas = self.get_queryset().filter(leida=False).update(leida=True)
+        return Response({"marcadas": marcadas})
+
+    @extend_schema(responses=ResumenOperativoSerializer)
+    @action(detail=False, url_path="resumen-operativo", permission_classes=[EsControlEscolar])
+    def resumen_operativo(self, request):
+        """Alumnos que cancelaron hoy y ayer (tarjeta "Cancelaciones Hoy")."""
+        hoy = timezone.localdate()
+        cancelaciones = Bitacora.objects.filter(accion="cancelar_folio")
+
+        def alumnos(dia):
+            inicio = timezone.make_aware(datetime.combine(dia, time.min))
+            return (
+                cancelaciones.filter(fecha__gte=inicio, fecha__lt=inicio + timedelta(days=1))
+                .values("usuario")
+                .distinct()
+                .count()
+            )
+
+        return Response({"cancelaciones_hoy": alumnos(hoy), "cancelaciones_ayer": alumnos(hoy - timedelta(days=1))})
+
+
+POR_PAGINA_BITACORA = 50
+FILTROS_BITACORA = [
+    OpenApiParameter("q", str, description="Usuario, folio o detalle."),
+    OpenApiParameter("categoria", str, enum=CATEGORIAS_BITACORA),
+    OpenApiParameter("rol", str, enum=list(ROLES)),
+    OpenApiParameter("desde", str, description="AAAA-MM-DD"),
+    OpenApiParameter("hasta", str, description="AAAA-MM-DD"),
+]
+
+
+class BitacoraViewSet(viewsets.GenericViewSet):
+    """Bitácora de auditoría: solo lectura, para control escolar y el administrador."""
+
+    serializer_class = RegistroBitacoraSerializer
+    permission_classes = [EsPersonalEscolar]
+    pagination_class = None
+    queryset = Bitacora.objects.select_related("usuario").order_by("-fecha", "-id")
+
+    def filtrar(self, request):
+        registros = self.get_queryset()
+        params = request.query_params
+        if q := params.get("q", "").strip():
+            registros = registros.filter(
+                Q(usuario__username__icontains=q)
+                | Q(usuario__first_name__icontains=q)
+                | Q(usuario__last_name__icontains=q)
+                | Q(detalle__icontains=q)
+                | Q(entidad__icontains=q)
+            )
+        categoria = params.get("categoria")
+        if categoria == "Usuarios":
+            registros = registros.filter(accion__endswith="_usuario")
+        elif categoria in CATEGORIAS_BITACORA:
+            registros = registros.filter(accion__in=acciones_de(categoria))
+        if params.get("rol") in ROLES:
+            registros = registros.filter(usuario__rol=params["rol"])
+        for campo, operador in (("desde", "gte"), ("hasta", "lte")):
+            if valor := params.get(campo):
+                try:
+                    dia = date.fromisoformat(valor)
+                    registros = registros.filter(**{f"fecha__date__{operador}": dia})
+                except ValueError:
+                    raise ValidationError({campo: ["Usa el formato AAAA-MM-DD."]}) from None
+        return registros
+
+    @extend_schema(
+        parameters=[*FILTROS_BITACORA, OpenApiParameter("pagina", int, description="Desde 1; 50 registros por página.")],
+        responses=PaginaBitacoraSerializer,
+    )
+    def list(self, request):
+        registros = self.filtrar(request)
+        total = registros.count()
+        paginas = max(1, -(-total // POR_PAGINA_BITACORA))
+        try:
+            pagina = min(max(int(request.query_params.get("pagina", 1)), 1), paginas)
+        except ValueError:
+            pagina = 1
+        inicio = (pagina - 1) * POR_PAGINA_BITACORA
+        return Response(
+            {
+                "total": total,
+                "pagina": pagina,
+                "paginas": paginas,
+                "resultados": RegistroBitacoraSerializer(registros[inicio : inicio + POR_PAGINA_BITACORA], many=True).data,
+            }
+        )
+
+    @extend_schema(parameters=FILTROS_BITACORA, responses={(200, "text/csv"): bytes})
+    @action(detail=False)
+    def exportar(self, request):
+        """La bitácora filtrada en CSV (UTF-8 con BOM, para Excel)."""
+        salida = io.StringIO()
+        escritor = csv.writer(salida, lineterminator="\r\n")
+        escritor.writerow(["Fecha", "Usuario", "Rol", "Accion", "Detalle"])
+        for registro in self.filtrar(request).iterator(chunk_size=500):
+            escritor.writerow(
+                [
+                    timezone.localtime(registro.fecha).strftime("%d/%m/%Y %H:%M"),
+                    usuario_bitacora(registro.usuario),
+                    ROLES.get(registro.usuario.rol, "") if registro.usuario else "",
+                    categoria_de(registro.accion),
+                    registro.detalle or registro.entidad,
+                ]
+            )
+        periodo = periodo_activo()
+        nombre = f"bitacora_sabe_{periodo.ciclo.replace('-', '')}.csv" if periodo else "bitacora_sabe.csv"
+        respuesta = HttpResponse("\ufeff" + salida.getvalue(), content_type="text/csv; charset=utf-8")
+        respuesta["Content-Disposition"] = f'attachment; filename="{nombre}"'
+        return respuesta

@@ -41,6 +41,30 @@ class LoteExportacionAdmin(admin.ModelAdmin):
     list_filter = ("periodo", "formato")
 
 
+@admin.register(models.Bitacora)
+class BitacoraAdmin(admin.ModelAdmin):
+    """Solo lectura: la bitácora no se edita ni se borra."""
+
+    list_display = ("fecha", "usuario", "accion", "detalle", "ip")
+    list_filter = ("accion",)
+    search_fields = ("detalle", "entidad", "usuario__username")
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(models.Notificacion)
+class NotificacionAdmin(admin.ModelAdmin):
+    list_display = ("fecha", "usuario", "tipo", "titulo", "leida")
+    list_filter = ("tipo", "leida")
+
+
 for modelo in (
     models.Programa,
     models.Estudiante,
@@ -48,8 +72,6 @@ for modelo in (
     models.PeriodoEscolar,
     models.UnidadAprendizaje,
     models.CargaAcademica,
-    models.Notificacion,
-    models.Bitacora,
     models.ImportacionCSV,
 ):
     admin.site.register(modelo)

@@ -201,12 +201,12 @@ class MarcarCargadoTests(BaseExportacionTest):
         self.assertEqual(set(DetalleSolicitud.objects.values_list("estado", flat=True)), {"cargada_sadce"})
         self.assertEqual(Solicitud.objects.get(pk=self.f1.pk).estado, "cargada_sadce")
 
-        avisos = sorted(Notificacion.objects.values_list("usuario__username", "mensaje"))
+        avisos = sorted(Notificacion.objects.values_list("usuario__username", "tipo", "titulo"))
         self.assertEqual(
             avisos,
             sorted([
-                (DIEGO, f"Tu solicitud {self.f2.folio_digital} fue cargada en SADCE."),
-                (ALUMNO, f"Tu solicitud {self.f1.folio_digital} fue cargada en SADCE."),
+                (DIEGO, "cargada_sadce", f"Tu solicitud {self.f2.folio_digital} fue cargada en SADCE"),
+                (ALUMNO, "cargada_sadce", f"Tu solicitud {self.f1.folio_digital} fue cargada en SADCE"),
             ]),
         )
         self.assertTrue(Bitacora.objects.filter(accion="marcar_cargado").exists())

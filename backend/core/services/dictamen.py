@@ -13,7 +13,7 @@ from django.utils import timezone
 
 from core.models import CargaAcademica, DetalleSolicitud, Estudiante, Grupo, Solicitud, Usuario
 
-from .avisos import notificar
+from .avisos import aviso_dictamen, movimiento_en_texto, registrar
 from .catalogo import con_cupo
 from .choques import Choque
 from .validacion import Codigo, Contexto, ErrorMovimiento, revisar_alta
@@ -109,14 +109,13 @@ def _bloquear(detalle: DetalleSolicitud) -> tuple[DetalleSolicitud, Solicitud]:
     return actual, solicitud
 
 
-def _nombre(detalle: DetalleSolicitud) -> str:
-    grupo = detalle.grupo
-    tipo = "alta" if detalle.tipo_tramite == Tipo.ALTA else "baja"
-    return f"Tu {tipo} de {grupo.materia.nombre_materia} (grupo {grupo.num_grupo}) del folio {detalle.solicitud.folio_digital}"
-
-
 def aprobar_movimiento(
-    detalle: DetalleSolicitud, usuario: Usuario, *, visto_bueno: bool = False, ahora: datetime | None = None
+    detalle: DetalleSolicitud,
+    usuario: Usuario,
+    *,
+    visto_bueno: bool = False,
+    ahora: datetime | None = None,
+    request=None,
 ) -> DetalleSolicitud:
     """Aprueba el movimiento y cambia la carga del alumno, o lanza DictamenInvalido."""
     with transaction.atomic():
@@ -150,12 +149,15 @@ def aprobar_movimiento(
         detalle.revisado_por = usuario
         detalle.fecha_resolucion = ahora or timezone.now()
         detalle.save(update_fields=["estado", "visto_bueno", "revisado_por", "fecha_resolucion"])
-        notificar(solicitud.estudiante.usuario, f"{_nombre(detalle)} fue aprobada.")
+        aviso_dictamen(detalle)
+        registrar(
+            usuario, "aprobar", detalle, detalle=f"Aprobó {movimiento_en_texto(detalle)}.", request=request
+        )
     return detalle
 
 
 def rechazar_movimiento(
-    detalle: DetalleSolicitud, usuario: Usuario, motivo: str, *, ahora: datetime | None = None
+    detalle: DetalleSolicitud, usuario: Usuario, motivo: str, *, ahora: datetime | None = None, request=None
 ) -> DetalleSolicitud:
     """Rechaza el movimiento con su motivo (lo verá el alumno), o lanza DictamenInvalido."""
     motivo = motivo.strip()
@@ -172,5 +174,12 @@ def rechazar_movimiento(
         detalle.revisado_por = usuario
         detalle.fecha_resolucion = ahora or timezone.now()
         detalle.save(update_fields=["estado", "motivo_rechazo", "revisado_por", "fecha_resolucion"])
-        notificar(solicitud.estudiante.usuario, f"{_nombre(detalle)} fue rechazada. Motivo: {motivo}")
+        aviso_dictamen(detalle)
+        registrar(
+            usuario,
+            "rechazar",
+            detalle,
+            detalle=f"Rechazó {movimiento_en_texto(detalle)}. Motivo: {motivo}",
+            request=request,
+        )
     return detalle

@@ -2,6 +2,7 @@
 // de control escolar en stitch/ (aquí, el de sabe_solicitudes_control_escolar).
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useCampana } from "../api/avisos";
 import { usePeriodoActivo } from "../api/estudiante";
 import { useAuth } from "../auth/AuthProvider";
 import { Simbolo } from "../components/acceso";
@@ -26,6 +27,7 @@ const PIES: Record<string, string> = {
   "/control-escolar/periodo": "Plataforma auxiliar independiente de SADCE Central",
   "/control-escolar/importacion":
     "Plataforma interna auxiliar. No se conecta ni sincroniza automáticamente con SADCE; la captura final corresponde a Control Escolar.",
+  "/control-escolar/notificaciones": "Plataforma auxiliar independiente de SADCE Central",
 };
 
 export function LayoutControlEscolar() {
@@ -34,6 +36,7 @@ export function LayoutControlEscolar() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const [menuAbierto, setMenuAbierto] = useState(false);
+  const { data: campana } = useCampana();
 
   // En teléfono el menú es un panel: Esc lo cierra y la página de atrás no se desplaza.
   useEffect(() => {
@@ -127,7 +130,12 @@ export function LayoutControlEscolar() {
             <div className="flex items-center gap-space-sm sm:gap-space-lg">
               {/* Campana y salida: prototipo.js las agrega antes del usuario, con 8 px de margen. */}
               <div className="flex items-center gap-2 sm:mr-2">
-                <BotonEncabezado icono="notifications" titulo="Notificaciones" onClick={() => navigate("/control-escolar/notificaciones")} />
+                <BotonEncabezado
+                  icono="notifications"
+                  titulo={campana?.no_leidas ? `Notificaciones (${campana.no_leidas} sin leer)` : "Notificaciones"}
+                  insignia={campana?.no_leidas}
+                  onClick={() => navigate("/control-escolar/notificaciones")}
+                />
                 <BotonEncabezado icono="logout" titulo="Cerrar sesión" onClick={salir} />
               </div>
               <div className="flex items-center gap-space-sm text-right">
@@ -204,16 +212,32 @@ function Seccion({
   );
 }
 
-function BotonEncabezado({ icono, titulo, onClick }: { icono: string; titulo: string; onClick: () => void }) {
+function BotonEncabezado({
+  icono,
+  titulo,
+  insignia,
+  onClick,
+}: {
+  icono: string;
+  titulo: string;
+  /** Número de no leídas (la insignia de la campana del portal del estudiante). */
+  insignia?: number;
+  onClick: () => void;
+}) {
   return (
     <button
       type="button"
       title={titulo}
       aria-label={titulo}
       onClick={onClick}
-      className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-[10px] text-on-surface-variant hover:bg-surface-container"
+      className="relative flex h-9 w-9 cursor-pointer items-center justify-center rounded-[10px] text-on-surface-variant hover:bg-surface-container"
     >
       <Simbolo nombre={icono} className="text-[22px]!" />
+      {!!insignia && (
+        <span className="absolute top-1 right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-secondary-container px-1 text-[10px] leading-none font-bold text-[#002B49]">
+          {insignia > 99 ? "99+" : insignia}
+        </span>
+      )}
     </button>
   );
 }

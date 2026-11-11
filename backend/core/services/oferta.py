@@ -135,6 +135,8 @@ def guardar_grupo(
             "publicar_grupo" if nuevo else "editar_grupo",
             grupo,
             descripcion=f"{materia.clave} gpo {grupo.num_grupo}",
+            detalle=f"{'Publicó' if nuevo else 'Editó'} {materia.nombre_materia} ({materia.clave}), "
+            f"grupo {grupo.num_grupo}, cupo {grupo.cupo_maximo}.",
             request=request,
         )
     return con_cupo(Grupo.objects.filter(pk=grupo.pk)).get()
@@ -152,6 +154,8 @@ def cambiar_visibilidad(grupo: Grupo, visible: bool, usuario: Usuario | None, *,
                 "mostrar_grupo" if visible else "ocultar_grupo",
                 grupo,
                 descripcion=f"{grupo.materia.clave} gpo {grupo.num_grupo}",
+                detalle=f"{'Mostró en' if visible else 'Ocultó del'} catálogo {grupo.materia.nombre_materia} "
+                f"({grupo.materia.clave}), grupo {grupo.num_grupo}.",
                 request=request,
             )
     return con_cupo(Grupo.objects.filter(pk=grupo.pk)).get()
