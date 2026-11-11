@@ -296,7 +296,12 @@ export function CambiarPasswordPage() {
                 <p className="text-[11px] text-slate-400">Ventanilla de Control Escolar - Unidad Académica de Economía • Convocatoria {CICLO}</p>
                 {/* No está en stitch (el diseño no permite salir del paso obligatorio). Ver conflictos en el PR. */}
                 {obligatorio ? (
-                  <button onClick={cerrarSesion} className="mt-2 text-[11px] font-semibold text-slate-500 hover:text-uan-navy hover:underline">
+                  <button
+                    onClick={() => {
+                      cerrarSesion();
+                      navigate("/login", { replace: true });
+                    }}
+                    className="mt-2 text-[11px] font-semibold text-slate-500 hover:text-uan-navy hover:underline">
                     Cerrar sesión
                   </button>
                 ) : (

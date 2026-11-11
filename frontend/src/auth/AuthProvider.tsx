@@ -52,8 +52,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     cerrarSesion() {
       tokens.borrar();
-      queryClient.clear();
+      // No usar queryClient.clear(): desconecta la consulta "me" y la sesión seguiría en pantalla.
       queryClient.setQueryData(CLAVE_ME, null);
+      queryClient.removeQueries({ predicate: (q) => q.queryKey[0] !== CLAVE_ME[0] });
     },
     recargarUsuario: refetch,
   };
