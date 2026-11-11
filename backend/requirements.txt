@@ -6,3 +6,6 @@ drf-spectacular>=0.28
 psycopg[binary]>=3.2
 openpyxl>=3.1
 python-dotenv>=1.0
+# Producción (F12)
+gunicorn>=23
+whitenoise>=6.8

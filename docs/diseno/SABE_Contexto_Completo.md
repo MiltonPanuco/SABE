@@ -1,6 +1,6 @@
 # SABE: contexto completo del proyecto
 
-Archivo pensado para pasarlo a cualquier IA o compañero de equipo y que tenga todo el panorama. Actualizado el 4 de noviembre de 2026. Complementa y actualiza `Material de clases/SABE_Contexto_Proyecto.md` (del 13 de octubre). Si algo se contradice, manda este archivo.
+Archivo pensado para pasarlo a cualquier IA o compañero de equipo y que tenga todo el panorama. Actualizado el 4 de noviembre de 2026; la sección 16 resume el estado al cierre (noviembre de 2026). Complementa y actualiza `Material de clases/SABE_Contexto_Proyecto.md` (del 13 de octubre). Si algo se contradice, manda este archivo.
 
 ---
 
@@ -75,8 +75,8 @@ No incluye:
 ## 7. Stack
 
 - Backend: Django + Django REST Framework.
-- Frontend: React + TypeScript.
-- Recomendado, no confirmado por todo el equipo: PostgreSQL, JWT con simplejwt, openpyxl/csv para exportar, TanStack Query y Tailwind.
+- Frontend: React + TypeScript (Vite).
+- Confirmado y en uso: PostgreSQL, JWT con simplejwt, openpyxl/csv para exportar, TanStack Query, React Router y Tailwind. Producción con Docker Compose, Gunicorn y Caddy (HTTPS); CI en GitHub Actions.
 
 ## 8. Estado de la EDT (por fases, como pidió la maestra)
 
@@ -179,7 +179,7 @@ Tablas: usuarios, estudiantes, periodos_escolares, unidades_aprendizaje, solicit
 15. notificaciones: usuario, mensaje, leída, fecha.
 16. lotes_exportacion: quién, cuándo, formato, y los movimientos incluidos (respalda "marcar como cargado en SADCE").
 
-Resultado: unas 14 tablas.
+Resultado: unas 14 tablas. (Al cierre son 15 modelos: se agregaron `importaciones_csv` en F8 y la clave de programa; los cambios de esta lista ya están aplicados.)
 
 **Reglas de backend**
 - Validación de choques solo en el servidor, en un servicio único. El frontend solo la muestra.
@@ -188,13 +188,13 @@ Resultado: unas 14 tablas.
 - Exportación con openpyxl/csv, registrada en lotes_exportacion.
 - Auditoría de aprobar, rechazar, exportar y cambios de catálogo.
 
-## 13. Puntos abiertos
+## 13. Puntos abiertos (resueltos al cierre)
 
-- De dónde sale la carga académica actual del alumno (necesaria para los choques). Propuesta: importación por CSV hecha por control escolar.
-- Formato exacto del reporte para SADCE (columnas). Pendiente de consultar con control escolar.
-- Cómo comprobar que quien pide la alta es el alumno (por ahora solo login con contraseña).
-- Confirmar el stack final con el equipo.
-- Aprobación por folio o por movimiento (se recomienda por movimiento).
+- De dónde sale la carga académica actual del alumno: **importación por CSV** de control escolar (padrón y cargas, F8).
+- Formato del reporte para SADCE: **decidido (D1)**. Ciclo, Folio, Matrícula, Nombre, Programa, Clave materia, Materia, Grupo, Docente, Tipo y Fecha de aprobación; una fila por movimiento.
+- Cómo comprobar que quien pide la alta es el alumno: se queda en **login con contraseña** (fuera de alcance verificar más). La contraseña temporal se cambia en el primer acceso.
+- Stack final: **confirmado** (sección 7).
+- Aprobación: **por movimiento**, y el estado del folio se deriva de sus movimientos (F6).
 
 ## 14. Mapa de archivos
 
@@ -207,7 +207,7 @@ Estructura de `C:\dev\SABE` (reorganizada el 4 de noviembre de 2026):
   - `output/`: PDFs y Word de la actividad 9 (ruta crítica).
   - Este archivo vive ahora en `docs/diseno/`.
 - `stitch/`: prototipo en HTML, una carpeta por pantalla (`sabe_*/code.html`), `_shared/prototipo.js` (navegación entre pantallas y roles) y `academic_prestige_modern/DESIGN.md`. Ver la sección 9.
-- `docs/`: `requerimientos/` (Word por rol) y `diseno/` (este contexto, `SABE_Pantallas_y_Flujos.docx` y los prompts de Stitch).
+- `docs/`: `requerimientos/` (Word por rol) y `diseno/` (este contexto y `Pantallas y Flujos.docx`).
 - `diagramas/`: `SABE_ERD_Backend.png` y `.mmd` (ERD corregido, 15 tablas; el .mmd es el editable en Mermaid).
 - `backend/core/`: `models.py` de Django que refleja el ERD (Django 5.1+, PostgreSQL, `AUTH_USER_MODEL = "core.Usuario"`).
 - `tmp/`: scripts y renders que se usaron para generar los documentos de la actividad 9. Se puede ignorar; sus rutas apuntan a la estructura anterior.
@@ -217,3 +217,12 @@ Estructura de `C:\dev\SABE` (reorganizada el 4 de noviembre de 2026):
 - Textos de entrega en voz natural, directa, primera persona del plural.
 - Sin guiones largos (la raya) en textos de entrega.
 - Respuestas específicas y concretas. Entregables suelen ser PDF.
+
+## 16. Estado al cierre (noviembre de 2026)
+
+- Las 13 funciones de `docs/PLAN.md` están construidas, con pruebas del backend (unas 290) y un recorrido completo con los tres roles en producción.
+- Demostración pública: https://sabe.163-192-148-141.sslip.io, en la VM de Oracle Cloud del equipo con Docker Compose y HTTPS de Let's Encrypt (D6).
+- Decisiones: D1 columnas del Excel para SADCE; D2 la baja del mismo folio libera el horario; D3 sin "24 hrs hábiles"; D4 sin correo: contraseña temporal que restablece el administrador o control escolar; D5 acuse imprimible desde el navegador; D6 hospedaje en la VM de Oracle.
+- Cada pantalla se revisó contra `stitch/`; las diferencias acordadas están en la sección de cada función de `docs/PLAN.md`.
+- Fuera de alcance (sin cambios): conexión con PiiDA o SADCE, correo electrónico, verificar identidad más allá del login.
+- Para el equipo: guía de prueba de usabilidad en `docs/pruebas/prueba_usabilidad.md` y guion de la presentación en `docs/presentacion/guion.md`.

@@ -48,6 +48,7 @@ class Usuario(AbstractUser):
 class Programa(models.Model):
     """Licenciatura: Economía, Finanzas."""
 
+    clave = models.CharField(max_length=10, unique=True)  # "L-ECO", la que trae el CSV del padrón
     nombre = models.CharField(max_length=100, unique=True)
 
     class Meta:
@@ -259,24 +260,45 @@ class CargaAcademica(models.Model):
 # ---------------------------------------------------------------------------
 
 class LoteExportacion(models.Model):
-    """Cada descarga del reporte para SADCE. Respalda 'marcar como cargado'."""
+    """
+    Cada Excel o CSV generado para SADCE con los movimientos aprobados de un periodo.
+    El archivo no se guarda: se vuelve a armar con sus movimientos, que ya no cambian.
+    """
 
     class Formato(models.TextChoices):
         XLSX = "xlsx", "Excel"
         CSV = "csv", "CSV"
 
+    periodo = models.ForeignKey(PeriodoEscolar, on_delete=models.PROTECT, related_name="lotes")
+    numero = models.PositiveIntegerField()  # consecutivo dentro del periodo: LOTE-2026A-001
     usuario = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="lotes_exportados"
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="lotes_exportados"
     )
     fecha = models.DateTimeField(auto_now_add=True)
     formato = models.CharField(max_length=4, choices=Formato.choices)
     total_registros = models.PositiveIntegerField(default=0)
+    # Se llenan al marcar el lote como cargado en SADCE.
+    cargado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="lotes_cargados"
+    )
+    fecha_carga = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "lotes_exportacion"
+        ordering = ["-fecha", "-id"]
+        constraints = [models.UniqueConstraint(fields=["periodo", "numero"], name="lote_unico_por_periodo")]
+
+    @property
+    def folio(self) -> str:
+        """LOTE-2026A-006"""
+        return f"LOTE-{self.periodo.ciclo.replace('-', '')}-{self.numero:03d}"
+
+    @property
+    def cargado(self) -> bool:
+        return self.fecha_carga is not None
 
     def __str__(self):
-        return f"Lote {self.pk} ({self.fecha:%Y-%m-%d})"
+        return self.folio
 
 
 class Solicitud(models.Model):
@@ -287,6 +309,8 @@ class Solicitud(models.Model):
     periodo = models.ForeignKey(PeriodoEscolar, on_delete=models.PROTECT, related_name="solicitudes")
     justificacion = models.TextField(blank=True)
     fecha_solicitud = models.DateTimeField(auto_now_add=True)
+    # Enviada después de convocatoria_fin. Se guarda al crearla: si luego cambian las fechas, no cambia.
+    extemporanea = models.BooleanField(default=False)
 
     class Meta:
         db_table = "solicitudes"
@@ -299,21 +323,19 @@ class Solicitud(models.Model):
     def estado(self):
         """
         Estado del folio, derivado de sus movimientos:
-        pendiente si queda alguno por resolver, si no el más avanzado de los resueltos.
+        pendiente si queda alguno por resolver; si no, aprobada, cargada en SADCE, rechazada
+        o cancelada, en ese orden (el primero que tenga algún movimiento).
         """
-        estados = set(self.detalles.values_list("estado", flat=True))
+        # detalles.all() usa el prefetch si lo hay (listados sin una consulta por folio).
+        estados = {detalle.estado for detalle in self.detalles.all()}
         E = DetalleSolicitud.Estado
-        if not estados:
+        if not estados or E.PENDIENTE in estados:
             return E.PENDIENTE
-        if E.PENDIENTE in estados:
-            return E.PENDIENTE
-        if estados == {E.RECHAZADA}:
-            return E.RECHAZADA
-        if estados == {E.CANCELADA}:
-            return E.CANCELADA
-        if estados <= {E.CARGADA_SADCE, E.RECHAZADA, E.CANCELADA}:
-            return E.CARGADA_SADCE
-        return E.APROBADA
+        # Ya no queda nada pendiente: manda el resultado más favorable al alumno.
+        for estado in (E.APROBADA, E.CARGADA_SADCE, E.RECHAZADA):
+            if estado in estados:
+                return estado
+        return E.CANCELADA
 
 
 class DetalleSolicitud(models.Model):
@@ -372,19 +394,59 @@ class DetalleSolicitud(models.Model):
 # ---------------------------------------------------------------------------
 
 class Notificacion(models.Model):
+    """
+    Aviso para un usuario. `tipo` decide el icono, el chip y los enlaces de la tarjeta; `datos` guarda
+    lo que la tarjeta muestra aparte del texto (movimientos, horario, conteos...).
+    """
+
+    class Tipo(models.TextChoices):
+        # Estudiante
+        FOLIO_ENVIADO = "folio_enviado", "Folio enviado"
+        MOVIMIENTO_APROBADO = "movimiento_aprobado", "Movimiento aprobado"
+        MOVIMIENTO_RECHAZADO = "movimiento_rechazado", "Movimiento rechazado"
+        CARGADA_SADCE = "cargada_sadce", "Cargada en SADCE"
+        CONVOCATORIA_CIERRA = "convocatoria_cierra", "La convocatoria cierra"
+        # Control escolar
+        NUEVA_SOLICITUD = "nueva_solicitud", "Nueva solicitud"
+        SOLICITUD_EXTEMPORANEA = "solicitud_extemporanea", "Solicitud extemporánea"
+        CANCELACION = "cancelacion", "Cancelación de alumno"
+        IMPORTACION = "importacion", "Importación de CSV"
+        EXPORTACION_PENDIENTE = "exportacion_pendiente", "Movimientos por exportar"
+        # Avisos de antes de F10 (solo texto)
+        AVISO = "aviso", "Aviso"
+
     usuario = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notificaciones"
     )
-    mensaje = models.CharField(max_length=255)
+    tipo = models.CharField(max_length=30, choices=Tipo.choices, default=Tipo.AVISO)
+    titulo = models.CharField(max_length=200, blank=True)
+    mensaje = models.TextField()
+    solicitud = models.ForeignKey(
+        "Solicitud", null=True, blank=True, on_delete=models.CASCADE, related_name="notificaciones"
+    )
+    periodo = models.ForeignKey(
+        PeriodoEscolar, null=True, blank=True, on_delete=models.CASCADE, related_name="notificaciones"
+    )
+    datos = models.JSONField(default=dict, blank=True)
     leida = models.BooleanField(default=False)
     fecha = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "notificaciones"
-        ordering = ["-fecha"]
+        ordering = ["-fecha", "-id"]
+        indexes = [models.Index(fields=["usuario", "leida"], name="notificacion_usuario_leida")]
+        constraints = [
+            # Los avisos que se crean al consultar (cierre de convocatoria, movimientos por exportar)
+            # son uno por usuario y periodo.
+            models.UniqueConstraint(
+                fields=["usuario", "tipo", "periodo"],
+                condition=Q(tipo__in=["convocatoria_cierra", "exportacion_pendiente"]),
+                name="aviso_de_estado_unico",
+            )
+        ]
 
     def __str__(self):
-        return f"{self.usuario}: {self.mensaje[:40]}"
+        return f"{self.usuario}: {(self.titulo or self.mensaje)[:40]}"
 
 
 class Bitacora(models.Model):
@@ -393,14 +455,48 @@ class Bitacora(models.Model):
     usuario = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="bitacora"
     )
-    accion = models.CharField(max_length=100)  # "aprobar", "rechazar", "exportar", "importar_csv"
+    accion = models.CharField(max_length=100)  # "aprobar", "rechazar", "exportar_sadce", "importar_csv"
     entidad = models.CharField(max_length=100, blank=True)  # "DetalleSolicitud #12"
+    # La frase que lee control escolar: "Aprobó la baja de Pensamiento Económico II (EC504) del folio..."
+    detalle = models.TextField(blank=True)
     ip = models.GenericIPAddressField(null=True, blank=True)
-    fecha = models.DateTimeField(auto_now_add=True)
+    fecha = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
         db_table = "bitacora"
-        ordering = ["-fecha"]
+        ordering = ["-fecha", "-id"]
 
     def __str__(self):
         return f"{self.fecha:%Y-%m-%d %H:%M} {self.accion}"
+
+
+class ImportacionCSV(models.Model):
+    """Historial de cargas por CSV (padrón de alumnos o cargas académicas) de un periodo."""
+
+    class Tipo(models.TextChoices):
+        ALUMNOS = "alumnos", "Alumnos"
+        CARGAS = "cargas", "Cargas académicas"
+
+    tipo = models.CharField(max_length=8, choices=Tipo.choices)
+    periodo = models.ForeignKey(PeriodoEscolar, on_delete=models.PROTECT, related_name="importaciones")
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="importaciones"
+    )
+    fecha = models.DateTimeField(auto_now_add=True)
+    archivo = models.CharField(max_length=255)
+    total = models.PositiveIntegerField(default=0)
+    creados = models.PositiveIntegerField(default=0)
+    actualizados = models.PositiveIntegerField(default=0)
+    excluidos = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        db_table = "importaciones_csv"
+        ordering = ["-fecha", "-id"]
+
+    @property
+    def folio(self) -> str:
+        """IMP-2026A-049"""
+        return f"IMP-{self.periodo.ciclo.replace('-', '')}-{self.pk:03d}"
+
+    def __str__(self):
+        return self.folio

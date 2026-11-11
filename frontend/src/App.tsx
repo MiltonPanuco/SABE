@@ -1,32 +1,79 @@
-import { useQuery } from "@tanstack/react-query";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { RedirigirPorRol, RutaProtegida } from "./auth/RutaProtegida";
+import { UsuariosPage } from "./admin/UsuariosPage";
+import { BitacoraPage } from "./control/BitacoraPage";
+import { ExportacionPage } from "./control/ExportacionPage";
+import { ImportacionPage } from "./control/ImportacionPage";
+import { LayoutControlEscolar } from "./control/LayoutControlEscolar";
+import { NotificacionesPage as NotificacionesControlPage } from "./control/NotificacionesPage";
+import { OfertaPage } from "./control/OfertaPage";
+import { PeriodoPage } from "./control/PeriodoPage";
+import { RevisarFolioPage } from "./control/RevisarFolioPage";
+import { SolicitudesPage } from "./control/SolicitudesPage";
+import { CatalogoPage } from "./estudiante/CatalogoPage";
+import { DashboardPage } from "./estudiante/DashboardPage";
+import { HorarioPage } from "./estudiante/HorarioPage";
+import { LayoutEstudiante } from "./estudiante/LayoutEstudiante";
+import { ConfirmacionPage } from "./estudiante/ConfirmacionPage";
+import { DetalleFolioPage } from "./estudiante/DetalleFolioPage";
+import { HistorialPage } from "./estudiante/HistorialPage";
+import { NotificacionesPage } from "./estudiante/NotificacionesPage";
+import { CambiarPasswordPage } from "./pages/CambiarPasswordPage";
+import { NoEncontrada } from "./pages/Inicios";
+import { LoginPage } from "./pages/LoginPage";
+import { RecuperarPasswordPage } from "./pages/RecuperarPasswordPage";
 
-// Pantalla de arranque: comprueba que el frontend ya conversa con el backend.
-// Reemplazar por las rutas reales (login, estudiante, control escolar).
 export default function App() {
-  const { data, isError, isPending } = useQuery({
-    queryKey: ["health"],
-    queryFn: async () => {
-      const res = await fetch("/api/health/");
-      if (!res.ok) throw new Error("backend no disponible");
-      return (await res.json()) as { status: string; app: string };
-    },
-    retry: false,
-  });
-
   return (
-    <main className="mx-auto flex min-h-screen max-w-xl flex-col justify-center gap-4 p-6">
-      <h1 className="font-display text-3xl font-bold text-primary">SABE</h1>
-      <p className="text-slate-600">Sistema de Altas y Bajas de Economía</p>
-      <div className="rounded-xl border border-slate-200 bg-white p-4">
-        <span className="text-sm text-slate-500">Backend: </span>
-        {isPending && <span>comprobando...</span>}
-        {isError && (
-          <span className="font-semibold text-baja">
-            sin conexión (levanta Django en el puerto 8000)
-          </span>
-        )}
-        {data && <span className="font-semibold text-alta">conectado ({data.status})</span>}
-      </div>
-    </main>
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/recuperar-password" element={<RecuperarPasswordPage />} />
+
+      {/* Con sesión iniciada */}
+      <Route element={<RutaProtegida />}>
+        <Route path="/cambiar-password" element={<CambiarPasswordPage />} />
+        <Route path="/" element={<RedirigirPorRol />} />
+
+        {/* Portal del estudiante con su propio marco (stitch/sabe_estudiantes) */}
+        <Route element={<RutaProtegida roles={["estudiante"]} />}>
+          <Route path="/estudiante" element={<LayoutEstudiante />}>
+            <Route index element={<DashboardPage />} />
+            <Route path="horario" element={<HorarioPage />} />
+            <Route path="catalogo" element={<CatalogoPage />} />
+            <Route path="confirmacion" element={<ConfirmacionPage />} />
+            <Route path="historial" element={<HistorialPage />} />
+            <Route path="historial/:id" element={<DetalleFolioPage />} />
+            <Route path="notificaciones" element={<NotificacionesPage />} />
+          </Route>
+        </Route>
+
+        {/* Control escolar con el marco de sus pantallas en stitch/ */}
+        <Route element={<RutaProtegida roles={["control_escolar"]} />}>
+          <Route path="/control-escolar" element={<LayoutControlEscolar />}>
+            <Route index element={<Navigate to="solicitudes" replace />} />
+            <Route path="solicitudes" element={<SolicitudesPage />} />
+            <Route path="solicitudes/:id" element={<RevisarFolioPage />} />
+            <Route path="oferta" element={<OfertaPage />} />
+            <Route path="periodo" element={<PeriodoPage />} />
+            <Route path="importacion" element={<ImportacionPage />} />
+            <Route path="exportacion" element={<ExportacionPage />} />
+            <Route path="bitacora" element={<BitacoraPage />} />
+            <Route path="notificaciones" element={<NotificacionesControlPage />} />
+          </Route>
+        </Route>
+
+        {/* Administrador: el mismo marco con el menú de stitch/sabe_usuarios_y_roles_administrador */}
+        <Route element={<RutaProtegida roles={["administrador"]} />}>
+          <Route path="/administrador" element={<LayoutControlEscolar portal="admin" />}>
+            <Route index element={<Navigate to="usuarios" replace />} />
+            <Route path="usuarios" element={<UsuariosPage />} />
+            <Route path="periodo" element={<PeriodoPage />} />
+            <Route path="bitacora" element={<BitacoraPage />} />
+          </Route>
+        </Route>
+      </Route>
+
+      <Route path="*" element={<NoEncontrada />} />
+    </Routes>
   );
 }
