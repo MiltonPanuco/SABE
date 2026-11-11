@@ -106,7 +106,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 - **Accepted differences from stitch:** "{semestre}° Semestre" chip instead of "Alumno Regular"; bell with no badge, empty until F10; "en trámite" class with a dashed border and label; Seminario de Tesis fills both of its grid rows; cart starts closed on phones; catalog sorted by course code; open or closed convocatoria badge without dates.
 - **Done when:** the demo student sees their schedule and the filterable catalog; the full group shows no seats; the screens match their `stitch/` design.
 - **Target date:** Nov 14.
-- **Status:** Pending.
+- **Status:** Done.
 
 ### F4. Schedule clash detection
 
@@ -128,7 +128,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 - **Accepted differences from stitch:** the clash sentence adds "(en tu carrito)" or "(en trámite)"; another group of a course the student already has uses the clash card with "Ya tienes esta materia en otro grupo"; in the cart, an invalid move is red with its reason and "Corrige los movimientos marcados para continuar.".
 - **Done when:** unit tests covering: no clash, clash with enrollment, clash between two adds, an add replacing a drop in the same folio, touching edges, different days; the screens match their `stitch/` design.
 - **Target date:** Nov 13.
-- **Status:** Pending.
+- **Status:** Done.
 
 ### F5. Student requests
 
@@ -155,7 +155,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 - **Differences from stitch (agreed):** the detail, cancel and closed-window screens use the F3 portal frame; the history is the `sabe_estudiantes` one (receipt plus table); no verification code, no "Turno asignado", "Ventanilla UAE", "Plan 2020", "Al corriente" or the email line; "Descargar acuse (PDF)" becomes "Imprimir acuse"; the "seats released" phrases on cancel are dropped (a pending request doesn't hold a seat); "La convocatoria aún no abre" reuses the closing-notice card. Accepted without a stitch design: the history's "Resolución" texts ("1 de 2 aprobados"), the tracker's "No aplica" step on cancelled or rejected folios, the static "Filtro rápido" chip, and "Docente: X" on each item of the late request.
 - **Done when:** tests for the creation service (each rule above); the full flow works in the browser with the demo student; the folio appears in the history and schedule as "in progress"; the screens match their `stitch/` design.
 - **Target date:** Nov 17.
-- **Status:** Pending.
+- **Status:** Done.
 
 ### F6. Control Escolar inbox and review
 
@@ -180,7 +180,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 - **Differences from stitch (agreed):** the F7–F10 menu items open a "Próximamente" page inside the frame; on phones the side menu is a panel opened with a button (stitch has no phone layout); the bell and logout that `prototipo.js` adds sit inside the header; the "Aprueba primero la baja…" text is new; the header name comes from the user, without "Lic."; fully cancelled folios don't appear in the inbox; a cancelled move says "Cancelado por el alumno".
 - **Done when:** tests for approving the last seat (two simultaneous approvals don't exceed capacity), rejection without a reason, a late folio without sign-off, and the group change; full flow in the browser; the screens match their `stitch/` design.
 - **Target date:** Nov 20.
-- **Status:** Pending.
+- **Status:** Done.
 
 ### F7. Period, enrollment window and course offering
 
@@ -208,7 +208,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 - **Differences from stitch (agreed):** "+ Nuevo docente" in the teacher dropdown (team decision); new texts for the scheduled and closed window ("Convocatoria programada", "Abre en…", "Cerró el…", "Programada", "Próximo"); the program list comes from the data (no "Posgrados UAE"); "Activar" uses an in-page dialog with the text of stitch's `confirm()`; the edit form is titled "Editar periodo escolar"; new texts "Dos horarios del mismo día se traslapan." and "Dictamina los N movimientos pendientes…"; the footer name comes from the user, without "Lic."; the stitch screenshot has an older menu (Dictamen en Lote, Cruces…) and the frame keeps the `code.html` one, as in F6.
 - **Done when:** tests for creating and activating periods (with and without pending moves), publishing and editing groups (duplicate, low seats, invalid schedules), hiding, and the audit row of each change; Control Escolar creates a group with a schedule and the student sees it in the catalog; the screens match their `stitch/` design.
 - **Target date:** Nov 21.
-- **Status:** Pending.
+- **Status:** Done.
 
 ### F8. CSV import
 
@@ -231,7 +231,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 - **Differences from stitch (agreed):** seat and clash warnings under the row's action; "Ver cuentas de estudiantes generadas" downloads the temporary passwords; "Descargar reporte de errores (.csv)" without PDF; error texts adapted to the data ("Materia inexistente: X." instead of "…en el plan curricular 2020", groups "01" and codes "EC504" instead of "G-01" and "ECO-204") and new texts for the other rules; the sample shows up to 10 rows; enrollments use the same wizard with their own columns ("Cargas procesadas", "cargas nuevas"); its own text when there were no new records; the selected card looks like stitch's screenshot (light icon box, no check mark); the screenshot has an older menu and a single type card, and `code.html` is followed.
 - **Done when:** tests with a valid CSV, one with errors and one re-imported (students and enrollments); the preview shows errors per row; a new student logs in with the temporary password and changes it; the screens match their `stitch/` design.
 - **Target date:** Nov 22.
-- **Status:** Pending.
+- **Status:** Done.
 
 ### F9. SADCE export and batches
 
@@ -255,7 +255,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 - **Differences from stitch (agreed):** the pending and template tabs, the guide button and the "Generar Excel de intercambio" dialog are new because stitch doesn't design them (the pending table follows the "Concentrado de Cargas para SADCE"); in stitch "Generar Excel" opens the mark-as-uploaded dialog, here it opens its own; the verification checkbox starts unchecked and the button turns on when it is checked, instead of `alert()`; "Generar Excel" is disabled when there is nothing to export; "Total Movimientos Dictaminados" counts approved and uploaded moves (rejected ones aren't exported); the exporter's name comes from the user, without "Lic.", with "Ventanilla UAE" under it for everyone.
 - **Done when:** service tests (no repeated moves, `total_registros` counted correctly); the Excel file opens correctly in Excel and LibreOffice; the screens match their `stitch/` design.
 - **Target date:** Nov 23.
-- **Status:** Pending.
+- **Status:** Done.
 
 ### F10. Notifications and audit log
 
@@ -276,7 +276,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 - **Differences from stitch (agreed):** on Control Escolar's screen, "Configurar alertas", "Canales de Notificación Activa", the "Servidor SABE 100% / Latencia" card (now "Folios Extemporáneos"), the support extension, the PDF attachment on late folios, "Cupos reincorporados / N plazas devueltas" (pending folios don't hold seats) and "Submódulo 2.9" are removed; the import card has no "Ver reporte de errores" (errors aren't stored) and its button goes to Importación de Datos; texts start with the student's name, without "El estudiante" / "La estudiante"; the student bell stays a dropdown (in `prototipo.js` it goes straight to the page) and adds "Ver todas las notificaciones"; "Ver dictamen…" opens the folio page instead of the modal; the student page uses the portal's frame, not the panel's older menu; the audit log shows every record, not only "del ciclo 2026-A", with "Cargar más registros"; no "24 horas hábiles" or "Tiempo promedio de resolución" (D3).
 - **Done when:** each action on the list leaves its row in the audit log; the student sees the notice of their decision; the screens match their `stitch/` design.
 - **Target date:** Nov 24.
-- **Status:** Pending.
+- **Status:** Done.
 
 ### F11. Users and roles (administrator)
 
@@ -299,7 +299,7 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
 - **Differences from stitch (agreed):** the form asks for "Nombre" and "Apellidos" instead of a single "Nombre Completo" (team decision); no email is sent: the temporary password is shown once with "Copiar" (D4); "Último acceso" shows the origin by role and the real IP; the header shows the admin's name and "Administrador del sistema"; no "BUILD v2.11-SEC" in the footer; Control Escolar's "Restablecer contraseña" on the folio is new (team decision); the name column truncates so the actions fit without scrolling the table.
 - **Done when:** the admin creates a Control Escolar user who can log in; the screens match their `stitch/` design.
 - **Target date:** Nov 24.
-- **Status:** Pending.
+- **Status:** Done.
 
 ### F12. Deployment
 
@@ -313,15 +313,39 @@ Template for each feature: **Goal**, **Depends on**, **Backend**, **Frontend** (
   - `.env.prod` is never committed (mode 600 on the server). With `DJANGO_DEBUG=0` the backend refuses to start without its own `DJANGO_SECRET_KEY` of 50+ characters.
   - `seed_demo` never runs on its own: it's run by hand after the first deploy and to reset the demo. In production `admin` uses `SABE_ADMIN_PASSWORD`; the other demo users keep `demo1234`.
   - HSTS starts at one day (`SECURE_HSTS_SECONDS`), without preload (the domain isn't ours).
+- **Decisions (agreed):** Caddy instead of Nginx, one-day HSTS without preload, the admin password in `.env.prod` and no admin demo button, a login limit of 10 attempts per minute, a daily backup kept 7 days, and CI on GitHub Actions.
 - **Done when:** the H2 and H3 flows can be completed on the public URL from both a phone and a computer; the screens on the public URL look the same as in `stitch/`.
 - **Target date:** Nov 27.
-- **Status:** Pending.
+- **Status:** Done.
 
 ### F13. Final testing and documentation
 
 - **Goal:** the delivery works end to end and is documented.
 - **Depends on:** F12.
-- **Tasks:** full walkthrough with all 3 roles in production; quick usability test with 2 or 3 classmates; fix the bugs found; update the README (how to start, how to deploy, demo users), `SABE_Contexto_Completo.md` and this plan; prepare the presentation script.
+- **Tasks:**
+  - Full walkthrough in production with all 3 roles, at 1280 and 390 px: cart with a blocked clash, sending, receipt, cancelling; first access; review (approve, reject with motive, late folio with visto bueno); offering; import; export and loaded batch; notifications and audit log; the admin's users. No console errors, no 5xx responses and no sideways scroll.
+  - Final review of every screen against `stitch/` (table below).
+  - README complete for a newcomer (tested by cloning the repository and following it word for word), `SABE_Contexto_Completo.md` and this plan up to date.
+  - Usability test kit for 2 or 3 classmates: [`docs/pruebas/prueba_usabilidad.md`](pruebas/prueba_usabilidad.md). The team runs it.
+  - Presentation script: [`docs/presentacion/guion.md`](presentacion/guion.md).
+- **Final review against `stitch/`:**
+
+| Screen (stitch) | Result |
+|---|---|
+| Login, forced password change | Same as stitch |
+| Password recovery | Same structure; stitch's `code.html` renders broken outside its viewer (text without contrast). "Continuar" instead of "Enviar enlace" (F2, no email) |
+| Student portal: dashboard, schedule, catalog, confirmation | Same as stitch |
+| History and receipt, folio detail | Same as the portal's history and `sabe_detalle_de_folio` (differences agreed in F5) |
+| Student notification center | Same (differences agreed in F10) |
+| Control Escolar inbox and folio review | Same (differences agreed in F6) |
+| Course offering, Period and call | Same (differences agreed in F7) |
+| CSV import | Same (differences agreed in F8) |
+| SADCE export | Same (differences agreed in F9) |
+| Control Escolar notifications, Audit log | Same (differences agreed in F10) |
+| Users and roles | Same (differences agreed in F11) |
+
+At 390 px no screen scrolls sideways. No new bugs or unagreed differences were found.
+
 - **Done when:** no bugs block the main flow, and the README lets a newcomer set up the project; every screen got a final check against its `stitch/` design.
 - **Target date:** Nov 28.
-- **Status:** Pending.
+- **Status:** Done.

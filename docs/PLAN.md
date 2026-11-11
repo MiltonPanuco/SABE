@@ -104,7 +104,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 - **Diferencias aceptadas con stitch:** chip "{semestre}° Semestre" en lugar de "Alumno Regular"; campana sin contador y vacía hasta F10; clase "en trámite" con borde punteado y etiqueta; Seminario de Tesis ocupa sus dos filas de la retícula; carrito cerrado de inicio en celular; catálogo ordenado por clave; insignia de convocatoria abierta o cerrada sin fechas.
 - **Terminado cuando:** el alumno demo ve su horario y el catálogo filtrable; el grupo lleno aparece sin cupo; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 14 nov.
-- **Estado:** Pendiente.
+- **Estado:** Hecho.
 
 ### F4. Detección de choques de horario
 
@@ -126,7 +126,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 - **Diferencias aceptadas con stitch:** la frase del choque agrega "(en tu carrito)" o "(en trámite)"; otro grupo de una materia que ya se tiene usa la tarjeta de choque con "Ya tienes esta materia en otro grupo"; en el carrito, el movimiento inválido va en rojo con su motivo y "Corrige los movimientos marcados para continuar.".
 - **Terminado cuando:** pruebas unitarias que cubran: sin choque, choque con carga, choque entre dos altas, alta que reemplaza una baja del mismo folio, extremos que se tocan, días distintos; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 13 nov.
-- **Estado:** Pendiente.
+- **Estado:** Hecho.
 
 ### F5. Solicitudes del estudiante
 
@@ -153,7 +153,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 - **Diferencias con stitch (acordadas):** las pantallas de detalle, cancelar y convocatoria cerrada usan el marco del portal de F3; el historial es el de `sabe_estudiantes` (acuse más tabla); sin código de verificación, sin "Turno asignado", "Ventanilla UAE", "Plan 2020", "Al corriente" ni la línea del correo; "Descargar acuse (PDF)" pasa a "Imprimir acuse"; se quitan las frases de "cupos liberados" al cancelar (un trámite pendiente no aparta lugar); "La convocatoria aún no abre" usa la tarjeta del aviso de cierre. Sin diseño en stitch y aceptados: los textos de "Resolución" del historial ("1 de 2 aprobados"), el paso "No aplica" del seguimiento en folios cancelados o rechazados, el chip fijo "Filtro rápido" y "Docente: X" en cada movimiento de la solicitud extemporánea.
 - **Terminado cuando:** pruebas del servicio de creación (cada regla de arriba); flujo completo en el navegador con el alumno demo; el folio aparece en historial y horario como "en trámite"; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 17 nov.
-- **Estado:** Pendiente.
+- **Estado:** Hecho.
 
 ### F6. Bandeja y dictamen de control escolar
 
@@ -178,7 +178,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 - **Diferencias con stitch (acordadas):** el menú de F7 a F10 abre una página "Próximamente" dentro del marco; en teléfono el menú lateral es un panel que se abre con un botón (stitch no tiene versión para teléfono); la campana y la salida que agrega `prototipo.js` van dentro del encabezado; el texto de "Aprueba primero la baja…" es nuevo; el nombre del encabezado sale del usuario, sin "Lic."; los folios cancelados por completo no aparecen en la bandeja; un movimiento cancelado dice "Cancelado por el alumno".
 - **Terminado cuando:** pruebas de aprobar con último cupo (dos aprobaciones simultáneas no sobrepasan el cupo), rechazo sin motivo, extemporáneo sin visto bueno y cambio de grupo; flujo completo en el navegador; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 20 nov.
-- **Estado:** Pendiente.
+- **Estado:** Hecho.
 
 ### F7. Periodo, convocatoria y oferta académica
 
@@ -206,7 +206,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 - **Diferencias con stitch (acordadas):** "+ Nuevo docente" en la lista de docentes (decisión del equipo); textos nuevos para la convocatoria programada y cerrada ("Convocatoria programada", "Abre en…", "Cerró el…", "Programada", "Próximo"); la lista de programas sale de los datos (sin "Posgrados UAE"); "Activar" usa una ventana dentro de la página con el texto del `confirm()` de stitch; el formulario de edición se titula "Editar periodo escolar"; textos nuevos "Dos horarios del mismo día se traslapan." y "Dictamina los N movimientos pendientes…"; el nombre del pie sale del usuario, sin "Lic."; la captura de stitch tiene un menú anterior (Dictamen en Lote, Cruces…) y el marco conserva el del `code.html`, como en F6.
 - **Terminado cuando:** pruebas de crear y activar periodos (con y sin pendientes), publicar y editar grupos (repetido, cupo bajo, horarios inválidos), ocultar y la bitácora de cada cambio; control escolar crea un grupo con horario y el alumno lo ve en el catálogo; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 21 nov.
-- **Estado:** Pendiente.
+- **Estado:** Hecho.
 
 ### F8. Importación de CSV
 
@@ -229,7 +229,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 - **Diferencias con stitch (acordadas):** avisos de cupo excedido y choque bajo la acción de la fila; "Ver cuentas de estudiantes generadas" descarga las contraseñas temporales; "Descargar reporte de errores (.csv)" sin PDF; textos de error adaptados a los datos ("Materia inexistente: X." en lugar de "…en el plan curricular 2020", grupos "01" y claves "EC504" en lugar de "G-01" y "ECO-204") y textos nuevos para las demás reglas; la muestra enseña hasta 10 filas; cargas usa el mismo asistente con sus propias columnas ("Cargas procesadas", "cargas nuevas"); texto propio cuando no hubo registros nuevos; la tarjeta elegida se ve como en la captura de stitch (recuadro claro y sin palomita); la captura tiene un menú anterior y una sola tarjeta de tipo, y se sigue el `code.html`.
 - **Terminado cuando:** pruebas con un CSV válido, uno con errores y uno reimportado (alumnos y cargas); la vista previa muestra los errores por fila; un alumno nuevo entra con su contraseña temporal y la cambia; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 22 nov.
-- **Estado:** Pendiente.
+- **Estado:** Hecho.
 
 ### F9. Exportación a SADCE y lotes
 
@@ -253,7 +253,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 - **Diferencias con stitch (acordadas):** las pestañas de pendientes y de plantilla, el botón de la guía y la ventana "Generar Excel de intercambio" son nuevos porque stitch no los diseña (la tabla de pendientes sigue el "Concentrado de Cargas para SADCE"); en stitch "Generar Excel" abre la ventana de marcar como cargado y aquí abre la suya; la casilla de verificación empieza sin marcar y el botón se habilita al marcarla, en lugar del `alert()`; "Generar Excel" se deshabilita sin movimientos por exportar; "Total Movimientos Dictaminados" cuenta los aprobados y los cargados (los rechazados no se exportan); el nombre de quien exportó sale del usuario, sin "Lic.", con "Ventanilla UAE" debajo para todos.
 - **Terminado cuando:** pruebas del servicio (no repite movimientos, cuenta bien `total_registros`); el Excel abre bien en Excel y LibreOffice; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 23 nov.
-- **Estado:** Pendiente.
+- **Estado:** Hecho.
 
 ### F10. Notificaciones y bitácora
 
@@ -274,7 +274,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 - **Diferencias con stitch (acordadas):** en control escolar se quitan "Configurar alertas", "Canales de Notificación Activa", la tarjeta "Servidor SABE 100% / Latencia" (queda "Folios Extemporáneos"), la extensión de soporte, el adjunto PDF de los folios extemporáneos, "Cupos reincorporados / N plazas devueltas" (los folios pendientes no apartan lugar) y "Submódulo 2.9"; la tarjeta de importación no tiene "Ver reporte de errores" (los errores no se guardan) y su botón lleva a Importación de Datos; los textos empiezan con el nombre del alumno, sin "El estudiante" / "La estudiante"; la campana del estudiante sigue siendo desplegable (en `prototipo.js` lleva directo a la página) y agrega "Ver todas las notificaciones"; "Ver dictamen…" abre la página del folio en lugar del modal; la página del estudiante usa el marco del portal y no el menú anterior del panel; la bitácora muestra todos los registros, no solo "del ciclo 2026-A", con "Cargar más registros"; sin "24 horas hábiles" ni "Tiempo promedio de resolución" (D3).
 - **Terminado cuando:** cada acción de la lista deja su fila en la bitácora; el alumno ve la notificación de su dictamen; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 24 nov.
-- **Estado:** Pendiente.
+- **Estado:** Hecho.
 
 ### F11. Usuarios y roles (administrador)
 
@@ -297,7 +297,7 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
 - **Diferencias con stitch (acordadas):** el alta pide "Nombre" y "Apellidos" en lugar de un solo "Nombre Completo" (decisión del equipo); no se envía correo: la contraseña provisional se muestra una vez en pantalla con "Copiar" (D4); "Último acceso" muestra el origen por rol y la IP real; el encabezado muestra el nombre del administrador y "Administrador del sistema"; sin "BUILD v2.11-SEC" en el pie; "Restablecer contraseña" en el folio de control escolar es nuevo (decisión del equipo); la columna del nombre se recorta para que las acciones quepan sin desplazar la tabla.
 - **Terminado cuando:** el admin crea un usuario de control escolar que puede iniciar sesión; las pantallas coinciden con su diseño en `stitch/`.
 - **Fecha objetivo:** 24 nov.
-- **Estado:** Pendiente.
+- **Estado:** Hecho.
 
 ### F12. Despliegue
 
@@ -311,15 +311,39 @@ Plantilla de cada función: **Objetivo**, **Depende de**, **Backend**, **Fronten
   - El `.env.prod` nunca se sube al repositorio (permisos 600 en el servidor). Con `DJANGO_DEBUG=0` el backend no arranca sin una `DJANGO_SECRET_KEY` propia de 50 caracteres o más.
   - `seed_demo` nunca corre solo: se ejecuta a mano después del primer despliegue y para reiniciar la demostración. En producción el usuario `admin` usa `SABE_ADMIN_PASSWORD`; los demás usuarios demo conservan `demo1234`.
   - HSTS de un día al inicio (`SECURE_HSTS_SECONDS`), sin preload (el dominio no es nuestro).
+- **Decisiones (acordadas):** Caddy en lugar de Nginx, HSTS de un día sin preload, contraseña del administrador en `.env.prod` y sin botón de demostración del administrador, límite de 10 intentos de inicio de sesión por minuto, respaldo diario por 7 días y CI en GitHub Actions.
 - **Terminado cuando:** desde un celular y una computadora se completa el flujo de H2 y H3 en la URL pública; las pantallas en la URL pública se ven igual que en `stitch/`.
 - **Fecha objetivo:** 27 nov.
-- **Estado:** Pendiente.
+- **Estado:** Hecho.
 
 ### F13. Pruebas finales y documentación
 
 - **Objetivo:** la entrega funciona de punta a punta y está documentada.
 - **Depende de:** F12.
-- **Tareas:** recorrido completo con los 3 roles en producción; prueba rápida de usabilidad con 2 o 3 compañeros; corregir errores encontrados; actualizar README (cómo arrancar, cómo desplegar, usuarios demo), `SABE_Contexto_Completo.md` y este plan; preparar guion de la presentación.
+- **Tareas:**
+  - Recorrido completo en producción con los 3 roles, a 1280 y 390 px: carrito con choque bloqueado, envío, acuse, cancelación; primer acceso; dictamen (aprobar, rechazar con motivo, extemporáneo con visto bueno); oferta; importación; exportación y lote cargado; notificaciones y bitácora; usuarios del administrador. Sin errores de consola, sin respuestas 5xx y sin desborde horizontal.
+  - Revisión final de cada pantalla contra `stitch/` (tabla abajo).
+  - README completo para alguien nuevo (probado clonando el repositorio y siguiéndolo al pie de la letra), `SABE_Contexto_Completo.md` y este plan al día.
+  - Kit de prueba de usabilidad para 2 o 3 compañeros: [`docs/pruebas/prueba_usabilidad.md`](pruebas/prueba_usabilidad.md). Lo corre el equipo.
+  - Guion de la presentación: [`docs/presentacion/guion.md`](presentacion/guion.md).
+- **Revisión final contra `stitch/`:**
+
+| Pantalla (stitch) | Resultado |
+|---|---|
+| Inicio de sesión, cambio obligatorio de contraseña | Igual a stitch |
+| Recuperar contraseña | Igual en estructura; el `code.html` de stitch se ve roto fuera de su visor (texto sin contraste). "Continuar" en lugar de "Enviar enlace" (F2, sin correo) |
+| Portal del estudiante: dashboard, horario, catálogo, confirmación | Igual a stitch |
+| Historial y acuse, detalle de folio | Igual al historial del portal y a `sabe_detalle_de_folio` (diferencias acordadas en F5) |
+| Centro de Notificaciones del estudiante | Igual (diferencias acordadas en F10) |
+| Bandeja y revisión de folio de control escolar | Igual (diferencias acordadas en F6) |
+| Oferta Académica, Periodo y Convocatoria | Igual (diferencias acordadas en F7) |
+| Importación de Datos (CSV) | Igual (diferencias acordadas en F8) |
+| Exportación a SADCE | Igual (diferencias acordadas en F9) |
+| Notificaciones de control escolar, Bitácora | Igual (diferencias acordadas en F10) |
+| Usuarios y Roles | Igual (diferencias acordadas en F11) |
+
+A 390 px ninguna pantalla se desborda a lo ancho. No se encontraron errores nuevos ni diferencias sin acordar.
+
 - **Terminado cuando:** no quedan errores que bloqueen el flujo principal y el README permite a alguien nuevo levantar el proyecto; cada pantalla se revisó una última vez contra su diseño en `stitch/`.
 - **Fecha objetivo:** 28 nov.
-- **Estado:** Pendiente.
+- **Estado:** Hecho.

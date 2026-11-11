@@ -4,36 +4,40 @@ Aplicación web para que los estudiantes de la Unidad Académica de Economía (U
 
 Proyecto universitario, 7mo semestre. SABE es independiente: **no se integra a PiiDA ni a SADCE**.
 
+**Demostración pública:** https://sabe.163-192-148-141.sslip.io (usuarios de demostración en [Cómo arrancar](#3-backend)).
+
 ## Stack tecnológico
 
 | Capa | Tecnología | Estado |
 |---|---|---|
 | Backend | **Django + Django REST Framework** | Confirmado |
 | Frontend | **React + TypeScript** (Vite) | Confirmado |
-| Base de datos | PostgreSQL (SQLite para arrancar rápido) | Recomendado, por confirmar con el equipo |
-| Autenticación | JWT con `djangorestframework-simplejwt` (login con matrícula) | Recomendado, por confirmar |
+| Base de datos | PostgreSQL (SQLite para arrancar rápido sin Docker) | Confirmado |
+| Autenticación | JWT con `djangorestframework-simplejwt` (login con matrícula) | Confirmado |
 | Exportación a SADCE | `openpyxl` (xlsx) y `csv` | Confirmado |
-| Frontend: datos y rutas | TanStack Query + React Router | Recomendado, por confirmar |
-| Frontend: estilos | Tailwind CSS (paleta de `stitch/academic_prestige_modern/DESIGN.md`) | Recomendado, por confirmar |
-| Documentación de API | `drf-spectacular` (Swagger en `/api/docs/`) | Incluido |
+| Frontend: datos y rutas | TanStack Query + React Router | Confirmado |
+| Frontend: estilos | Tailwind CSS (paleta de `stitch/academic_prestige_modern/DESIGN.md`) | Confirmado |
+| Documentación de API | `drf-spectacular` (Swagger en `/api/docs/`) | Confirmado |
 | Contenedores | Docker Compose: PostgreSQL en desarrollo; db, Gunicorn y Caddy en producción | Confirmado |
-
-"Por confirmar" significa que el proyecto base ya viene con eso, pero el equipo puede cambiarlo antes de construir encima.
+| Integración continua | GitHub Actions (pruebas del backend y build del frontend) | Confirmado |
 
 ## Estructura del repositorio
 
 ```
-backend/      API en Django (config/ y core/ con los modelos)
-frontend/     Interfaz en React + TypeScript
-diagramas/    ERD del backend (SABE_ERD_Backend.png y .mmd editable)
-stitch/       Prototipo navegable en HTML (16 pantallas por rol), DESIGN.md y _shared/prototipo.js
-docs/         Requerimientos (docs/requerimientos) y diseño: contexto, flujos y prompts (docs/diseno)
-Clases/       Entregas y material de la materia (análisis, diseño, EDT)
+backend/                 API en Django: config/ (settings) y core/ (modelos, services/ con las reglas, tests/)
+frontend/                Interfaz en React + TypeScript: src/estudiante, src/control, src/admin, src/api
+diagramas/               ERD del backend (SABE_ERD_Backend.png y .mmd editable)
+stitch/                  Prototipo navegable en HTML (16 pantallas por rol), DESIGN.md y _shared/prototipo.js
+docs/                    PLAN.md (plan y decisiones), requerimientos, diseño, pruebas de usabilidad y guion de la presentación
+docker-compose.yml       PostgreSQL para desarrollo
+docker-compose.prod.yml  Producción: db, backend (Gunicorn), web (Caddy) y respaldos
+.github/workflows/       Integración continua
+Clases/                  Entregas y material de la materia (análisis, diseño, EDT)
 ```
 
 ## Cómo arrancar
 
-Necesitas Python 3.12+, Node 20+ y, opcionalmente, Docker.
+Necesitas Python 3.12+, Node 20+ y, opcionalmente, Docker. Revisa con `python --version`: si el `python` de tu sistema es más viejo, usa el ejecutable de la versión nueva al crear el entorno (por ejemplo `python3.12 -m venv .venv`); después de activarlo, `python` ya es el correcto.
 
 ### 1. Variables de entorno
 ```
@@ -69,7 +73,7 @@ Usuarios de demostración que crea `seed_demo` (iguales al prototipo):
 | Estudiante | `210089334` | `demo1234` |
 | Estudiante, primer acceso (debe cambiar contraseña) | `230012345` | `temporal` |
 | Control escolar | `valeria.ruiz` | `demo1234` |
-| Administrador (también entra a `/admin/`) | `admin` | `demo1234` |
+| Administrador (también entra a `/admin/`) | `admin` | `demo1234` (en producción, `SABE_ADMIN_PASSWORD` de `.env.prod`) |
 
 `python manage.py seed_demo --convocatoria-cerrada` deja la convocatoria cerrada para probar solicitudes extemporáneas.
 
@@ -81,11 +85,23 @@ cd frontend
 npm install
 npm run dev
 ```
-Abre http://localhost:5173. La pantalla de arranque indica si ya hay conexión con el backend.
+Abre http://localhost:5173 y entra con un usuario de demostración (en desarrollo, la página de inicio de sesión tiene botones que llenan los datos). Vite reenvía `/api` y `/admin` al backend en el puerto 8000; si tu backend corre en otro, arranca con `SABE_BACKEND=http://localhost:PUERTO npm run dev`.
+
+### 5. Pruebas
+```
+cd backend
+python manage.py test core                          (unas 290 pruebas; con PostgreSQL tardan unos 6 minutos)
+python manage.py makemigrations --check --dry-run   (que no falten migraciones)
+python manage.py spectacular --validate --fail-on-warn --file /dev/null   (contrato de la API)
+
+cd frontend
+npm run build                                       (revisa tipos con tsc y arma el sitio)
+```
+Lo mismo corre en GitHub Actions (`.github/workflows/ci.yml`) en cada push y Pull Request.
 
 ## Modelo de datos
 
-16 entidades en `backend/core/models.py`, según `diagramas/SABE_ERD_Backend.png`. Reglas importantes que ya quedan en la base de datos:
+15 modelos en `backend/core/models.py`, según `diagramas/SABE_ERD_Backend.png`. Reglas importantes que ya quedan en la base de datos:
 - Solo un periodo escolar activo a la vez.
 - Un rechazo siempre lleva motivo.
 - El cupo disponible se calcula, no se guarda.
@@ -93,30 +109,18 @@ Abre http://localhost:5173. La pantalla de arranque indica si ya hay conexión c
 
 Si cambias un modelo: `python manage.py makemigrations` y sube la migración en el mismo commit.
 
-## Pendientes (para repartir)
+## Estado del proyecto
 
-**Backend**
-- [ ] Servicio de detección de choques de horario (con pruebas)
-- [x] Importador de CSV: alumnos y cargas académicas (vista previa de errores, reimportar sin duplicar, contraseña temporal)
-- [ ] Endpoints de solicitudes: crear folio, listar, cancelar
-- [ ] Aprobar y rechazar con bloqueo de cupo (`transaction.atomic` + `select_for_update`)
-- [x] Permisos por rol (estudiante, control escolar, administrador)
-- [x] Exportación a SADCE (xlsx/csv) y registro del lote
-- [ ] Comprobante PDF del folio (el dashboard tiene el acceso "Comprobantes")
-- [x] Notificaciones y bitácora
-- [x] Datos de prueba (seed) iguales a los del prototipo
+Las 13 funciones del plan están construidas y probadas; el detalle (objetivo, contrato de API, reglas, diferencias con `stitch/` acordadas) está en [`docs/PLAN.md`](docs/PLAN.md).
 
-**Frontend** (el diseño de referencia está en `stitch/`)
-- [x] Login, recuperar contraseña y cambio obligatorio de contraseña
-- [ ] Estudiante: dashboard, horario, catálogo y carrito (alta y baja), confirmación, historial con acuse y notificaciones
-- [ ] Estudiante: cancelar solicitud pendiente y ver motivo de rechazo
-- [ ] Control escolar: bandeja, validación, catálogos, oferta
-- [x] Control escolar: periodo y convocatoria, importación de CSV, exportación a SADCE, notificaciones y bitácora
-- [x] Administrador: usuarios y roles
+| Hito | Funciones |
+|---|---|
+| H1. Base | F1 datos de prueba · F2 autenticación y roles |
+| H2. Flujo del estudiante | F3 catálogo y horario · F4 choques de horario · F5 solicitudes (carrito, folio, acuse imprimible, cancelar, extemporáneas) |
+| H3. Control escolar | F6 bandeja y dictamen por movimiento · F7 periodo, convocatoria y oferta · F8 importación de CSV · F9 exportación a SADCE y lotes · F10 notificaciones y bitácora · F11 usuarios y roles |
+| H4. Despliegue y cierre | F12 despliegue con HTTPS · F13 pruebas finales y documentación |
 
-**Diseño**
-- [x] Pantallas del prototipo completas (ver `docs/diseno/Pantallas y Flujos.docx`). Para verlo, abre `stitch/sabe_inicio_de_sesi_n_institucional_uan_uae/code.html` y usa los accesos de demostración
-- [x] Definir con control escolar el formato exacto del reporte para SADCE (D1 en `docs/PLAN.md`)
+Para el equipo: la [guía de prueba de usabilidad](docs/pruebas/prueba_usabilidad.md) y el [guion de la presentación](docs/presentacion/guion.md).
 
 Más contexto del proyecto en `docs/diseno/SABE_Contexto_Completo.md`.
 
